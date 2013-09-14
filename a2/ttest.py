@@ -17,15 +17,18 @@ for key in d:
 		N.append(key)
 #Find nodes N with odd degree
 M = G.subgraph(N).to_undirected()
-M = nx.Graph(-1* nx.adjacency_matrix(M)).to_undirected()
-M = nx.max_weight_matching(M, maxcardinality=True)
-M = M.items()
-B = []
-for m in M:
-	B.append((m[1], m[0]))
-C = M + B
-C.sort()
-D = C[0::2]
+a = nx.Graph(-1* nx.adjacency_matrix(M)).to_undirected()
+a = nx.max_weight_matching(a, maxcardinality=True)
+
+ae = []
+an = M.nodes()
+for (key, value) in a.items():
+	ae.append((an[key], an[value]))
+	
+aee = []
+for i in ae:
+	if i[0] < i[1]:
+		aee.append(i)
 
 #a = np.array(A).tolist()
 # m = Munkres()
@@ -33,13 +36,30 @@ D = C[0::2]
 # M = m.compute(A)
 
 H = nx.MultiGraph()
-H.add_node(T)
+H.add_nodes_from(T.nodes())
 H.add_edges_from(T.edges())
-H.add_edges_from(D)
+H.add_edges_from(aee)
 print nx.is_eulerian(H)
-#nx.is_eulerian(H) == false		WTF
-#E = nx.eulerian_circuit(H)
-#Do shortcutting on E
+E = list(nx.eulerian_circuit(H))
+
+tsp = [i for (i, j) in E]
+t = []
+seen = set()
+for i in tsp:
+	if i in seen:
+		continue
+	seen.add(i)
+	t.append(i)
+	
+#the result is t
+t_e = zip(t[:-1], t[1:])
+distance = 0
+for (i, j) in t_e:
+	distance += Y[i, j]
+	
+stupid_dist = 0
+for i in range(0, 999):
+	stupid_dist += Y[i][i+1]
 
 
 
