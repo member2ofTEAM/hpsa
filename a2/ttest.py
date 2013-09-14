@@ -1,9 +1,11 @@
 import numpy as np
 import networkx as nx
+import time
 
 from numpy import genfromtxt
 from scipy.spatial.distance import cdist
 
+start = time.time()
 my_data = genfromtxt('travelingtest', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
 Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 m = np.matrix(Y)
@@ -60,6 +62,6 @@ stupid_dist = 0
 for i in range(0, 999):
 	stupid_dist += Y[i][i+1]
 
-
+print time.time() - start
 
 
