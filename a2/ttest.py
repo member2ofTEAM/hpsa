@@ -1,11 +1,10 @@
 import numpy as np
 import networkx as nx
-from munkres import Munkres	
 
 from numpy import genfromtxt
 from scipy.spatial.distance import cdist
 
-my_data = genfromtxt('C:\\Users\\User\\Desktop\\travelingtest.txt', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
+my_data = genfromtxt('travelingtest', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
 Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 m = np.matrix(Y)
 G = nx.Graph(m)
