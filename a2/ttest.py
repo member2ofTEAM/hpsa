@@ -8,8 +8,8 @@ from scipy.spatial.distance import cdist
 my_data = genfromtxt('C:\\Users\\User\\Desktop\\travelingtest.txt', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
 Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 m = np.matrix(Y)
-G = nx.Graph(m).to_undirected()
-T = nx.minimum_spanning_tree(G).to_undirected()
+G = nx.Graph(m)
+T = nx.minimum_spanning_tree(G)
 d = T.degree() #Get dictionary of node:degree
 N = []
 for key in d:
