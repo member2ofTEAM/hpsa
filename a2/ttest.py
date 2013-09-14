@@ -18,16 +18,20 @@ for key in d:
 #Find nodes N with odd degree
 M = G.subgraph(N)
 A = nx.adjacency_matrix(M)
-a = np.array(A).tolist()
+B = -1 * A
+M = nx.Graph(B)
+M = nx.max_weight_matching(M, maxcardinality=True)
 
-m = Munkres()
-#Compute edges of min cost perfect matching on subset of G
-M = m.compute(A)
+#a = np.array(A).tolist()
+# m = Munkres()
+##Compute edges of min cost perfect matching on subset of G
+# M = m.compute(A)
 
 H = nx.MultiGraph()
 H.add_node(T)
 H.add_edges_from(T.edges())
-H.add_edges_from(M)
+H.add_edges_from(M.items())
+print nx.is_eulerian(H)
 #nx.is_eulerian(H) == false		WTF
 #E = nx.eulerian_circuit(H)
 #Do shortcutting on E
