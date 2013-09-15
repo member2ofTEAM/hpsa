@@ -11,33 +11,26 @@ Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 G = nx.Graph(np.matrix(Y))
 T = nx.minimum_spanning_tree(G)
 
-
-#WHY DOES THE FOLLOWING NOT WORK?
-#WHY IS IT NOT EQUIVALENT TO THE CORRECT VERSION?
-
+#THIS CAN STILL BE OPTIMIZED
 d = T.degree() #Get dictionary of node:degree
 N = []
 for key in d:
 	if d[key] % 2 == 1:
 		N.append(key)
-for i in N:
-	for j in N:
-		if i != j:
-			G[i][j]['weight'] = int(round(100 - 0.0023 * G[i][j]['weight']))
 M = G.subgraph(N)
-# M = nx.adjacency_matrix(M)
-# M = 0.0023 * M
-# M = M.round()
-# a = nx.Graph(100 - M)
-a = nx.max_weight_matching(M)
-
+M = nx.adjacency_matrix(M)
+M = 0.0023 * M
+M = M.round()
+a = nx.Graph(100 - M)
+a = nx.max_weight_matching(a)
+#UNTIL HERE
 
 H = nx.MultiGraph()
 H.add_nodes_from(T.nodes())
 H.add_edges_from(T.edges())
 for (key, value) in a.items():
-	if key < value:
-		H.add_edge(key, value)
+	if N[key] < N[value]:
+		H.add_edge(N[key], N[value])
 
 t = []
 seen = set()
