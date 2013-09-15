@@ -8,8 +8,7 @@ from scipy.spatial.distance import cdist
 start = time.time()
 my_data = genfromtxt('travelingtest', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
 Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
-m = np.matrix(Y)
-G = nx.Graph(m)
+G = nx.Graph(np.matrix(Y))
 T = nx.minimum_spanning_tree(G)
 d = T.degree() #Get dictionary of node:degree
 N = []
@@ -17,36 +16,27 @@ for key in d:
 	if d[key] % 2 == 1:
 		N.append(key)
 #Find nodes N with odd degree
-M = G.subgraph(N).to_undirected()
-a = nx.Graph(-1* nx.adjacency_matrix(M)).to_undirected()
-a = nx.max_weight_matching(a, maxcardinality=True)
+M = G.subgraph(N)
+M = nx.adjacency_matrix(M)
+M = 0.0023 * M
+M = M.round()
+a = nx.Graph(100 - M)
+a = nx.max_weight_matching(a)
 
 ae = []
-an = M.nodes()
 for (key, value) in a.items():
-	ae.append((an[key], an[value]))
+	if N[key] < N[value]:
+		ae.append((N[key], N[value]))
 	
-aee = []
-for i in ae:
-	if i[0] < i[1]:
-		aee.append(i)
-
-#a = np.array(A).tolist()
-# m = Munkres()
-##Compute edges of min cost perfect matching on subset of G
-# M = m.compute(A)
-
 H = nx.MultiGraph()
 H.add_nodes_from(T.nodes())
 H.add_edges_from(T.edges())
-H.add_edges_from(aee)
-print nx.is_eulerian(H)
-E = list(nx.eulerian_circuit(H))
+H.add_edges_from(ae)
+E = nx.eulerian_circuit(H)
 
-tsp = [i for (i, j) in E]
 t = []
 seen = set()
-for i in tsp:
+for (i, j) in E:
 	if i in seen:
 		continue
 	seen.add(i)
