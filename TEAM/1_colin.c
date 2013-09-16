@@ -6,11 +6,11 @@
 #endif
 
 
-int main()
+int main(int argc, char *argv[])
 {
    int i,j,k,l, s, se, mins = 100000000, minse = 10000000;
    int *arr, *bests, *bestse;
-   float N = 1.0;
+   float N = atof(argv[1]);
 
    void Score(int *arr, float N, int *s, int *se);
 
@@ -30,11 +30,11 @@ int main()
 
    for(i = 2; i < 10; i++)
    {
-      for(j = i + 1; j < 30 ; j++)
+      for(j = i + 1; j < 20 ; j++)
       {
-         for(k = j + 1; k < 50; k++)
+         for(k = j + 1; k < 40; k++)
          { 
-            for(l = k + 1; l < 50; l++)
+            for(l = k + 1; l < 70; l++)
             {
                arr[1] = i;
                arr[2] = j;
@@ -60,14 +60,11 @@ int main()
             }
          }
       }
-      printf("%d\n", i);
    }
-   printf("Score Problem 1: %d\n Score Problem 2: %d\n", mins, minse);
-   printf("Prob 1: 1, %d, %d, %d, %d\n", bests[1], bests[2], 
+   printf("1, %d, %d, %d, %d\n", bests[1], bests[2], 
 					bests[3], bests[4]);
-   printf("Prob 2: 1, %d, %d, %d, %d\n", bestse[1], bestse[2], 
+   printf("1, %d, %d, %d, %d", bestse[1], bestse[2], 
 					bestse[3], bestse[4]);
-
    free(arr);
    free(bests);
    free(bestse);
@@ -113,6 +110,8 @@ void Score(int *D, float N, int *s, int *se)
                mini = min(T[i - D[j]] + 1, mini);
             }
          } 
+         if(i > 100)
+            mini = min(mini, T[i - 100]);
          T[i] = mini;
       }
    }
@@ -121,9 +120,9 @@ void Score(int *D, float N, int *s, int *se)
    {
       if(i == D[0] || i == D[1] || i == D[2] || i == D[3] || i == D[4] || i == D[5])
          continue;
-      for(j = i + 1; j < min(i + D[5], 199); j++)
+      for(j = i + 1; j < 199; j++)
          E[i] =  min(E[i], T[j] + T[j - i]);
-            E[i] = min(E[i], T[200 - i]);
+      E[i] = min(E[i], T[200 - i]);
    }
  
    for(i = 1; i < 100; i++)
