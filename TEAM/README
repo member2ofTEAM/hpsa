@@ -1,0 +1,43 @@
+Compile:
+$ make
+
+Launch:
+./yourprog N problem-number | ./mint-scorer N problem-number
+
+When it comes the time for your team to go for architecture, you will
+find that figuring out how to calculate scores is one thing, but you
+must also launch programs, communicate with them, manage a timer, etc
+etc. And once you have all the scores, you must sort through them to
+find the winner.
+
+In a high-level language, all this isn't a big deal, but we decided to
+write generic code that you can reuse if you want. This way, you can
+concentrate on calculating scores accurately for 100% of the time that
+you spend on the project.
+
+timed-pipe is a program behaving very much like an ordinary unix
+pipe (output of yourproblemsolver appears as input for architecture-prog),
+however if the time limit is reached and problemsolver still hasn't
+finished calculating, the programs are killed off. Simply call with
+$ ./timed-pipe problemsolver architecture-prog [args [...]]
+problem-solver-prog and architecture-prog will be launched with all the
+additional arguments that you passed to timed-pipe.
+Example:
+$ ./timed-pipe yourproblemsolver mint-scorer N 1
+will launch both yourproblemsolver and mint-scorer with arguments N and 1.
+
+score-printer is a program that reads all the scores from standard
+input, then prints out a sorted list of all the teams, with the team that
+performed best appearing on top. score-printer expects to read lines
+using the the following format:
+Score Team-name
+
+To make everything as convenient as possible on tournament day, write a
+wrapper script.
+mint-launcher.sh is a simple bash wrapper for everything else. On
+tournament day, we will be calling mint-launcher.sh as such:
+$ ./mint-launcher architecture-prog N-exact-change N-exchange path/to/problem-solvers/*
+
+Everything specific to the mint problem is either in mint-scorer.c or in
+mint-launcher.sh: you can reuse timed-pipe.c and score-printer.c in your
+own architecture program without modifying a single line of code.
