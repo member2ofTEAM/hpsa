@@ -40,11 +40,9 @@ for (key, value) in a.items():
 		H.add_edge(N[key], N[value])
 
 t = []
-seen = set()
 for (i, j) in nx.eulerian_circuit(H):
-	if i in seen:
+	if i in t:
 		continue
-	seen.add(i)
 	t.append(i)
 
 print time.time() - start
