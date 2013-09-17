@@ -23,7 +23,11 @@ M = 0.0023 * M
 M = M.round()
 M = 100 - M
 for i in range(444):
-		M[i, i] = 0
+	for j in range(444):
+		if (i == j):
+			M[i, j] = 0
+		else:
+			M[i, j] = int(M[i, j])
 a = nx.Graph(M)
 a = nx.max_weight_matching(a)
 #UNTIL HERE

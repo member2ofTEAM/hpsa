@@ -23,7 +23,7 @@ for key in d:
 for i in N:
 	for j in N:
 		if i != j:
-			G[i][j]['weight'] = int(round(100 - 0.0023 * G[i][j]['weight']))
+			G[i][j]['weight'] = int(100 - round(0.0023 * G[i][j]['weight']))
 M = G.subgraph(N)
 # M = nx.adjacency_matrix(M)
 # M = 0.0023 * M
