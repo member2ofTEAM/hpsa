@@ -19,12 +19,12 @@ for key in d:
 		N.append(key)
 M = G.subgraph(N)
 M = nx.adjacency_matrix(M)
-for i in range(1000):
-	for j in range(1000):
-		M[i][j] = 0
 M = 0.0023 * M
 M = M.round()
-a = nx.Graph(100 - M)
+M = 100 - M
+for i in range(444):
+		M[i, i] = 0
+a = nx.Graph(M)
 a = nx.max_weight_matching(a)
 #UNTIL HERE
 
