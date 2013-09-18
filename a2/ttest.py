@@ -1,6 +1,7 @@
 import numpy as np
 import networkx as nx
 import time
+import subprocess
 
 from numpy import genfromtxt
 from scipy.spatial.distance import cdist
@@ -11,30 +12,39 @@ Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 G = nx.Graph(np.matrix(Y))
 T = nx.minimum_spanning_tree(G)
 
-#THIS CAN STILL BE OPTIMIZED
+#MINMAXMATCHING
 d = T.degree() #Get dictionary of node:degree
 N = []
 for key in d:
 	if d[key] % 2 == 1:
 		N.append(key)
-print len(N)
+f = open("data.dat", "wb")
+f.write(str(len(N)))
+f.write("\n")
 for n in N:
-	print my_data[n]
+	f.write(str(round(my_data[n][0])) + " ")
+	f.write(str(round(my_data[n][1])) + " ")
+	f.write(str(round(my_data[n][2])))
+	f.write("\n")
+f.close()
 
-M = G.subgraph(N)
-M = nx.adjacency_matrix(M)
-M = 0.0023 * M
-M = M.round()
-a = nx.Graph(100 - M)
-a = nx.max_weight_matching(a)
-#UNTIL HERE
+print "done writing"
+
+fh = open("NUL","w")
+subprocess.call(["./blossom4","-3", "-x","data.dat", "-w", "output.dat"], stdout=fh)
+fh.close()
+
+print "done pipiing"
+
+result = genfromtxt('output.dat', delimiter=' ', usecols = (0, 1))
+result = result[1:]
+#MINMAXMATCHING END
 
 H = nx.MultiGraph()
 H.add_nodes_from(T.nodes())
 H.add_edges_from(T.edges())
-for (key, value) in a.items():
-	if N[key] < N[value]:
-		H.add_edge(N[key], N[value])
+for (key, value) in result:
+	H.add_edge(N[int(key)], N[int(value)])
 
 t = []
 seen = set()
