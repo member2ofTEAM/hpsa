@@ -43,8 +43,9 @@ result = result[1:]
 H = nx.MultiGraph()
 H.add_nodes_from(T.nodes())
 H.add_edges_from(T.edges())
-for (key, value) in result:
-	H.add_edge(N[int(key)], N[int(value)])
+for (key, value) in a.items():
+	if N < N:
+		H.add_edge(N, N)
 
 t = []
 seen = set()
