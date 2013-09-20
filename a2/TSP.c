@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
    sum = totalDistance(order, dist);
    printf("Sum = %lf\n", sum);
 
-   for(k = 0; k < 30; k++)
+   for(k = 0; k < 90; k++)
    {
       for(i = 0; i < 1000; i++)
       {

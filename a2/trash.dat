@@ -3,7 +3,7 @@ Using x-norm nearest code
  1318 edges
 Nearest added 1318 edges (0.00 seconds)
 Edgegen total edges: 1318 (0.00 seconds)
-ZZ nnodes: 444  seed: 1379696301
+ZZ nnodes: 444  seed: 1379700242
  Starting Init... 326 nodes  ... ready in 0.00 sec !! 
  Matching with 444 nodes and 1318 edges ...
  Make a fractional Matching...
@@ -51,7 +51,7 @@ free_edgegenerator
  Starting Init... 326 nodes  ... ready in 0.00 sec !! 
  Matching with 444 nodes and 1363 edges ...
  Make a fractional Matching...
- 89 Dual Changes, 0 with delta=0  ... ready in 0.00 sec !! 
+ 89 Dual Changes, 0 with delta=0  ... ready in 0.01 sec !! 
  Make an integral Matching ...
  406 nodes are matched now !
  unmatched_count = 38
@@ -67,8 +67,8 @@ Now work on tree-vereinigung in a forest (19 points)
  323 Dual Changes, 14 with delta=0 
  9 Expands 
  121 Shrinks 
- Running Time in match_main: 0.01
- ... ready in 0.01 sec !! 
+ Running Time in match_main: 0.00
+ ... ready in 0.00 sec !! 
      Dual Matching Length: 220038.0
 Start Price-Repair Phase ...
 Pricing ...
