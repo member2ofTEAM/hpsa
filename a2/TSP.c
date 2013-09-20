@@ -5,31 +5,29 @@
 
 int main(int argc, char *argv[])
 {
-   FILE *file;
-   int **city, *order, *best;
-   int i, j, k, i_ind, j_ind, ind1, ind2, tmp, min1 = 1000000, min2 = 100000;
-   double min, sum, bests, check;
+   FILE *file, *data, *result;
+   int **city, *order;
+   int i, j, k, tmp, i_ind, j_ind, flag, before, after;
+   double min, sum;
    double **dist;
    double Distance(int *a, int *b);
-   double totalDistance(int *order, int **city);
-   void eTest(int *order);
-   void printSequence(int *order);
-   void arrayCopy(int *order, int *best);
+   double totalDistance(int *order, double **dist);
 
    min = 1000000000.0;
-   bests = 100000000.0;
    sum = 0.0;
 
    order = malloc(1000 * sizeof(int));
    assert(order);
-   best = malloc(1000 * sizeof(int));
-   assert(best);
    city = malloc(1000 * sizeof(int*));
    assert(city);
    dist = malloc(1000 * sizeof(double*));
    assert(dist);
    file = fopen(argv[1], "r");
    assert(file);
+   data = fopen("data.dat", "r");
+   assert(data);
+   result = fopen("result.dat", "w");
+   assert(result);
 
    /* fill in city array from file */
    for(i = 0; i < 1000; i++)
@@ -39,6 +37,7 @@ int main(int argc, char *argv[])
       dist[i] = malloc(1000 * sizeof(double));
       assert(dist[i]);   
       fscanf(file, "%d %d %d %d", &city[i][0], &city[i][1], &city[i][2], &city[i][3]);
+      fscanf(data, "%d", &order[i]);
    }
 
    /* creates a distance matrix between every point */
@@ -56,99 +55,58 @@ int main(int argc, char *argv[])
       }
    }
 
-   /* nearest neighbor algorithm */
-   for(i = 0; i < 1000; i++)
-   {
-      if(dist[i_ind][i] < min1 && i != i_ind && i != j_ind)
-      {
-         min1 = dist[i_ind][i];
-         ind1 = i;
-      }
-      if(dist[j_ind][i] < min2 && i != j_ind && i != i_ind)
-      {
-         min2 = dist[j_ind][i];
-         ind2 = i; 
-      }
-   }
+   sum = totalDistance(order, dist);
+   printf("Sum = %lf\n", sum);
 
-   if(min2 < min1)
+   for(k = 0; k < 30; k++)
    {
-      order[0] = city[i_ind][0];
-      order[1] = city[j_ind][0];
-      order[2] = city[ind2][0];
-      for(i = 0; i < 1000; i++)
-      {
-         dist[i][i_ind] = -1;
-         dist[i][j_ind] = -1;
-         dist[i_ind][i] = -1;
-         dist[j_ind][i] = -1;
-      }
-   }
-   else
-   {
-      order[0] = city[j_ind][0];
-      order[1] = city[i_ind][0];
-      order[2] = city[ind2][0];
-      for(i = 0; i < 1000; i++)
-      {    
-         dist[i][i_ind] = -1;  /* values are set to -1 which means it has already been used */
-         dist[i][j_ind] = -1;
-         dist[i_ind][i] = -1;
-         dist[j_ind][i] = -1;
-      }
-   }
-
-   for(i = 3; i < 1000; i++)
-   {
-      min = 100000.0;
-      for(j = 0; j < 1000; j++)
-      {
-         if(dist[ind2][j] < min && j != ind2 && dist[ind2][j] > 0)
-         {
-            min = dist[ind2][j];
-            ind1 = j;
-         }
-      }
-      order[i] = city[ind1][0];
-      for(j = 0; j < 1000; j++)
-      {
-         dist[ind2][j] = -1.0;
-         dist[j][ind2] = -1.0;
-      }
-      ind2 = ind1;
-   }
-   /* end of nearest neighbor algorithm */
-
-   sum = totalDistance(order, city);
-   bests = sum;
-   eTest(order);
-   arrayCopy(order, best);
-
-   /* switch tests */
       for(i = 0; i < 1000; i++)
       {
          for(j = 0; j < 1000; j++)
          {
+            flag = 0;
+            before = 0;
+            before += i == 0   ? 0 : dist[order[i - 1]][order[i]];
+            before += i == 999 ? 0 : dist[order[i]][order[i + 1]];
+            before += j == 0   ? 0 : dist[order[j - 1]][order[j]];
+            before += j == 999 ? 0 : dist[order[j]][order[j + 1]];
+
             tmp = order[i];
             order[i] = order[j];
             order[j] = tmp;
-            sum = totalDistance(order, city);
-            if(sum < bests)
-            {
-               bests = sum;
-               arrayCopy(order, best);
-            }
-            else
-            {
-               arrayCopy(best, order);
-            } 
-         }
-         printf("%d\n", i);
-      }   
 
-   eTest(order);
-   printSequence(order);
+            after = 0;
+            after += i == 0   ? 0 : dist[order[i - 1]][order[i]];
+            after += i == 999 ? 0 : dist[order[i]][order[i + 1]];
+            after += j == 0   ? 0 : dist[order[j - 1]][order[j]];
+            after += j == 999 ? 0 : dist[order[j]][order[j + 1]];
+/*
+            if(after < before)
+            {
+               flag = 1;
+               break;
+            }
+            else */
+            if(after > before)
+            {   
+               tmp = order[i];
+               order[i] = order[j];
+               order[j] = tmp;
+            }
+         }
+         if(flag)
+            break;
+      }   
+   }
+
+   sum = totalDistance(order, dist);
    printf("Sum = %lf\n", sum);
+  
+   for(i = 0; i < 1000; i++)
+      fprintf(result, "%d ", order[i]);
+   fprintf(result, ";");
+
+ /*  printf("Sum = %lf\n", sum); */
 
 
    for(i = 0; i < 1000; i++)
@@ -162,6 +120,7 @@ int main(int argc, char *argv[])
    free(dist);
    free(city);
    fclose(file);
+   fclose(data);
  
    return 0;
 } /* end of main */ 
@@ -178,72 +137,18 @@ double Distance(int *a, int *b)
 
 
 /* computes the total distance across the sequence */
-double totalDistance(int *order, int **city)
+double totalDistance(int *order, double **dist)
 {
-   int min1, min2, i;
+   int i;
    double sum = 0;
 
    for(i = 0; i < 999; i++)
    {
-      min1 = order[i];
-      min2 = order[i+1];
-      sum += Distance(city[min1 - 1], city[min2 - 1]);
+      sum += dist[order[i]][order[i + 1]];
    }
-   
+  
    return(sum);  
 } /* end of totalDistance */
 
 
-/* prints out the order of the sequence */
-void printSequence(int *order)
-{
-   int i;
-   
-   printf("\n");
-   printf("Sequence: \n %d %d %d", order[0], order[1], order[2]);
-   for(i = 3; i < 1000; i++)
-   {   
-      if(i%10 == 0)
-         printf("\n"); 
-      printf(" %d", order[i]);
-   }
-   printf("\n");
-}  /* end of printSeq */
 
-
-/* Test to make sure no 2 elements are repeated */
-void eTest(int *order)
-{
-   int i, j;
-
-   for(i = 0; i < 1000; i++)
-   {
-      for(j = 0; j < 1000; j++)
-      {
-         if(i == j)
-            continue;
-         else
-         {
-            if(order[i] == order[j])
-               printf("ERROR: Order %d and %d are the same", i, j);
-         }
-      }
-   }
-} /* end of eTest */
-
-
-/* copies array */
-void arrayCopy(int *order, int *best)
-{
-   int i;
-
-   for(i = 0; i < 1000; i++)
-      best[i] = order[i]; 
-
-} /* end of arrayCopy */
-
-
-double localDistance(int *order, int **city)
-{
-
-} /* end of localDistance */
