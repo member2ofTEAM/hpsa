@@ -1,119 +1,146 @@
-nnodes = 444
+nnodes = 382
 Using x-norm nearest code
- 1318 edges
-Nearest added 1318 edges (0.00 seconds)
-Edgegen total edges: 1318 (0.00 seconds)
-ZZ nnodes: 444  seed: 1379700242
- Starting Init... 326 nodes  ... ready in 0.00 sec !! 
- Matching with 444 nodes and 1318 edges ...
+ 1199 edges
+Nearest added 1199 edges (0.00 seconds)
+Edgegen total edges: 1199 (0.00 seconds)
+ZZ nnodes: 382  seed: 1379702532
+ Starting Init... 314 nodes  ... ready in 0.00 sec !! 
+ Matching with 382 nodes and 1199 edges ...
  Make a fractional Matching...
- 87 Dual Changes, 0 with delta=0  ... ready in 0.00 sec !! 
+ 37 Dual Changes, 0 with delta=0  ... ready in 0.00 sec !! 
  Make an integral Matching ...
- 406 nodes are matched now !
- unmatched_count = 38
+ 350 nodes are matched now !
+ unmatched_count = 32
  ... ready in 0.00 sec !! 
  Starting Integral Matching-Code...
- Need to find 19 edges ...
+ Need to find 16 edges ...
 
 Try to grow the trees in the forest directly
 
-Now work on tree-vereinigung in a forest (19 points)
-...................
- 338 Dual Changes, 14 with delta=0 | 9 Expands | 123 Shrinks 
- 338 Dual Changes, 14 with delta=0 
- 9 Expands 
- 123 Shrinks 
+Now work on tree-vereinigung in a forest (16 points)
+................
+ 122 Dual Changes, 34 with delta=0 | 5 Expands | 95 Shrinks 
+ 122 Dual Changes, 34 with delta=0 
+ 5 Expands 
+ 95 Shrinks 
  Running Time in match_main: 0.00
  ... ready in 0.00 sec !! 
-     Dual Matching Length: 221761.0
+     Dual Matching Length: 824.0
 Start Price-Repair Phase ...
 Pricing ...
 matching_price ....
-558 tree nodes
-Range of sums: -5.000000  to 2895.000000
+472 tree nodes
+Range of sums: -0.500000  to 18.500000
 Use general pricing ...
 CCtsp_init_edgegenerator (-1)
 xprice_build
 reset_edgegenerator
 xprice_reset (0)
-generate_edges (1332)
-Found 1000 potential edges
+generate_edges (1146)
+Found 751 potential edges
 Finished = 1
-ancstor_price(1000) ....
-Number of bad edges: 45  (penalty = -11743.000000)
+ancstor_price(751) ....
+Number of bad edges: 28  (penalty = -45.000000)
 Ancestor Time: 0.00 seconds
-Total potential edges: 1000
+Total potential edges: 751
 free_edgegenerator
 
-45 Edges are wrong in the extra graph, penalty=-11743.0000
+28 Edges are wrong in the extra graph, penalty=-45.0000
     Total time in pricing: 0.00 seconds
- Added 45 edges  ... ready in 0.00 sec !! 
- Starting Init... 326 nodes  ... ready in 0.00 sec !! 
- Matching with 444 nodes and 1363 edges ...
+ Added 28 edges  ... ready in 0.00 sec !! 
+ Starting Init... 314 nodes  ... ready in 0.00 sec !! 
+ Matching with 382 nodes and 1227 edges ...
  Make a fractional Matching...
- 89 Dual Changes, 0 with delta=0  ... ready in 0.01 sec !! 
+ 37 Dual Changes, 0 with delta=0  ... ready in 0.00 sec !! 
  Make an integral Matching ...
- 406 nodes are matched now !
- unmatched_count = 38
+ 350 nodes are matched now !
+ unmatched_count = 32
  ... ready in 0.00 sec !! 
  Starting Integral Matching-Code...
- Need to find 19 edges ...
+ Need to find 16 edges ...
 
 Try to grow the trees in the forest directly
 
-Now work on tree-vereinigung in a forest (19 points)
-...................
- 323 Dual Changes, 14 with delta=0 | 9 Expands | 121 Shrinks 
- 323 Dual Changes, 14 with delta=0 
- 9 Expands 
- 121 Shrinks 
+Now work on tree-vereinigung in a forest (16 points)
+................
+ 125 Dual Changes, 38 with delta=0 | 10 Expands | 120 Shrinks 
+ 125 Dual Changes, 38 with delta=0 
+ 10 Expands 
+ 120 Shrinks 
  Running Time in match_main: 0.00
  ... ready in 0.00 sec !! 
-     Dual Matching Length: 220038.0
+     Dual Matching Length: 822.0
 Start Price-Repair Phase ...
 Pricing ...
 matching_price ....
-556 tree nodes
-Range of sums: 0.000000  to 2365.500000
+492 tree nodes
+Range of sums: 0.000000  to 19.500000
 Use general pricing ...
 CCtsp_init_edgegenerator (-1)
 xprice_build
 reset_edgegenerator
 xprice_reset (0)
-generate_edges (1332)
-Found 669 potential edges
+generate_edges (1146)
+Found 984 potential edges
 Finished = 1
-ancstor_price(669) ....
-Number of bad edges: 2  (penalty = -169.000000)
+ancstor_price(984) ....
+Number of bad edges: 3  (penalty = -2.500000)
 Ancestor Time: 0.00 seconds
-Total potential edges: 669
+Total potential edges: 984
 free_edgegenerator
 
-2 Edges are wrong in the extra graph, penalty=-169.0000
+3 Edges are wrong in the extra graph, penalty=-2.5000
     Total time in pricing: 0.00 seconds
-++
++++
+
+Try to grow the trees in the forest directly
+...
+Now work on tree-vereinigung in a forest (3 points)
+...
+ 141 Dual Changes, 45 with delta=0 | 22 Expands | 134 Shrinks Pricing ...
+matching_price ....
+494 tree nodes
+214 nodes must be checked
+Range of sums: 0.000000  to 21.000000
+Use general pricing ...
+CCtsp_init_edgegenerator (-1)
+xprice_build
+reset_edgegenerator
+xprice_reset (0)
+generate_edges (1146)
+Found 1092 potential edges
+Finished = 1
+ancstor_price(1092) ....
+Number of bad edges: 1  (penalty = -1.000000)
+Ancestor Time: 0.00 seconds
+Total potential edges: 1092
+free_edgegenerator
+
+1 Edges are wrong in the extra graph, penalty=-1.0000
+    Total time in pricing: 0.00 seconds
++
 
 Try to grow the trees in the forest directly
 
-Now work on tree-vereinigung in a forest (2 points)
-..
- 329 Dual Changes, 16 with delta=0 | 10 Expands | 121 Shrinks Pricing ...
+Now work on tree-vereinigung in a forest (1 points)
+.
+ 143 Dual Changes, 45 with delta=0 | 23 Expands | 138 Shrinks Pricing ...
 matching_price ....
-555 tree nodes
-105 nodes must be checked
-Range of sums: 0.000000  to 2365.500000
+497 tree nodes
+62 nodes must be checked
+Range of sums: 0.000000  to 20.500000
 Use general pricing ...
 CCtsp_init_edgegenerator (-1)
 xprice_build
 reset_edgegenerator
 xprice_reset (0)
-generate_edges (1332)
-Found 669 potential edges
+generate_edges (1146)
+Found 1002 potential edges
 Finished = 1
-ancstor_price(669) ....
+ancstor_price(1002) ....
 Number of bad edges: 0  (penalty = 0.000000)
 Ancestor Time: 0.00 seconds
-Total potential edges: 669
+Total potential edges: 1002
 free_edgegenerator
 
 0 Edges are wrong in the extra graph, penalty=0.0000
@@ -121,41 +148,41 @@ free_edgegenerator
  ... ready in 0.00 sec !! 
  Adjust found Matching...
  ... ready in 0.00 sec !! 
-Matching Time: 0.01 Seconds
+Matching Time: 0.00 Seconds
 Testing the solution...
-     Matching Length: 220038.0, Dual 220038.0
-555 tree nodes
-Range of sums: 0.000000  to 2365.500000
+     Matching Length: 822.0, Dual 822.0
+497 tree nodes
+Range of sums: 0.000000  to 20.500000
 Check complementary slackness conditions ....
 All nodes meet exactly one matching edge
-Length of matching: 220038.00
-ancstor_price(222) ....
+Length of matching: 822.00
+ancstor_price(191) ....
 Number of bad edges: 0  (penalty = 0.000000)
 Ancestor Time: 0.00 seconds
 All matching edges have zero reduced cost
 All blossoms have odd cardinality
 All blossoms meet exactly one matching edge
-Complementary slackness satisfied (0.00 seconds)
+Complementary slackness satisfied (0.01 seconds)
 
 matching_price ....
-555 tree nodes
-Range of sums: 0.000000  to 2365.500000
+497 tree nodes
+Range of sums: 0.000000  to 20.500000
 Use general pricing ...
 CCtsp_init_edgegenerator (-1)
 xprice_build
 reset_edgegenerator
 xprice_reset (0)
-generate_edges (1332)
-Found 669 potential edges
+generate_edges (1146)
+Found 1002 potential edges
 Finished = 1
-ancstor_price(669) ....
+ancstor_price(1002) ....
 Number of bad edges: 0  (penalty = 0.000000)
 Ancestor Time: 0.00 seconds
-Total potential edges: 669
+Total potential edges: 1002
 free_edgegenerator
-Testing Time: 0.00 sec
-ZZ Edges:  1318 (starting)   1365 (total)
- Writing output.dat ... 444 nodes, 222 edges  ... in 0.00 sec !! 
+Testing Time: 0.01 sec
+ZZ Edges:  1199 (starting)   1231 (total)
+ Writing output.dat ... 382 nodes, 191 edges  ... in 0.00 sec !! 
 
-ZZ Running Time: 0.01 seconds (Edgegen 0.00, Matching 0.01)
+ZZ Running Time: 0.00 seconds (Edgegen 0.00, Matching 0.00)
 ZZ Total Time: 0.01 Seconds (includes IO and checking)

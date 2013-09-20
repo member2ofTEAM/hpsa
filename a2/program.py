@@ -9,7 +9,7 @@ from subprocess import call
 from sys import argv
 from scipy.spatial.distance import cdist
 
-my_data = genfromtxt('travelingtest', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
+my_data = genfromtxt('travelingtest.dat', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
 Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 G = Graph(matrix(Y))
 T = minimum_spanning_tree(G)
