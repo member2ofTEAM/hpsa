@@ -6,10 +6,10 @@ from networkx import minimum_spanning_tree
 from networkx import MultiGraph
 from networkx import eulerian_circuit
 from subprocess import call
-from sys import argv
+import sys
 from scipy.spatial.distance import cdist
 
-my_data = genfromtxt('travelingtest.dat', delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
+my_data = genfromtxt(sys.argv[1], delimiter=' ', usecols = (1,2,3)) #read in data from csv file 
 Y = cdist(my_data,my_data, 'euclidean') #create distance matrix
 G = Graph(matrix(Y))
 T = minimum_spanning_tree(G)
@@ -52,6 +52,10 @@ for (i, j) in eulerian_circuit(H):
 	t.add(i)
 	f.write(str(i) + " ")
 f.close()
+
+fh = open("trash.dat", "w")
+call(["./exe", sys.argv[1]], stdout = fh)
+fh.close()
 
 #the result is t
 #t_e = zip(t[:-1], t[1:])
