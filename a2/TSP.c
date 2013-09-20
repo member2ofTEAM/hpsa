@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
    FILE *file, *data, *result;
    int **city, *order;
-   int i, j, k, tmp, i_ind, j_ind, flag, before, after;
+   int i, j, k, tmp, i_ind, j_ind, before, after;
    double min, sum;
    double **dist;
    double Distance(int *a, int *b);
@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
       {
          for(j = 0; j < 1000; j++)
          {
-            flag = 0;
             before = 0;
             before += i == 0   ? 0 : dist[order[i - 1]][order[i]];
             before += i == 999 ? 0 : dist[order[i]][order[i + 1]];
@@ -80,13 +79,6 @@ int main(int argc, char *argv[])
             after += i == 999 ? 0 : dist[order[i]][order[i + 1]];
             after += j == 0   ? 0 : dist[order[j - 1]][order[j]];
             after += j == 999 ? 0 : dist[order[j]][order[j + 1]];
-/*
-            if(after < before)
-            {
-               flag = 1;
-               break;
-            }
-            else */
             if(after > before)
             {   
                tmp = order[i];
@@ -94,8 +86,6 @@ int main(int argc, char *argv[])
                order[j] = tmp;
             }
          }
-         if(flag)
-            break;
       }   
    }
 
