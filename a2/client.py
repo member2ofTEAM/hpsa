@@ -11,7 +11,7 @@ s.connect(('127.0.0.1', 5006))
 ques1=s.recv(1024)
 
 if ques1=="Team_Name?":
-    s.send("Shaqal")
+    s.send("TEAM")
 
 input_data=''
 
@@ -24,8 +24,11 @@ while True:
     if ';' in input_data:
         break
 
+execfile("program.py")
 #calculate your solution is less than 2 minutes
-solution = "1 2 3 4 54 77 43 3 4 5 6 7 8 9;"
+f = file.open("result.dat")
+solution = f.read()
+f.close()
 
 totalsent=0
 MSGLEN = len(solution) 
