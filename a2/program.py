@@ -50,7 +50,7 @@ for (i, j) in eulerian_circuit(H):
 	if i in t:
 		continue
 	t.add(i)
-	f.write(str(i) + " ")
+	f.write(str(i + 1) + " ")
 f.close()
 
 #the result is t
