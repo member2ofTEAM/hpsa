@@ -10,8 +10,8 @@ import math
 import operator
 
 client = None
-Path_to_client_run = "/path on your system/client_run.txt"
-Path_to_input = "/path on your system/input.txt"
+Path_to_client_run = "submission/client_run.txt"
+Path_to_input = "input.txt"
 leaderBoard = {}
 citiesVisited = ()
 coordChart = [ [0,0,0,0] for i in range(0,1001)]

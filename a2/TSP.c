@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
    printf("Sum = %lf\n", sum);
   
    for(i = 0; i < 1000; i++)
-      fprintf(result, "%d ", order[i]);
+      fprintf(result, "%d ", order[i] + 1);
    fprintf(result, ";");
 
  /*  printf("Sum = %lf\n", sum); */
