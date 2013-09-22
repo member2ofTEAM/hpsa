@@ -1,0 +1,2 @@
+python /home/shaqal/Documents/EclipseWorkspace/tsp/base/client.py
+python /home/shaqal/Documents/EclipseWorkspace/tsp/base/new_client.py

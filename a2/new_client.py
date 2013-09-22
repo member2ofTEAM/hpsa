@@ -11,7 +11,7 @@ s.connect(('127.0.0.1', 5006))
 ques1=s.recv(1024)
 
 if ques1=="Team_Name?":
-    s.send("Shaqal")
+    s.send("Shaqal2")
 
 input_data=''
 
@@ -25,7 +25,7 @@ while True:
         break
 
 #calculate your solution is less than 2 minutes
-solution = "1 2 3 4 54 77 43 3 4 5 6 7 8 9;"
+solution = "1 2;"
 
 totalsent=0
 MSGLEN = len(solution) 
