@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
 {
    FILE *file, *data, *result;
    int **city, *order;
-   int i, j, k, tmp, i_ind, j_ind, before, after, besti;
-   double min, sum, bestd;
+   int i, j, k, tmp, i_ind, j_ind, besti, bestj;
+   double min, sum, bestd, before, after, max;
    double **dist;
    double Distance(int *a, int *b);
    double totalDistance(int *order, double **dist);
@@ -49,11 +49,12 @@ int main(int argc, char *argv[])
       }
    }
 
-   for(k = 0; k < 90; k++)
+   for(k = 0; k < 180; k++)
    {
+      max = 0;
       for(i = 0; i < 1000; i++)
       {
-         for(j = 0; j < 1000; j++)
+         for(j = i; j < 1000; j++)
          {
             before = 0;
             before += i == 0   ? 0 : dist[order[i - 1]][order[i]];
@@ -70,14 +71,22 @@ int main(int argc, char *argv[])
             after += i == 999 ? 0 : dist[order[i]][order[i + 1]];
             after += j == 0   ? 0 : dist[order[j - 1]][order[j]];
             after += j == 999 ? 0 : dist[order[j]][order[j + 1]];
-            if(after > before)
-            {   
-               tmp = order[i];
-               order[i] = order[j];
-               order[j] = tmp;
+
+            if(max < before - after)
+            {  
+	       besti = i;
+               bestj = j; 
+               max = before - after;
             }
-         }
-      }   
+
+            tmp = order[i];
+            order[i] = order[j];
+            order[j] = tmp;
+          }
+      } 
+      tmp = order[besti];
+      order[besti] = order[bestj];
+      order[bestj] = tmp;
    }
 
    for(i = 0; i < 1000; i++)
