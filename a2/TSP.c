@@ -93,16 +93,16 @@ int main(int argc, char *argv[])
    printf("Sum = %lf\n", sum);
 
    besti = 0;
-   bestd = 1000000000.0;
+   bestd = 0;
    for(j = 0; j < 999; j++)
    {
-      if(bestd > dist[j][j+1])
+      if(bestd < dist[j][j+1])
       {
          bestd = dist[j][j+1];
          besti = j + 1;
       }
    }
-   if(bestd > dist[999][0])
+   if(bestd < dist[999][0])
       besti = 1000;
   
    for(i = besti; i < 1000; i++)
