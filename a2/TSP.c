@@ -46,17 +46,8 @@ int main(int argc, char *argv[])
       for(j = 0; j < 1000; j++)
       {
          dist[i][j] = Distance(city[i], city[j]);
-         if(dist[i][j] < min && i != j)
-         {
-            min = dist[i][j];
-            i_ind = i;
-            j_ind = j;
-         }
       }
    }
-
-   sum = totalDistance(order, dist);
-   printf("Sum = %lf\n", sum);
 
    for(k = 0; k < 90; k++)
    {
@@ -89,8 +80,13 @@ int main(int argc, char *argv[])
       }   
    }
 
-   sum = totalDistance(order, dist);
-   printf("Sum = %lf\n", sum);
+   for(i = 0; i < 1000; i++)
+   {
+      for(j = 0; j < 1000; j++)
+      {
+         dist[i][j] = Distance(city[order[i]], city[order[j]]);
+      }
+   }
 
    besti = 0;
    bestd = 0;
@@ -110,8 +106,6 @@ int main(int argc, char *argv[])
    for(i = 0; i < besti; i++)
       fprintf(result, "%d ", order[i] + 1);
    fprintf(result, ";");
-
- /*  printf("Sum = %lf\n", sum); */
 
 
    for(i = 0; i < 1000; i++)
