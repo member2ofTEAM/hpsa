@@ -58,10 +58,17 @@ call(["./exe", sys.argv[1]], stdout = fh)
 fh.close()
 
 #the result is t
-#t_e = zip(t[:-1], t[1:])
-#distance = 0
-#for (i, j) in t_e:
-#	distance += Y[i, j]
+f = open("result.dat", "rb")
+s = f.read()
+s = s.replace(";", "")
+s = s.split(" ")
+for c in s:
+	c = int(c) - 1
+t_e = zip(c[:-1], c[1:])
+distance = 0
+for (i, j) in t_e:
+	distance += Y[i, j]
+print distance
 	
 
 

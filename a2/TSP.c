@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
 {
    FILE *file, *data, *result;
    int **city, *order;
-   int i, j, k, tmp, i_ind, j_ind, before, after;
-   double min, sum;
+   int i, j, k, tmp, i_ind, j_ind, before, after, besti;
+   double min, sum, bestd;
    double **dist;
    double Distance(int *a, int *b);
    double totalDistance(int *order, double **dist);
@@ -91,8 +91,23 @@ int main(int argc, char *argv[])
 
    sum = totalDistance(order, dist);
    printf("Sum = %lf\n", sum);
+
+   besti = 0;
+   bestd = 1000000000.0;
+   for(j = 0; j < 999; j++)
+   {
+      if(bestd > dist[j][j+1])
+      {
+         bestd = dist[j][j+1];
+         besti = j + 1;
+      }
+   }
+   if(bestd > dist[999][0])
+      besti = 1000;
   
-   for(i = 0; i < 1000; i++)
+   for(i = besti; i < 1000; i++)
+      fprintf(result, "%d ", order[i] + 1);
+   for(i = 0; i < besti; i++)
       fprintf(result, "%d ", order[i] + 1);
    fprintf(result, ";");
 
