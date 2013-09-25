@@ -57,6 +57,18 @@ class Decision(object):
         return (torque[0]*torque[1] > 0)
 
 
+    def _branch(boardinfo, bitstring)
+        if bitstring has value  # stop if value is assigned
+           keep value, exit
+        else if t[0] > 0 or t[1] < 0 # stop if tipping occurs
+           value = 0, exit
+        else
+           value = 1  # no tipping has occurred, continue
+
+        for x in bitstring
+           if(x == 1)  # branch off from all possible removals
+              Branch(boardinfo, bitstring with x = 0) # x has been removed.
+           
 
 #if __name__ == "__main__":
 board = 31 * [0]
