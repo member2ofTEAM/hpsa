@@ -10,23 +10,26 @@ def minimax_decision(state, game):
     player = game.to_move(state)
 
     def max_value(state):
+        suc = game.successors(state)
         if game.terminal_test(state):
             return game.utility(state, player)
         v = -infinity
-        for (a, s) in game.successors(state):
+        for (a, s) in suc:
             v = max(v, min_value(s))
         return v
 
     def min_value(state):
+        suc = game.successors(state)
         if game.terminal_test(state):
             return game.utility(state, player)
         v = infinity
-        for (a, s) in game.successors(state):
+        for (a, s) in suc:
             v = min(v, max_value(s))
         return v
 
     # Body of minimax_decision starts here:
-    action, state = argmax(game.successors(state),
+    suc = game.successors(state)
+    action, state = argmax(suc,
                            lambda ((a, s)): min_value(s))
     return action
 
@@ -39,10 +42,11 @@ def alphabeta_full_search(state, game):
     player = game.to_move(state)
 
     def max_value(state, alpha, beta):
+        suc = game.successors(state)
         if game.terminal_test(state):
             return game.utility(state, player)
         v = -infinity
-        for (a, s) in game.successors(state):
+        for (a, s) in suc:
             v = max(v, min_value(s, alpha, beta))
             if v >= beta:
                 return v
@@ -50,10 +54,11 @@ def alphabeta_full_search(state, game):
         return v
 
     def min_value(state, alpha, beta):
+        suc = game.successors(state)
         if game.terminal_test(state):
             return game.utility(state, player)
         v = infinity
-        for (a, s) in game.successors(state):
+        for (a, s) in suc:
             v = min(v, max_value(s, alpha, beta))
             if v <= alpha:
                 return v
@@ -61,7 +66,8 @@ def alphabeta_full_search(state, game):
         return v
 
     # Body of alphabeta_search starts here:
-    action, state = argmax(game.successors(state),
+    suc = game.successors(state)
+    action, state = argmax(suc,
                            lambda ((a, s)): min_value(s, -infinity, infinity))
     return action
 
@@ -171,7 +177,220 @@ class Game:
 
     def __repr__(self):
         return '<%s>' % self.__class__.__name__
+        
+class NoTipping(Game):
+    """Play TicTacToe on an h x v board, with Max (first player) playing 'X'.
+    A state has the player to move, a cached utility, a list of moves in
+    the form of a list of (x, y) positions, and a board, in the form of
+    a dict of {(x, y): Player} entries, where Player is 'X' or 'O'."""
+    def __init__(self):
+        self.board = Board()
+        self.board.initialize()
+        self.dim = 30
+        
+        moves1 = [(x, y) for x in range(-15,16) if self.board.positionFree(x) for y in range(1,8) if not self.board.weightSet(y) and y != 0]
+        moves2 = [(x, y) for x in range(-15,16) if self.board.positionFree(x) for y in range(-7,0) if not self.board.weightSet(y) and y != 0]
+        self.initial = Struct(to_move=1, utility=0, moves=(0,moves1,moves2))
+        
 
+    def legal_moves(self, state):
+        "Legal moves are any square not yet taken."
+        return state.moves
+
+    def make_move(self, move, state, board = None):
+        #print move
+        if(state.to_move == 1):            
+            if move not in state.moves[1]:
+                return state # Illegal move has no effect
+        else:
+            if move not in state.moves[-1]:
+                return state # Illegal move has no effect
+        
+        if board == None:
+            board = Board(self.board.dim,self.board.positions[:],self.board.supports[:],self.board.weightsSet[:],self.board.weightsPos[:])
+            
+        ut = self.compute_utility(board, move, state)
+        board.setWeight(move[0], move[1])
+        moves = ([(x,y) for (x,y) in state.moves[1] if not move[0] == x and not move[1] == y],[(x,y) for (x,y) in state.moves[-1] if not move[0] == x and not move[1] == y])
+        return Struct(to_move=if_(state.to_move == 1, -1, 1),
+                      utility=ut,
+                      moves=moves)
+
+    def utility(self, state, player):
+        "Return the value to X; 1 for win, -1 for loss, 0 otherwise."
+        return state.utility
+
+    def terminal_test(self, state):
+        "A state is terminal if it is won or there are no empty squares."
+        return state.utility != 0 or len(state.moves) == 0
+
+    def display(self):
+        b1 = 0
+        b2 = 0
+        for x in range(-1*int(self.dim/2), int(self.dim/2)+1):
+            if(x<=self.board.supports[0]['pos']-1):
+                b1 += 2
+            if(x<=self.board.supports[1]['pos']-1):
+                b2 += 2
+                
+            if(self.board.positions[x]>=0):
+                if(x<=self.board.supports[0]['pos']-1):
+                    b1 += 1
+                if(x<=self.board.supports[1]['pos']-1):
+                    b2 += 1
+                print "",
+                
+            if(self.board.positions[x]<10 and self.board.positions[x]>-10):
+                if(x<=self.board.supports[0]['pos']-1):
+                    b1 += 1
+                if(x<=self.board.supports[1]['pos']-1):
+                    b2 += 1
+                print "",
+                
+            print self.board.positions[x],
+        print 
+        for x in range(-1*int(self.dim/2), int(self.dim/2)+1):    
+            if(x>=0):
+                print "",
+            if(x<10 and x>-10):
+                print "",        
+            print x,
+        print ""
+        print " "*b1,self.board.supports[0]['torque'],(b2-b1-len(str(self.board.supports[0]['torque']))-1)*" ",self.board.supports[1]['torque']
+        print ''
+
+        
+    def compute_utility(self, board, move, state):
+        "If X wins with this move, return 1; if O return -1; else return 0."
+        bo = Board(board.dim,board.positions[:],board.supports[:],board.weightsSet[:],board.weightsPos[:])
+        bo.setWeight(move[0],move[1])
+        
+        if (board._tipped()):
+            return if_(state.to_move == -1, +1, -1)
+        else:
+            return 0
+        
+    def successors(self, state):
+        "Return a list of legal (move, state) pairs."
+       # print [(move, self.make_move(move, state))
+        #        for move in state.moves[state.to_move]]
+        print "DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONEE"
+        return [(move, self.make_move(move, state))
+                for move in state.moves[state.to_move]]
+
+    
+class Board():    
+    
+        def __init__(self, dim = 30, positions = None, supports = None, weightsSet = [0]*15, weightsPos = [0]*15):
+            if positions == None:
+                self.positions = [0] * (dim + 1)
+            else:        
+                self.positions = positions
+            
+            if supports == None:
+                sup1 = {}
+                sup2 = {}
+                supports = [sup1,sup2]
+
+            self.supports = supports
+                
+            self.dim = dim            
+            self.weightsSet = weightsSet
+            self.weightsPos = weightsPos   
+            
+
+        def initialize(self, t1=-3, t2=-1, inW = (-4,3)):        
+            self.supports[0]['pos'] = t1
+            self.supports[0]['torque'] = -9
+                       
+            self.supports[1]['pos'] = t2
+            self.supports[1]['torque'] = -3            
+                         
+            
+            #The initial weight has index 0
+            self.positions[inW[0]] = inW[1]
+            self.weightsPos[0] = -4
+            self.weightsSet[0] = 1 
+            
+            sup =  self.calculateTorques(self.positions)
+            self.supports[0]['torque'] = sup[0]
+            self.supports[1]['torque'] = sup[1]
+                     
+            
+        def setWeight(self, pos, weight, positions = None, weightsSet = None, weightsPos = None, supports = None):
+            if positions == None:
+                positions = self.positions
+                
+            if weightsSet == None:
+                weightsSet = self.weightsSet
+            
+            if weightsPos == None:
+                weightsPos = self.weightsPos
+                
+            if supports == None:
+                supports = self.supports
+                
+            w = weight
+            if(not self.weightSet(w,weightsSet)):
+                if(self.positionFree(pos,positions)):
+                    weightsSet[w] = 1
+                    weightsPos[w] = pos
+                    positions[pos] = w
+                else:
+                    raise ValueError('Position already used')
+            else:
+                raise ValueError('Weight already used')
+            
+            sup =  self.calculateTorques(self.positions)
+            supports[0]['torque'] = sup[0]
+            supports[1]['torque'] = sup[1]
+                    
+            
+        def positionFree(self,pos,positions=None):
+            if positions == None:
+                positions = self.positions
+            if(positions[pos]!=0):
+                return False
+            return True
+        
+        def weightSet(self,weight,weightsSet=None):
+            if weightsSet == None:
+                weightsSet = self.weightsSet
+            if(weightsSet[weight]==1):
+                return True
+            return False
+        
+        def calculateTorques(self, positions = None):
+            if positions == None:
+                positions = self.positions
+            board = positions
+            sup1 = -9
+            sup2 = -3
+            for i in range(-15, 16):
+                if i < -3:
+                    sup1 += abs(i + 3) * abs(board[i])
+                else:                    
+                    sup1 -= abs(i + 3) * abs(board[i])
+            for i in range(-15, 16):
+                if i < -1:                    
+                    sup2 += abs(i + 1) * abs(board[i])
+                else:                    
+                    sup2 -= abs(i + 1) * abs(board[i])
+            return (sup1,sup2)
+
+        def _tipped(self, supports=None):
+            if supports == None:
+                supports = self.supports
+            if supports[0]['torque'] > 0 and supports[1]['torque'] == 0:
+                return True
+            return (supports[0]['torque']*supports[1]['torque'] > 0)               
+        
+        
+        
+        
+        
+####################################################################################       
+        
 class Fig62Game(Game):
     """The game represented in [Fig. 6.2]. Serves as a simple test case.
     >>> g = Fig62Game()
