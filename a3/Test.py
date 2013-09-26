@@ -5,39 +5,38 @@ Created on 25.09.2013
 
 Just a small test utility to initialize a game and make some moves
 '''
-from Game import *
+from Game_clean import NoTipping
 
 A = NoTipping()
 A.display()
-b = A.initial
 
 #c = alphabeta_full_search(b,A)
 #print c
 
 
 while True:
-    if b.to_move == 1:
+    if A.to_move == 1:
         pos = int(raw_input("Enter Position: "))
-        wei = b.to_move * int(raw_input("Enter Weight: "))
+        wei = A.to_move * int(raw_input("Enter Weight: "))
         move = (pos,wei)
-        b = A.make_move(move, b, A.board)
+        A = A.make_move(move)
         A.display()
         
-        if A.board._tipped():
+        if A.board.tipped():
             break
     else:    
-        if A.board._tipped():
+        if A.board.tipped():
             break
         random.random()
         move = random.choice(b.moves[b.to_move])
-        b = A.make_move(move, b, A.board)
+        A = A.make_move(move)
         A.display()
         
         
-        if A.board._tipped():
+        if A.board.tipped():
             break
 
-if(b.to_move==1):
+if(A.to_move==1):
     print "Player wins"
 else:
     print "Computer wins"
