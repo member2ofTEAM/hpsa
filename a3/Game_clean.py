@@ -133,8 +133,7 @@ class NoTipping(Game):
 				if not self.board.weightSet(y)]
         self.initial = Struct(to_move=1, utility=0, 
                                  moves=(0,moves1,moves2))
-        
-
+       
     def legal_moves(self, state):
         "Legal moves are any square not yet taken."
         return state.moves
