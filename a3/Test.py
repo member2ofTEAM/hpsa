@@ -6,7 +6,9 @@ Created on 25.09.2013
 Just a small test utility to initialize a game and make some moves
 '''
 from Game_clean import NoTipping
+from Game_clean import alphabeta_search
 import random
+import pdb
 
 A = NoTipping()
 A.display()
@@ -15,22 +17,24 @@ A.display()
 #print c
 
 
+pdb.set_trace()
 while True:
     if A.to_move == 1:
-        pos = int(raw_input("Enter Position: "))
-        wei = int(raw_input("Enter Weight: "))
+#        pos = int(raw_input("Enter Position: "))
+#        wei = int(raw_input("Enter Weight: "))
+        ((pos, wei), score) = alphabeta_search(A, d=1)
         move = (pos,wei)
         A = A.make_move(move)
         A.display()
-        
         if A.board.tipped():
             break
-    else:    
+    else:
         if A.board.tipped():
             break
+#        ((pos, wei), score) = alphabeta_search(A, d=1)
         pos = int(raw_input("Enter Position: "))
         wei = int(raw_input("Enter Weight: "))
-        move = (pos,wei)
+        move = (pos, wei)
         A = A.make_move(move)
         A.display()
         

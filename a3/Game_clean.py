@@ -1,30 +1,31 @@
-from utils import infinity, argmax, argmin
 import random
 import copy
 
-def alphabeta_search(state, game, d=4):
+infinity = 1.0e400
+
+def alphabeta_search(game, d=4):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
 
-    player = game.to_move(state)
+   # player = game.to_move
 
-    def max_value(state, alpha, beta, depth):
-        if cutoff_test(state, depth):
-            return eval_fn(state)
+    def max_value(game, alpha, beta, depth):
+        if cutoff_test(game, depth):
+            return eval_fn(game)
         v = -infinity
-        for (a, s) in game.children(state):
-            v = max(v, min_value(s, alpha, beta, depth+1))
+        for child in game[1].generate_children():
+            v = max(v, min_value(child, alpha, beta, depth+1))
             if v >= beta:
                 return v
             alpha = max(alpha, v)
         return v
 
-    def min_value(state, alpha, beta, depth):
-        if cutoff_test(state, depth):
-            return eval_fn(state)
+    def min_value(game, alpha, beta, depth):
+        if cutoff_test(game, depth):
+            return eval_fn(game)
         v = infinity
-        for (a, s) in game.children(state):
-            v = min(v, max_value(s, alpha, beta, depth+1))
+        for child in game[1].generate_children():
+            v = min(v, max_value(child, alpha, beta, depth+1))
             if v <= alpha:
                 return v
             beta = min(beta, v)
@@ -32,13 +33,17 @@ def alphabeta_search(state, game, d=4):
 
     # Body of alphabeta_search starts here:
     # The default test cuts off at depth d or at a terminal state
-    cutoff_test = lambda state,depth: depth>d or \
-                                      state.terminal_test()
-    eval_fn = lambda state: game.utility(state, player)
-    action, state = argmax(game.children(state),
-                           lambda ((a, s)):
-                           min_value(s, -infinity, infinity, 0))
-    return action
+    cutoff_test = lambda game,depth: depth>d or \
+                                      game[1].terminal_test()
+    eval_fn = lambda game: game[1].get_utility()
+
+    best_move = ((0, 0), infinity)
+    for game in game.generate_children():
+        x = min_value(game, -infinity, infinity, 0)
+        if x < best_move[1]:
+            best_move = (game[0], x)
+
+    return best_move
 
 class NoTipping:
     """Play TicTacToe on an h x v board, with Max (first player)
@@ -54,9 +59,19 @@ class NoTipping:
         self.phase = 1
         self.valid_moves = self._get_valid_moves()
 
-    def legal_moves(self, state):
+    def legal_moves(self):
         "Legal moves are any square not yet taken."
         return self.valid_moves
+
+    def get_utility(self):
+        return self.utility
+
+    def __deepcopy__(self, memo):
+        x = copy.copy(self)
+        memo[id(self)] = x
+        for name, value in self.__dict__.iteritems():
+            setattr(x, name, copy.deepcopy(value, memo))
+        return x 
 
     def make_move(self, move):
         if((self.phase==1) and \
@@ -67,7 +82,7 @@ class NoTipping:
             self.valid_moves = self._get_valid_moves() 
             
         if(self.phase==1):
-            move = (move[0],self.to_move*move[1])
+            move = (move[0],self.to_move*abs(move[1]))
                 
         if self.to_move == 1:
             if move not in self.valid_moves[1]:
@@ -137,14 +152,14 @@ class NoTipping:
                     move_2.append((x,y))
         self.valid_moves = (0,move_1,move_2)
             
-
+#
     def change_player(self):
         if self.to_move == 1:
             self.to_move = -1
         else:
             self.to_move = 1
 
-    def terminal_test(self, state):
+    def terminal_test(self):
         "A state is terminal if it is won or there are no empty squares."
         return self.board.tipped() or (not self.board.moves_left())
 
@@ -157,7 +172,7 @@ class NoTipping:
         else:
             return 0
 
-    def children(self):
+    def generate_children(self):
         "Return a list of legal (move, state) pairs."
         for move in self.valid_moves[self.to_move]:
             yield (move, self.make_move(move))
@@ -247,7 +262,7 @@ class Board():
 
     def moves_left(self):
         try:
-            self.board.find(0)
+            self.board.index(0)
         except ValueError:
             return False
         return True
