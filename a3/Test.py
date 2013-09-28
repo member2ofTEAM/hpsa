@@ -6,6 +6,7 @@ Created on 25.09.2013
 Just a small test utility to initialize a game and make some moves
 '''
 from Game_clean import NoTipping
+import random
 
 A = NoTipping()
 A.display()
@@ -17,7 +18,7 @@ A.display()
 while True:
     if A.to_move == 1:
         pos = int(raw_input("Enter Position: "))
-        wei = A.to_move * int(raw_input("Enter Weight: "))
+        wei = int(raw_input("Enter Weight: "))
         move = (pos,wei)
         A = A.make_move(move)
         A.display()
@@ -27,10 +28,17 @@ while True:
     else:    
         if A.board.tipped():
             break
-        random.random()
-        move = random.choice(b.moves[b.to_move])
+        pos = int(raw_input("Enter Position: "))
+        wei = int(raw_input("Enter Weight: "))
+        move = (pos,wei)
         A = A.make_move(move)
         A.display()
+        
+        
+#        random.random()
+#        move = random.choice(A.valid_moves[A.to_move])
+#        A = A.make_move(move)
+#        A.display()
         
         
         if A.board.tipped():

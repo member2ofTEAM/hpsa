@@ -59,6 +59,16 @@ class NoTipping:
         return self.valid_moves
 
     def make_move(self, move):
+        if((self.phase==1) and \
+           (len(self.valid_moves[1])==0) and \
+           (len(self.valid_moves[-1])==0)):
+            
+            self.phase = 2
+            self.valid_moves = self._get_valid_moves() 
+            
+        if(self.phase==1):
+            move = (move[0],self.to_move*move[1])
+                
         if self.to_move == 1:
             if move not in self.valid_moves[1]:
             #DOES THIS HAVE TO BE A DEEP COPY?
@@ -68,32 +78,65 @@ class NoTipping:
                 return self # Illegal move has no effect
 
         d = copy.deepcopy(self)
-        d.board.set_weight(move[0], move[1])
+        if(self.phase == 1):
+            d.board.set_weight(move[0], move[1])
+        else:
+            d.board.remove_weight(move[0],move[1])
         d._update_utility()
         d._update_moves(move[0], move[1])
-        d.change_player()
+        d.change_player()          
 
         return d
 
     def _get_valid_moves(self):
-        moves_p1 = []
-        moves_p2 = []
-        for x in range(-15, 16):
-            for y in range(1, 8):
-                if self.board.valid_placement(x, y):
-                    moves_p1.append((x, y))
-            for y in range(-7, 0):
-                if self.board.valid_placement(x, y):
-                    moves_p2.append((x, y))
-        return (0, moves_p1, moves_p2)
+        if self.phase == 1:
+            moves_p1 = []
+            moves_p2 = []
+            for x in range(-15, 16):
+                for y in range(1, 8):
+                    if self.board.valid_placement(x, y):
+                        moves_p1.append((x, y))
+                for y in range(-7, 0):
+                    if self.board.valid_placement(x, y):
+                        moves_p2.append((x, y))
+            return (0, moves_p1, moves_p2)
+        else:
+            moves_p1 = []
+            moves_p2 = []
+            for x in range(-15, 16):
+                if(self.board.board[x]!=0):
+                    moves_p1.append((x,self.board.board[x]))
+                    moves_p2.append((x,self.board.board[x]))
+
+            return (0, moves_p1, moves_p2)
 
     def _update_moves(self, pos, weight):
-        for (x, y) in self.valid_moves[1]:
-            if x == pos or y == weight:
-                del (x, y)
-        for (x, y) in self.valid_moves[-1]:
-            if x == pos or y == weight:
-                del (x, y)
+        move_1 = []
+        move_2 = []
+        if self.phase == 1:
+            for (x, y) in self.valid_moves[1]:
+                if x == pos or y == weight:
+                    continue
+                else:
+                    move_1.append((x,y))
+            for (x, y) in self.valid_moves[-1]:
+                if x == pos or y == weight:
+                    continue
+                else:
+                    move_2.append((x,y))
+        else:
+            for (x, y) in self.valid_moves[1]:
+                if x == pos and y == weight:
+                    continue
+                else:
+                    move_1.append((x,y))
+            for (x, y) in self.valid_moves[-1]:
+                if x == pos or y == weight:
+                    continue
+                else:
+                    move_2.append((x,y))
+        self.valid_moves = (0,move_1,move_2)
+            
 
     def change_player(self):
         if self.to_move == 1:
@@ -116,7 +159,7 @@ class NoTipping:
 
     def children(self):
         "Return a list of legal (move, state) pairs."
-        for move in moves[self.to_move]:
+        for move in self.valid_moves[self.to_move]:
             yield (move, self.make_move(move))
 
     def display(self):
@@ -168,7 +211,7 @@ class Board():
         self.weightsPos = weightsPos
         self.board[-4] = 3
         self.weightsPos[0] = -4
-        self.updateTorques()
+        self.supports = self.updateTorques()
 
     def get_weights_set(self):
         raise NotImplemented
@@ -182,11 +225,25 @@ class Board():
             self._set_weight(pos, weight)
         else:
             raise ValueError("Invalid placement")
-        self.updateTorques()
+        self.supports = self.updateTorques()
+        
+    def _remove_weight(self, pos, weight):
+        self.board[pos] = 0
+        self.weightsPos[weight] = 16
+
+    def remove_weight(self, pos, weight):
+        if(self.valid_removement(pos, weight)):
+            self._remove_weight(pos, weight)
+        else:
+            raise ValueError("Invalid removement")
+        self.supports = self.updateTorques()
 
     def valid_placement(self,pos, weight):
         return self.board[pos] == 0 and \
                self.weightsPos[weight] == 0
+               
+    def valid_removement(self,pos, weight):
+        return abs(self.board[pos]) == abs(weight)
 
     def moves_left(self):
         try:
@@ -208,7 +265,7 @@ class Board():
                 sup2 += abs(i + 1) * abs(self.board[i])
             else:
                 sup2 -= abs(i + 1) * abs(self.board[i])
-        return (sup1,sup2)
+        return [sup1,sup2]
 
     def tipped(self):
         if self.supports[0] > 0 and self.supports[1] == 0:
