@@ -64,9 +64,13 @@ f.close()
 s = s.replace(";", "")
 s = s.split(" ")[:-1]
 print s
+print len(s)
+s = list(set(s))
+print len(s)
 for i in range(1000):
         s[i] = int(s[i]) - 1
 t_e = zip(s[:-1], s[1:])
+print t_e
 distance = 0
 for (i, j) in t_e:
         distance += Y[i, j]
