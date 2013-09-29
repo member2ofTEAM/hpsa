@@ -14,7 +14,7 @@ int p1w[7];
 int p2w[7];
 int offset = 40;
 
-int d = 10;
+int d = 2;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -107,7 +107,6 @@ int value(int alpha, int beta, int depth, int max)
     player = -1 * player;
 
     if (depth > d){
-        printf("%d\n", d);
         player = -1 * player;
         return eval_fn(0);
     }
