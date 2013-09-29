@@ -14,7 +14,7 @@ int p1w[7];
 int p2w[7];
 int offset = 40;
 
-int d = 2;
+int d = 3;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     phase = 1;
     player = 1;
 
-    board[12] = 3;
+    board[11] = 3;
     
     /* Phase 1 ! */
     
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < 31; i++)
     {
-        if (board[i] > 0 && i != 12)
+        if (board[i] > 0 && i != 11)
             p1w[board[i] - 1] = 0;   
         if (board[i] < 0)
             p2w[-1 * board[i] - 1] = 0; 
@@ -94,8 +94,12 @@ int eval_fn(int exhausted)
     score = 7;
     torques(t);
     if (exhausted)
-        return player * inf * -1;
+    {
+        player = -1 * player;
+        return player * inf;
+    }
     else
+        player = -1 * player;
         return score;
 }
 
@@ -107,7 +111,6 @@ int value(int alpha, int beta, int depth, int max)
     player = -1 * player;
 
     if (depth > d){
-        player = -1 * player;
         return eval_fn(0);
     }
     
@@ -135,6 +138,7 @@ int value(int alpha, int beta, int depth, int max)
                 {
                     v = max(v, value(alpha, beta, depth + 1, 0));
                     if (v >= beta)
+                        player = -1 * player;
                         return v;
                     alpha = max(alpha, v);
                 }
@@ -142,6 +146,7 @@ int value(int alpha, int beta, int depth, int max)
                 {
                     v = min(v, value(alpha, beta, depth + 1, 1));
                     if (v <= alpha)
+                        player = -1 * player;
                         return v;
                     beta = min(beta, v);
                 }
@@ -150,9 +155,9 @@ int value(int alpha, int beta, int depth, int max)
          }
          pw[j] = 1;
     }
-    player = -1 * player;
     if (!next)
         return eval_fn(1);
+    player = -1 * player;
     return v;
 }
                                  
