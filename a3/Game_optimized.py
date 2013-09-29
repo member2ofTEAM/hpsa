@@ -3,7 +3,7 @@ Created on 28.09.2013
 
 @author: Sven, Christian, Collin
 '''
-#asd
+
 from subprocess import Popen, PIPE
 import sys
 import random
@@ -120,7 +120,7 @@ class NoTipping:
             
             self.phase = 2
             self.valid_moves = self._get_valid_moves() 
-            self.non_tipping_moves = self._get_non_tipping_moves()
+        self.non_tipping_moves = self._get_non_tipping_moves()
             
         self.change_player()       
         
