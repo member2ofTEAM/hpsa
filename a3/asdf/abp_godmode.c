@@ -14,7 +14,7 @@ int p1w[7];
 int p2w[7];
 int offset = 40;
 
-int d = 8;
+int d = 10;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -80,24 +80,33 @@ void torques(int *torque)
    torque[1] = tt1;
 }
 
+int tipped(int *t)
+{
+    return (t[0] > 0 || t[1] < 0);
+}
+
 /* Calculates a score using the current state of the board
  */
 int eval_fn()
 {
-    int score;
+    int score, t[2];
     /* calculate score */
     score = 7;
-    return score;
+    torques(t);
+    if (!tipped(t))
+        return score;
+    else
+        return player * inf * -1;
 }
-
 
 int value(int alpha, int beta, int depth, int max)
 {
-    int v = -inf, i, next = 0, j, p, *pw;
+    int v = -inf, i, next = 0, j, *pw;
     int t[2];
-    char nmove[3];
-    if (depth > d)
+    if (depth > d){
+        printf("%d\n", d);
         return eval_fn();
+    }
     
     player = -1 * player;
     if (player > 0)
@@ -117,7 +126,7 @@ int value(int alpha, int beta, int depth, int max)
                 continue;
             board[i] = player * (j + 1);
             torques(t);
-            if(!(t[0] > 0 || t[1] < 0))
+            if(!tipped(t))
             {
                 next = 1;
                 if (max)
@@ -141,7 +150,7 @@ int value(int alpha, int beta, int depth, int max)
     }
     player = -1 * player;
     if (!next)
-        return player * inf * -1;
+        return eval_fn();
     return v;
 }
                                  
@@ -150,9 +159,8 @@ int value(int alpha, int beta, int depth, int max)
  */
 void alpha_better()
 {
-    int best_v = -1 * inf, x;
+    int best_v = -1 * inf, v = inf;
     int i, j;
-    int v = inf;
     int t[2];
     int best_move[2];
     int *pw;
@@ -174,12 +182,12 @@ void alpha_better()
                 continue;
             board[i] = player * (j + 1);
             torques(t);
-            if(!(t[0] > 0 || t[1] < 0))
+            if(!tipped(t))
             {
-                x = value(-1 * inf, inf, 1, 0);
-                if (x > best_v)
+                v = value(-1 * inf, inf, 1, 0);
+                if (v > best_v)
                 {
-                    best_v = x;
+                    best_v = v;
                     best_move[0] = i;
                     best_move[1] = (player > 0) ? j + 1 : -1 * (j + 1);
                 }
