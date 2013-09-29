@@ -1,7 +1,7 @@
 '''
 Created on 25.09.2013
 
-@author: Sven
+@author: Sven, Christian, Collin
 
 Just a small test utility to initialize a game and make some moves
 '''

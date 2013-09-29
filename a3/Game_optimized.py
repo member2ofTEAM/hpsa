@@ -1,7 +1,7 @@
 '''
 Created on 28.09.2013
 
-@author: Sven
+@author: Sven, Christian, Collin
 '''
 
 from subprocess import Popen, PIPE
