@@ -272,7 +272,7 @@ class NoTipping:
         self.phase = phase       
                     
         board = 31*[0]
-        f = open("C:\\Users\\Sven\\Desktop\\Architecture\\board2.txt")
+        f = open("board2.txt")
         lines = f.readlines()
         for line in lines:
             indices = line.split()
