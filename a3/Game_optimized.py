@@ -64,8 +64,8 @@ class NoTipping:
     
     
     def magic_alphabeta_search(self):
-        if(len(self.non_tipping_moves[self.to_move]) > 0):
-            if(self.phase==1):
+        if(len(self.non_tipping_moves[self.to_move])>0):
+            if(self.phase==0):
                 parallel = 0
                 if parallel:
                     l = []
@@ -88,7 +88,7 @@ class NoTipping:
                     ints = result.split(" ")
                     return (ints[0] - 15, ints[1])
             else:
-                random.choice(self.non_tipping_moves[self.to_move])
+                return random.choice(self.non_tipping_moves[self.to_move])
         else:
             return random.choice(self.valid_moves[self.to_move])
 
@@ -194,7 +194,6 @@ class NoTipping:
                 else:
                     move_2.append((x,y))
         self.valid_moves = (0,move_1,move_2)
-        self.non_tipping_moves = self._get_non_tipping_moves()
             
 
     def change_player(self):
@@ -295,6 +294,7 @@ class NoTipping:
                     if(weight>0):
                         self._update_moves(pos, -weight)
         self.board.renew_board(board)
+        self.non_tipping_moves = self._get_non_tipping_moves()
         if(phase == 2):
             self.valid_moves = self._get_valid_moves()
             self.non_tipping_moves = self._get_non_tipping_moves()
