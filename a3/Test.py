@@ -14,12 +14,6 @@ import sys
 A = NoTipping()
 A.get_input(int(sys.argv[1]),int(sys.argv[2]))
 A.display()
-print A.to_move
-move = A.magic_alphabeta_search()
-print move
-A = A.make_move(move)
-A.display()
-
 #c = alphabeta_full_search(b,A)
 #print c
 '''
@@ -30,7 +24,7 @@ print 'Argument List:', str(sys.argv)
 print A.to_move
 print A.phase
 
-'''
+
 #pdb.set_trace()
 while True:
     if A.to_move == 1:
@@ -40,6 +34,7 @@ while True:
         #move = (pos,wei)
         move = A.magic_alphabeta_search()
         A = A.make_move(move)
+        print "Move by player "+A.to_move+" "+move
         A.display()
         if A.board.tipped():
             break
@@ -51,6 +46,7 @@ while True:
         #move = (pos,wei)
         move = A.magic_alphabeta_search()
         A = A.make_move(move)
+        print "Move by player "+A.to_move+" "+move
         A.display()
         if A.board.tipped():
             break
@@ -74,4 +70,3 @@ if(A.to_move==1):
     print "Player "+str(A.to_move)+" wins"
 else:
     print "Player "+str(A.to_move)+" wins"
-'''
