@@ -87,28 +87,31 @@ int tipped(int *t)
 
 /* Calculates a score using the current state of the board
  */
-int eval_fn()
+int eval_fn(int exhausted)
 {
     int score, t[2];
     /* calculate score */
     score = 7;
     torques(t);
-    if (!tipped(t))
-        return score;
-    else
+    if (exhausted)
         return player * inf * -1;
+    else
+        return score;
 }
 
 int value(int alpha, int beta, int depth, int max)
 {
     int v = -inf, i, next = 0, j, *pw;
     int t[2];
+
+    player = -1 * player;
+
     if (depth > d){
         printf("%d\n", d);
-        return eval_fn();
+        player = -1 * player;
+        return eval_fn(0);
     }
     
-    player = -1 * player;
     if (player > 0)
         pw = p1w;
     else
@@ -150,7 +153,7 @@ int value(int alpha, int beta, int depth, int max)
     }
     player = -1 * player;
     if (!next)
-        return eval_fn();
+        return eval_fn(1);
     return v;
 }
                                  
