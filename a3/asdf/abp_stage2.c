@@ -34,7 +34,7 @@ void alpha_better();
 int main(int argc, char *argv[])
 {
     int i;
-    /*
+    
     phase = atoi(argv[1]);
     player = atoi(argv[2]);
 
@@ -42,11 +42,7 @@ int main(int argc, char *argv[])
     {
         board[i - 3] = atoi(argv[i]);
     }
-    */
-
-    phase = 1;
-    player = 1;
-    board[11] = 3;
+    
     /* Phase 1 ! */
     
     for (i = 0; i < 12; i++)

@@ -7,6 +7,7 @@ Created on 28.09.2013
 from subprocess import Popen, PIPE
 import sys
 import random
+import pdb
 
 infinity = 1.0e400
 
@@ -65,13 +66,14 @@ class NoTipping:
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
-            if(self.phase==0):
+            if(self.phase==1):
                 parallel = 0
                 if parallel:
                     l = []
                     for move in self.non_tipping_moves[self.to_move]:
-                        temp_board = self.board
+                        temp_board = self.board.board
                         temp_board[move[0]] = move[1]
+                        #Faulty because list(str(self.to_move))
                         l.append(Popen(['a.out'] + list(str(self.to_move)) + list(str(self.phase)) 
                                                  + map(lambda x : str(x), temp_board), stdout=PIPE))
                     l = map(lambda x : x.communicate(), l)
@@ -82,11 +84,17 @@ class NoTipping:
                 
                     return maxS
                 else:
-                    result = Popen(['a.out'] + list(str(self.to_move)) + list(str(self.phase)) 
-                                             + map(lambda x : str(x), self.board), stdout=PIPE)
-                    result = result.communicte()
-                    ints = result.split(" ")
-                    return (ints[0] - 15, ints[1])
+                    pdb.set_trace()
+                    input = ['./a.out']
+                    input.append(str(self.to_move))
+                    input.append(str(self.phase))
+                    input = input + map(lambda x : str(x), self.board.board)
+                    print input
+                    result = Popen(input, stdout=PIPE)
+                    result = result.communicate()
+                    print result
+                    ints = result[0].split(" ")
+                    return (int(ints[0]) - 15, int(ints[1]))
             else:
                 return random.choice(self.non_tipping_moves[self.to_move])
         else:
@@ -274,7 +282,7 @@ class NoTipping:
         self.phase = phase       
                     
         board = 31*[0]
-        f = open("C:\\Users\\Sven\\Desktop\\Architecture\\board2.txt")
+        f = open("board2.txt")
         lines = f.readlines()
         for line in lines:
             indices = line.split()
