@@ -127,15 +127,16 @@ int value(int alpha, int beta, int depth, int max, int phase)
         p1w[0] = 2;
     }
 
+	
     player = -1 * player;
-
-    if (phase == 1)
-    {
-
-    if (depth > d){
+	
+	if (depth > d){
         return eval_fn(0);
     }
     
+
+    if (phase == 1)
+    {
     if (player > 0)
         pw = p1w;
     else
