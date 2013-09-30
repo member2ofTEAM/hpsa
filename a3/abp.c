@@ -10,11 +10,11 @@ int t1 = -3;
 int player;
 int board[31];
 int inf = 999999999;
-int p1w[7];
-int p2w[7];
+int p1w[12];
+int p2w[12];
 int offset = 40;
 
-int d = 1;
+int d = 3;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -29,29 +29,23 @@ int d = 1;
 
 /* Player 2 is below 20, Player 1 is above 20 within the nmove */
 
+void alpha_better();
+
 int main(int argc, char *argv[])
 {
     int i;
-    phase = 1;
-    player = 1;
-
-    board[12] = 3;
     
-    for(i = -15; i < 16; i++)
-    {
-       if(i < -3)
-          t0 += abs(i + 3) * abs(board[i + 15]);
-       else
-          t0 -= abs(i + 3) * abs(board[i + 15]);
-       if(i < -1)
-          t1 += abs(i + 1) * abs(board[i + 15]);
-       else
-          t1 -= abs(i + 1) * abs(board[i + 15]);
-    }
+    phase = atoi(argv[1]);
+    player = atoi(argv[2]);
 
+    for (i = 3; i < 34; i++)
+    {
+        board[i - 3] = atoi(argv[i]);
+    }
+    
     /* Phase 1 ! */
     
-    for (i = 0; i < 7; i++)
+    for (i = 0; i < 12; i++)
     {
         p1w[i] = 1;
         p2w[i] = 1;
@@ -59,219 +53,164 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < 31; i++)
     {
-        if (board[i] > 0 && i != 12)
+        if (board[i] > 0 && i != 11)
             p1w[board[i] - 1] = 0;   
         if (board[i] < 0)
             p2w[-1 * board[i] - 1] = 0; 
     }
 
-    printf("%d\n", alpha_better());
-    printf("%d\n", '-');
+    alpha_better();
 
     return 0;
 } /* end of main */ 
 
-void torques(int *torque, char *moves)
+void torques(int *torque)
 {
-   int i, tt0 = t0, tt1 = t1, len, pos, w;
-
-   len = strlen(moves);
-   for (i = 0; i < len; i = i + 2)
+   int i, tt0 = -9, tt1 = -3;
+ 
+   for(i = -15; i < 16; i++)
    {
-      pos = moves[i];
-      if (moves[i + 1] - offset < 20)
-          w = moves[i + 1] - offset;
-      else
-          w = moves[i + 1] - offset - 20;
-      pos -= 15; /* Since board goes from 0 to 31, but positions go from -15 to 15 */
-      if(pos < -3)
-         tt0 += abs(pos + 3) * abs(w);
-      else
-         tt0 -= abs(pos + 3) * abs(w);
-      if(pos < -1)
-         tt1 += abs(pos + 1) * abs(w);
-      else
-         tt1 -= abs(i + 1) * abs(board[i + 15]);
+       if(i < -3)
+          tt0 += abs(i + 3) * abs(board[i + 15]);
+       else
+          tt0 -= abs(i + 3) * abs(board[i + 15]);
+       if(i < -1)
+          tt1 += abs(i + 1) * abs(board[i + 15]);
+       else
+          tt1 -= abs(i + 1) * abs(board[i + 15]);
    }
+
    torque[0] = tt0;
    torque[1] = tt1;
 }
 
-int play(char *moves)
+int tipped(int *t)
 {
-   int tply = player;
-   if ((strlen(moves)/2 % 2) == 1)
-      if (player > 0)
-         tply = player * -1;
-      else
-         tply = player;
-   return(tply);
+    return (t[0] > 0 || t[1] < 0);
 }
 
-
-void apply_moves(char *moves, int *board_tmp)
-{
-    int len = strlen(moves), pos, i, w;
-    for (i = 0; i < 31; i++)
-    {
-        board_tmp[i] = board[i];
-    }
-    for(i = 0; i < len; i = i + 2)
-    {
-        pos = moves[i] - offset;
-        printf("%d", pos - 1); 
-        w = (moves[i + 1] - offset < 20) ? -1 * (moves[i + 1] - offset) 
-                                         : moves[i + 1] - offset - 20;
-        board_tmp[pos - 1] = w;
-    }
-}
-
-/* Takes in a variables number of moves, realizes them in the board
- * calculates a score
+/* Calculates a score using the current state of the board
  */
-int eval_fn(char *moves)
+int eval_fn(int exhausted)
 {
-    int score = 0, board_tmp[31];
-    apply_moves(moves, board_tmp);
+    int score, t[2];
     /* calculate score */
     score = 7;
-    return score;
+    torques(t);
+    if (exhausted)
+    {
+        player = -1 * player;
+        return player * inf;
+    }
+    else
+        player = -1 * player;
+        return score;
 }
 
-
-int value(char *moves, int alpha, int beta, int depth, int max)
+int value(int alpha, int beta, int depth, int max)
 {
-    int v = -inf, i, tp1w[7], tp2w[7], next, board_tmp[31], j, p;
+    int v = -inf, i, next = 0, j, *pw;
     int t[2];
-    char nmove[3];
-    if (depth > d)
-        return eval_fn(moves);
-    for (i = 0; i < 7; i++)
-    {
-         tp1w[i] = p1w[i];
-         tp2w[i] = p2w[i];
+
+    player = -1 * player;
+
+    if (depth > d){
+        return eval_fn(0);
     }
-    /* */
-    for (i = 0; i < strlen(moves); i = i + 2)
+    
+    if (player > 0)
+        pw = p1w;
+    else
+        pw = p2w;
+
+    for (j = 0; j < 12; j++)
     {
-        if (moves[i + 1] - offset < 20)
-            tp2w[moves[i + 1] - offset - 1] = 0;
+        if (pw[j])
+            pw[j] = 0;
         else
-            tp1w[moves[i + 1] - offset - 1 - 20] = 0;
-    }
-
-    apply_moves(moves, board_tmp);
-
-    p = play(moves);
-
-    for (i = 0; i < 31; i++)
-    {
-        if(!board_tmp[i])
+            continue;
+        for (i = 0; i < 31; i++)
         {
-            for(j = 0; j < 7; j++)
+            if (board[i])
+                continue;
+            board[i] = player * (j + 1);
+            torques(t);
+            if(!tipped(t))
             {
-               if(p > 0)
-               {
-                  if(tp1w[j])
-                  {
-                     nmove[0] = i + offset;
-                     nmove[1] = j + 1 + offset;
-                  }
-                  else continue;
-               }
-               else
-               {
-                  if(tp2w[j])
-                  {
-                     nmove[0] = i + offset;
-                     nmove[1] = j + 21 + offset;
-                  }
-                  else continue;
-               }
-               torques(t, nmove);
-               if(!(t[0] > 0 || t[1] < 0))
-               {  
-                  if (max)
-                  {
-                      next = 1;
-                      v = max(v, value(strncat(moves, nmove, 2), 
-                                           alpha, beta, depth + 1, 0));
-                      if (v >= beta)
-                          return v;
-                      alpha = max(alpha, v);
-                  }
-                  else
-                  {
-                      next = 1;
-                      v = min(v, value(strncat(moves, nmove, 2),
-                                           alpha, beta, depth + 1, 1));
-                      if (v <= alpha)
-                          return v;
-                      beta = min(beta, v);
-                  }
-               }
+                next = 1;
+                if (max)
+                {
+                    v = max(v, value(alpha, beta, depth + 1, 0));
+                    if (v >= beta)
+                        player = -1 * player;
+                        return v;
+                    alpha = max(alpha, v);
+                }
+                else
+                {
+                    v = min(v, value(alpha, beta, depth + 1, 1));
+                    if (v <= alpha)
+                        player = -1 * player;
+                        return v;
+                    beta = min(beta, v);
+                }
             }
-        }
+            board[i] = 0;
+         }
+         pw[j] = 1;
     }
     if (!next)
-        return player * play(moves) * inf * -1;
+        return eval_fn(1);
+    player = -1 * player;
     return v;
 }
                                  
-/* Recrusively creates feasible sequences of nontipping moves and calls
+/* Recrusively realizes feasible sequences of nontipping moves and calls
  * the evaulation function
  */
-int alpha_better()
+void alpha_better()
 {
-    int best_v = -1 * inf, x;
-    int i, j, p;
-    int v = inf;
+    int best_v = -1 * inf, v = inf;
+    int i, j;
     int t[2];
-    char nmove[3];
-    char best_nmove[3];
+    int best_move[2];
+    int *pw;
 
-    p = player;
+    if (player > 0)
+        pw = p1w;
+    else
+        pw = p2w;
 
-    for (i = 0; i < 31; i++)
+    for (j = 0; j < 12; j++)
     {
-        if(!board[i])
+        if(pw[j])
+            pw[j] = 0;
+        else
+            continue;
+        for (i = 0; i < 31; i++)
         {
-            for(j = 0; j < 7; j++)
+            if (board[i])
+                continue;
+            board[i] = player * (j + 1);
+            torques(t);
+            if(!tipped(t))
             {
-               if(p > 0)
-               {
-                  if(p1w[j])
-                  {
-                     nmove[0] = i + offset;
-                     nmove[1] = j + 1 + offset;
-                  }
-                  else continue;
-               }
-               else
-               {
-                  if(p2w[j])
-                  {
-                     nmove[0] = i + offset;
-                     nmove[1] = j + 21 + offset;
-                  }
-                  else continue;
-               }
-               torques(t, nmove);
-               if(!(t[0] > 0 || t[1] < 0))
-               {  
-                  x = value(nmove, -1 * inf, inf, 0, 0);
-                  if (x > best_v)
-                  {
-                      best_v = x;
-                      best_nmove[0] = nmove[0];
-                      best_nmove[1] = nmove[1];
-                  }
-               }
+                v = value(-1 * inf, inf, 1, 0);
+                if (v > best_v)
+                {
+                    best_v = v;
+                    best_move[0] = i;
+                    best_move[1] = (player > 0) ? j + 1 : -1 * (j + 1);
+                }
             }
+            board[i] = 0;
         }
+        pw[j] = 1;
     }
-    return best_v;
+    printf("%d %d %d\n", best_move[0], best_move[1], best_v);
+
 }
+
 
 
 
