@@ -14,7 +14,7 @@ int p1w[12];
 int p2w[12];
 int offset = 40;
 
-int d = 3;
+int d = 1;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \

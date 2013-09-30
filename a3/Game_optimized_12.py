@@ -7,6 +7,7 @@ Created on 28.09.2013
 from subprocess import Popen, PIPE
 import sys
 import random
+import pdb
 
 infinity = 1.0e400
 
@@ -65,7 +66,7 @@ class NoTipping:
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
-            if(self.phase==0):
+            if(self.phase==1):
                 parallel = 0
                 if parallel:
                     l = []
@@ -82,11 +83,17 @@ class NoTipping:
                 
                     return maxS
                 else:
-                    result = Popen(['a.out'] + list(str(self.to_move)) + list(str(self.phase)) 
-                                             + map(lambda x : str(x), self.board), stdout=PIPE)
-                    result = result.communicte()
-                    ints = result.split(" ")
-                    return (ints[0] - 15, ints[1])
+                    pdb.set_trace()
+                    x = []
+                    x.append(self.to_move)
+                    x.append(self.phase)
+                    inp = x + self.board.board[16:32] + self.board.board[0:16]
+                    inp = map(lambda x : str(x), inp)
+                    print inp
+                    result = Popen(['./a.out'] + inp, stdout=PIPE)
+                    result = result.communicate()
+                    ints = result[0].split(" ")
+                    return (int(ints[0]) - 15, int(ints[1]))
             else:
                 return random.choice(self.non_tipping_moves[self.to_move])
         else:

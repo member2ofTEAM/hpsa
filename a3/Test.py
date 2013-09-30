@@ -5,14 +5,14 @@ Created on 25.09.2013
 
 Just a small test utility to initialize a game and make some moves
 '''
-from Game_optimized import NoTipping
-from Game_optimized import alphabeta_search
+from Game_optimized_12 import NoTipping
+from Game_optimized_12 import alphabeta_search
 import random
 import pdb
 import sys
 
 A = NoTipping()
-A.get_input(int(sys.argv[1]),int(sys.argv[2]))
+#A.get_input(int(sys.argv[1]),int(sys.argv[2]))
 A.display()
 #c = alphabeta_full_search(b,A)
 #print c
@@ -34,7 +34,6 @@ while True:
         #move = (pos,wei)
         move = A.magic_alphabeta_search()
         A = A.make_move(move)
-        print "Move by player "+A.to_move+" "+move
         A.display()
         if A.board.tipped():
             break
@@ -46,7 +45,6 @@ while True:
         #move = (pos,wei)
         move = A.magic_alphabeta_search()
         A = A.make_move(move)
-        print "Move by player "+A.to_move+" "+move
         A.display()
         if A.board.tipped():
             break
