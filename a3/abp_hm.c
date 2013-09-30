@@ -116,15 +116,17 @@ int value(int alpha, int beta, int depth, int max, int phase)
 {
     int v = -inf, i, next = 0, j, *pw;
     int t[2], wleft = 0, tmp;
-    
-    for (i = 0; i < 12; i++)
-    {
-        wleft += p1w[i] + p2w[i];
-    }
-    if (!wleft)
-    {
-        phase += 1;
-        p1w[0] = 2;
+
+    if (phase == 1)
+    {    
+        for (i = 0; i < 12; i++)
+        {
+            wleft += p1w[i] + p2w[i];
+        }
+        if (!wleft)
+        {
+            phase = 2;
+        }
     }
 
     player = -1 * player;
