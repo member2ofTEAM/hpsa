@@ -24,18 +24,20 @@ print 'Argument List:', str(sys.argv)
 print A.to_move
 print A.phase
 
+l = []
 
 #pdb.set_trace()
 while True:
     if A.to_move == 1:
-        pdb.set_trace()
         move = A.magic_alphabeta_search()
+        l.append(move)
         A = A.make_move(move)
         A.display()
         if A.board.tipped():
             break
     else:
         move = A.magic_alphabeta_search()
+        l.append(move)
         A = A.make_move(move)
         A.display()
         if A.board.tipped():

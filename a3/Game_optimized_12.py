@@ -124,7 +124,7 @@ class NoTipping:
         if((self.phase==1) and \
            (len(self.valid_moves[1])==0) and \
            (len(self.valid_moves[-1])==0)):
-            
+            pdb.set_trace(); 
             self.phase = 2
             self.valid_moves = self._get_valid_moves() 
         self.non_tipping_moves = self._get_non_tipping_moves()

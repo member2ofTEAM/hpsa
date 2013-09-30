@@ -35,13 +35,14 @@ int main(int argc, char *argv[])
 {
     int i;
 
-    phase = atoi(argv[1]);
-    player = atoi(argv[2]);
-
+    player = atoi(argv[1]);
+    phase = atoi(argv[2]);
+    
     for (i = 3; i < 34; i++)
     {
         board[i - 3] = atoi(argv[i]);
     }
+    
     
     //phase = 1;
     //player = 1;
@@ -178,7 +179,7 @@ int value(int alpha, int beta, int depth, int max)
  */
 void alpha_better()
 {
-    int best_v = -1 * inf, v = inf;
+    int best_v = -2 * inf, v = inf;
     int i, j;
     int t[2];
     int best_move[2];
@@ -215,7 +216,7 @@ void alpha_better()
         }
         pw[j] = 1;
     }
-    printf("%d %d %d\n", best_move[0], best_move[1], best_v);
+    printf("%d %d %d\n", best_move[0], abs(best_move[1]), best_v);
 
 }
 
