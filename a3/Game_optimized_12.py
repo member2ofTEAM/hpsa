@@ -83,7 +83,7 @@ class NoTipping:
                 
                     return maxS
                 else:
-                    pdb.set_trace()
+#                    pdb.set_trace()
                     x = []
                     x.append(self.to_move)
                     x.append(self.phase)

@@ -14,7 +14,7 @@ int p1w[12];
 int p2w[12];
 int offset = 40;
 
-int d = 1;
+int d = 10;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -34,7 +34,7 @@ void alpha_better();
 int main(int argc, char *argv[])
 {
     int i;
-    
+
     phase = atoi(argv[1]);
     player = atoi(argv[2]);
 
@@ -43,7 +43,9 @@ int main(int argc, char *argv[])
         board[i - 3] = atoi(argv[i]);
     }
     
-    /* Phase 1 ! */
+    //phase = 1;
+    //player = 1;
+    //board[11] = 3;
     
     for (i = 0; i < 12; i++)
     {
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
         if (board[i] > 0 && i != 11)
             p1w[board[i] - 1] = 0;   
         if (board[i] < 0)
-            p2w[-1 * board[i] - 1] = 0; 
+            p2w[(-1 * board[i]) - 1] = 0; 
     }
 
     alpha_better();
@@ -142,16 +144,22 @@ int value(int alpha, int beta, int depth, int max)
                 {
                     v = max(v, value(alpha, beta, depth + 1, 0));
                     if (v >= beta)
+                    {
                         player = -1 * player;
+                        board[i] = 0;
                         return v;
+                    }
                     alpha = max(alpha, v);
                 }
                 else
                 {
                     v = min(v, value(alpha, beta, depth + 1, 1));
                     if (v <= alpha)
+                    {
                         player = -1 * player;
+                        board[i] = 0;
                         return v;
+                    }
                     beta = min(beta, v);
                 }
             }
@@ -195,12 +203,12 @@ void alpha_better()
             torques(t);
             if(!tipped(t))
             {
-                v = value(-1 * inf, inf, 1, 0);
+                v = value((-1 * inf), inf, 1, 0);
                 if (v > best_v)
                 {
                     best_v = v;
                     best_move[0] = i;
-                    best_move[1] = (player > 0) ? j + 1 : -1 * (j + 1);
+                    best_move[1] = (player > 0) ? (j + 1) : (-1 * (j + 1));
                 }
             }
             board[i] = 0;

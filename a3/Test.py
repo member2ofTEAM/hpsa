@@ -28,41 +28,18 @@ print A.phase
 #pdb.set_trace()
 while True:
     if A.to_move == 1:
-#        pos = int(raw_input("Enter Position: "))
-#        wei = int(raw_input("Enter Weight: "))
-        #((pos, wei), score) = alphabeta_search(A, d=1)
-        #move = (pos,wei)
+        pdb.set_trace()
         move = A.magic_alphabeta_search()
         A = A.make_move(move)
         A.display()
         if A.board.tipped():
             break
     else:
-#        if A.board.tipped():
-#            break
-#        ((pos, wei), score) = alphabeta_search(A, d=1)
-        #((pos, wei), score) = alphabeta_search(A, d=1)
-        #move = (pos,wei)
         move = A.magic_alphabeta_search()
         A = A.make_move(move)
         A.display()
         if A.board.tipped():
             break
-        #pos = int(raw_input("Enter Position: "))
-        #wei = int(raw_input("Enter Weight: "))
-        #move = (pos, wei)
-        #A = A.make_move(move)
-        #A.display()
-        
-        
-#        random.random()
-#        move = random.choice(A.valid_moves[A.to_move])
-#        A = A.make_move(move)
-#        A.display()
-        
-        
-#        if A.board.tipped():
-#            break
 
 if(A.to_move==1):
     print "Player "+str(A.to_move)+" wins"
