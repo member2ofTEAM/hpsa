@@ -14,7 +14,7 @@ int p1w[12];
 int p2w[12];
 int offset = 40;
 
-int d = 10;
+int d = 24;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -98,12 +98,13 @@ int eval_fn(int exhausted)
 {
     int score, t[2];
     /* calculate score */
-    score = 7;
     torques(t);
+    score = abs(t[0]*t[1]);
     if (exhausted)
     {
         player = -1 * player;
-        return player * inf;
+        return score;
+//        return player * inf;
     }
     else
         player = -1 * player;

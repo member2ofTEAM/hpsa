@@ -73,6 +73,7 @@ class NoTipping:
                     for move in self.non_tipping_moves[self.to_move]:
                         temp_board = self.board
                         temp_board[move[0]] = move[1]
+                        # This is wrong! because list(str(self.to_move))
                         l.append(Popen(['a.out'] + list(str(self.to_move)) + list(str(self.phase)) 
                                                  + map(lambda x : str(x), temp_board), stdout=PIPE))
                     l = map(lambda x : x.communicate(), l)
@@ -89,7 +90,7 @@ class NoTipping:
                     x.append(self.phase)
                     inp = x + self.board.board[16:32] + self.board.board[0:16]
                     inp = map(lambda x : str(x), inp)
-                    print inp
+#                    print inp
                     result = Popen(['./a.out'] + inp, stdout=PIPE)
                     result = result.communicate()
                     ints = result[0].split(" ")
@@ -124,7 +125,6 @@ class NoTipping:
         if((self.phase==1) and \
            (len(self.valid_moves[1])==0) and \
            (len(self.valid_moves[-1])==0)):
-            pdb.set_trace(); 
             self.phase = 2
             self.valid_moves = self._get_valid_moves() 
         self.non_tipping_moves = self._get_non_tipping_moves()
