@@ -152,8 +152,8 @@ class NoTipping:
                             moves_p2.append((x,self.board.board[x]))
                             
                     else:
-                            moves_p1.append((x,self.board.board[x]))
-                            moves_p2.append((x,self.board.board[x]))
+						moves_p1.append((x,self.board.board[x]))
+						moves_p2.append((x,self.board.board[x]))
                         
 
             return (0, moves_p1, moves_p2)
@@ -183,7 +183,7 @@ class NoTipping:
                 else:
                     move_1.append((x,y))
             for (x, y) in self.valid_moves[-1]:
-                if x == pos or y == weight:
+                if x == pos and y == weight:
                     continue
                 else:
                     move_2.append((x,y))
