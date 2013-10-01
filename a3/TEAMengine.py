@@ -58,7 +58,7 @@ class NoTipping:
 				result = Popen(['./TEAM.out'] + inp, stdout=PIPE)
 				result = result.communicate()
 				ints = result[0].split(" ")
-				if((int(ints[0]) - 15, int(ints[1])) in self.non_tipping_moves[self.to_move]):
+				if((int(ints[0]) - 15, self.to_move*(int(ints[1]))) in self.non_tipping_moves[self.to_move]):
 					print "VALID MOVE RETURNED"
 					raw_input()
 					return (int(ints[0]) - 15, int(ints[1]))
