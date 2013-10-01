@@ -5,8 +5,8 @@ Created on 25.09.2013
 
 Just a small test utility to initialize a game and make some moves
 '''
-from Game_optimized_12 import NoTipping
-from Game_optimized_12 import alphabeta_search
+from TEAMengine import NoTipping
+from TEAMengine import alphabeta_search
 import random
 import pdb
 import sys
