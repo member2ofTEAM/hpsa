@@ -9,6 +9,7 @@ import sys
 import random
 import pdb
 import copy
+import time
 
 infinity = 1.0e400
 
@@ -21,7 +22,7 @@ class NoTipping:
         self.phase = 1
         self.valid_moves = self._get_valid_moves()
         self.non_tipping_moves = self._get_non_tipping_moves()
-    
+    #change
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
@@ -142,8 +143,8 @@ class NoTipping:
                             moves_p2.append((x,self.board.board[x]))
                             
                     else:
-                            moves_p1.append((x,self.board.board[x]))
-                            moves_p2.append((x,self.board.board[x]))
+						moves_p1.append((x,self.board.board[x]))
+						moves_p2.append((x,self.board.board[x]))
                         
 
             return (0, moves_p1, moves_p2)
@@ -173,7 +174,7 @@ class NoTipping:
                 else:
                     move_1.append((x,y))
             for (x, y) in self.valid_moves[-1]:
-                if x == pos or y == weight:
+                if x == pos and y == weight:
                     continue
                 else:
                     move_2.append((x,y))
