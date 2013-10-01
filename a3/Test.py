@@ -15,22 +15,22 @@ A.display()
 print A.to_move
 print A.phase
 
-Player_before == -1
+Player_before = -1
 
 #pdb.set_trace()
 while True:
     if A.to_move == 1:
 
         move = A.magic_alphabeta_search()
-		if(Player_before == A.to_move):
-			print str(A.to_move)
-			print str(move[0])+ " " + str(move[1])
-			raw_input()
+        if(Player_before == A.to_move):
+            print str(A.to_move)
+            print str(move[0])+ " " + str(move[1])
+            raw_input()
 #        x = raw_input()
 #        y = x.split(" ")
 #        move = (int(y[0]), int(y[1]))
         A = A.make_move(move)
-		Player_before == A.to_move
+        Player_before = A.to_move
 
         A.display()
         if A.board.tipped():
@@ -38,15 +38,15 @@ while True:
     else:
 
         move = A.magic_alphabeta_search()
-		if(Player_before == A.to_move):
-			print str(A.to_move)
-			print str(move[0])+ " " + str(move[1])
-			raw_input()
+        if(Player_before == A.to_move):
+            print str(A.to_move)
+            print str(move[0])+ " " + str(move[1])
+            raw_input()
 #        x = raw_input()
 #        y = x.split(" ")
 #        move = (int(y[0]), int(y[1]))
         A = A.make_move(move)
-		Player_before == A.to_move
+        Player_before = A.to_move
 
         A.display()
         if A.board.tipped():
