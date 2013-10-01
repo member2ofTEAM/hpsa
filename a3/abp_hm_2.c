@@ -8,13 +8,14 @@
 int t0 = -9;
 int t1 = -3;
 int player;
+int pplayer;
 int board[31];
 int inf = 999999999;
 int p1w[12];
 int p2w[12];
 int offset = 40;
 
-int d = 15;
+int d = 12;
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
     int i, phase;
 
     player = atoi(argv[1]);
+    pplayer = player;
     phase = atoi(argv[2]);
     
     for (i = 3; i < 34; i++)
@@ -95,7 +97,7 @@ int tipped(int *t)
 
 /* Calculates a score using the current state of the board
  */
-int eval_fn(int exhausted)
+int eval_fn(int exhausted, int phase)
 {
     int score, t[2];
     /* calculate score */
@@ -115,7 +117,7 @@ int eval_fn(int exhausted)
 int value(int alpha, int beta, int depth, int max, int phase)
 {
     int v = -inf, i, next = 0, j, *pw;
-    int t[2], wleft = 0, tmp;
+    int t[2], wleft = 0, tmp, p1wn = 0;
     
     for (i = 0; i < 12; i++)
     {
@@ -130,8 +132,8 @@ int value(int alpha, int beta, int depth, int max, int phase)
 	
     player = -1 * player;
 	
-	if (depth > d){
-        return eval_fn(0);
+    if (depth > d){
+        return eval_fn(0, phase);
     }
     
 
@@ -189,6 +191,13 @@ int value(int alpha, int beta, int depth, int max, int phase)
     {
         for (i = 0; i < 31; i++)
         {
+            if (board[i] > 0)
+                p1wn += 1;
+        }
+        for (i = 0; i < 31; i++)
+        {  
+            if (p1wn > 0 && board[i] < 0)
+                continue;
             if (!board[i])
                 continue;
             tmp = board[i];
@@ -224,7 +233,7 @@ int value(int alpha, int beta, int depth, int max, int phase)
         }
     }
     if (!next)
-        return eval_fn(1);
+        return eval_fn(1, phase);
     player = -1 * player;
     return v;
 }
@@ -240,6 +249,8 @@ void alpha_better(int phase)
     int best_move[2];
     int *pw;
     int tmp;
+    int p1wn = 0;
+    
 
     if (phase == 1)
     {
@@ -279,6 +290,13 @@ void alpha_better(int phase)
     {
     for (i = 0; i < 31; i++)
     {
+        if (board[i] > 0)
+            p1wn += 1;
+    }
+    for (i = 0; i < 31; i++)
+    {
+        if (p1wn > 0 && board[i] < 0)
+            continue;
         if (!board[i])
             continue;
         tmp = board[i];
