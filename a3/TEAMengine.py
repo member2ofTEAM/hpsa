@@ -25,7 +25,7 @@ class NoTipping:
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
-			parallel = 1
+			parallel = 0
 			if parallel:
 				l = []
 				for move in self.non_tipping_moves[self.to_move]:
@@ -57,7 +57,10 @@ class NoTipping:
 				result = Popen(['./TEAM.out'] + inp, stdout=PIPE)
 				result = result.communicate()
 				ints = result[0].split(" ")
-				return (int(ints[0]) - 15, int(ints[1]))
+				if ((int(ints[0]) - 15, int(ints[1])) in self.non_tipping_moves[self.to_move]:
+					return (int(ints[0]) - 15, int(ints[1]))
+				else:
+					return random.choice(self.non_tipping_moves[self.to_move])
         else:
             return random.choice(self.valid_moves[self.to_move])
 
