@@ -109,7 +109,10 @@ int eval_fn(int exhausted, int phase)
           else if(board[stab23[i] + 15] == -2)
              stab2++;
           if(board[stab23[i] + 15] == 3)
-             stab1++;
+          {
+             if(i != 4)
+                stab1++;
+          }
           else if(board[stab23[i] + 15] == -3)
              stab2++;
        }
