@@ -25,42 +25,39 @@ class NoTipping:
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
-            if(self.phase==1):
-                parallel = 1
-                if parallel:
-                    l = []
-                    for move in self.non_tipping_moves[self.to_move]:
-                        temp_board = copy.deepcopy(self.board.board)
-                        temp_board[move[0]] = move[1]
-                        x = []
-                        x.append(self.to_move*-1)
-                        x.append(self.phase)
-                        inp = x + temp_board[16:32] + temp_board[0:16]
-                        inp = map(lambda x : str(x), inp)
-                        # This is wrong! because list(str(self.to_move))
-                        l.append(Popen(['./a.out'] + inp, stdout=PIPE))
-                    l = map(lambda x : x.communicate(), l)
-                    l = map(lambda x : (int(x[0].split(" ")[0]), 
-                                        int(x[0].split(" ")[1]), 
-                                        int(x[0].split(" ")[2])), l)
+			parallel = 1
+			if parallel:
+				l = []
+				for move in self.non_tipping_moves[self.to_move]:
+					temp_board = copy.deepcopy(self.board.board)
+					temp_board[move[0]] = move[1]
+					x = []
+					x.append(self.to_move*-1)
+					x.append(self.phase)
+					inp = x + temp_board[16:32] + temp_board[0:16]
+					inp = map(lambda x : str(x), inp)
+					# This is wrong! because list(str(self.to_move))
+					l.append(Popen(['./a.out'] + inp, stdout=PIPE))
+				l = map(lambda x : x.communicate(), l)
+				l = map(lambda x : (int(x[0].split(" ")[0]), 
+									int(x[0].split(" ")[1]), 
+									int(x[0].split(" ")[2])), l)
 #                   pdb.set_trace()
-                    v = map(lambda x : x[2], l)
-                    i = v.index(min(v))
-                    return self.non_tipping_moves[self.to_move][i]
-                else:
+				v = map(lambda x : x[2], l)
+				i = v.index(min(v))
+				return self.non_tipping_moves[self.to_move][i]
+			else:
 #                    pdb.set_trace()
-                    x = []
-                    x.append(self.to_move)
-                    x.append(self.phase)
-                    inp = x + self.board.board[16:32] + self.board.board[0:16]
-                    inp = map(lambda x : str(x), inp)
+				x = []
+				x.append(self.to_move)
+				x.append(self.phase)
+				inp = x + self.board.board[16:32] + self.board.board[0:16]
+				inp = map(lambda x : str(x), inp)
 #                    print inp
-                    result = Popen(['./a.out'] + inp, stdout=PIPE)
-                    result = result.communicate()
-                    ints = result[0].split(" ")
-                    return (int(ints[0]) - 15, int(ints[1]))
-            else:
-                return random.choice(self.non_tipping_moves[self.to_move])
+				result = Popen(['./a.out'] + inp, stdout=PIPE)
+				result = result.communicate()
+				ints = result[0].split(" ")
+				return (int(ints[0]) - 15, int(ints[1]))
         else:
             return random.choice(self.valid_moves[self.to_move])
 
