@@ -60,12 +60,12 @@ class NoTipping:
 				ints = result[0].split(" ")
 				if((int(ints[0]) - 15, self.to_move*(int(ints[1]))) in self.non_tipping_moves[self.to_move]):
 					print "VALID MOVE RETURNED"
-					print str(int(ints[0]) - 15) + str(ints[1])
+					print str(int(ints[0]) - 15) + " " + str(ints[1])
 					raw_input()
 					return (int(ints[0]) - 15, int(ints[1]))
 				else:
 					print "NON VALID MOVE RETURNED"
-					print str(int(ints[0]) - 15) + str(ints[1])
+					print str(int(ints[0]) - 15) + " " + str(ints[1])
 					raw_input()
 					return random.choice(self.non_tipping_moves[self.to_move])
         else:
