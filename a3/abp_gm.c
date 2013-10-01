@@ -18,9 +18,10 @@ int d = 24;
 
 int w1 = 4;
 int w2 = 2;
-int w3 = 1;
-int w4 = 3;
-int w5 = 4;
+int w3 = 2;
+int w4 = 1;
+int w5 = 2;
+int w6 = 4;
 
 int stable1[9] = {-12, -11, -10, -9, -8, -7, -6, -5, -4};
 int stab23[5] = {-7, -6, -5, -4, -3}; /* 2 - 3 are the same */
@@ -115,6 +116,7 @@ int eval_fn(int exhausted, int phase)
     int i, j, stab1 = 0, stab2 = 0, unstab1 = 0, unstab2 = 0;
     int p1l = 0, p1r = 0;
     int num1 = 0, num2 = 0, count = 0;
+    int nearmid = 0;
 
     torques(t);
 
@@ -327,7 +329,11 @@ int eval_fn(int exhausted, int phase)
     for(i = 0; i < 12; i++)
     {
        if(board[i] > 0)
+       {
           p1l += board[i];
+          if(i > 8)
+             nearmid += board[i];
+       }
     }
     for(i = 13; i < 31; i++)
     {
@@ -335,6 +341,8 @@ int eval_fn(int exhausted, int phase)
        {
           p1r += board[i];
           num1++;
+          if(i < 15)
+             nearmid += board[i];
        }
        else if(board[i] < 0)
           num2++;
@@ -346,7 +354,7 @@ int eval_fn(int exhausted, int phase)
     if(pplayer == -1)
        score = w1 * stab2 - w2 * count;
     if(pplayer == 1)
-       score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]);
+       score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
 
     if (exhausted)
