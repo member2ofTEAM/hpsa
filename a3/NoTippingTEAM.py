@@ -11,5 +11,5 @@ import sys
 A = NoTipping()
 A.get_input(int(sys.argv[1]),int(sys.argv[2]))
 move = A.magic_alphabeta_search()
-print move[0] + " " + move[1]
+print str(move[0]) + " " + str(move[1])
 A.display()
