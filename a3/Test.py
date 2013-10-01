@@ -6,21 +6,11 @@ Created on 25.09.2013
 Just a small test utility to initialize a game and make some moves
 '''
 from TEAMengine import NoTipping
-from TEAMengine import alphabeta_search
-import random
 import pdb
 import sys
-from time import sleep
 
 A = NoTipping()
-#A.get_input(int(sys.argv[1]),int(sys.argv[2]))
 A.display()
-#c = alphabeta_full_search(b,A)
-#print c
-'''
-print 'Number of arguments:', len(sys.argv), 'arguments.'
-print 'Argument List:', str(sys.argv)
-'''
 
 print A.to_move
 print A.phase
