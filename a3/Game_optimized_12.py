@@ -8,6 +8,7 @@ from subprocess import Popen, PIPE
 import sys
 import random
 import pdb
+import copy
 
 infinity = 1.0e400
 
@@ -67,22 +68,27 @@ class NoTipping:
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
             if(self.phase==1):
-                parallel = 0
+                parallel = 1
                 if parallel:
                     l = []
                     for move in self.non_tipping_moves[self.to_move]:
-                        temp_board = self.board
+                        temp_board = copy.deepcopy(self.board.board)
                         temp_board[move[0]] = move[1]
+                        x = []
+                        x.append(self.to_move)
+                        x.append(self.phase)
+                        inp = x + temp_board[16:32] + temp_board[0:16]
+                        inp = map(lambda x : str(x), inp)
                         # This is wrong! because list(str(self.to_move))
-                        l.append(Popen(['a.out'] + list(str(self.to_move)) + list(str(self.phase)) 
-                                                 + map(lambda x : str(x), temp_board), stdout=PIPE))
+                        l.append(Popen(['./a.out'] + inp, stdout=PIPE))
                     l = map(lambda x : x.communicate(), l)
-                    l = map(lambda x : (int(x.split(" ")[0]), int(x.split(" ")[1]), int(x.split(" ")[2])), l)
+                    l = map(lambda x : (int(x[0].split(" ")[0]), 
+                                        int(x[0].split(" ")[1]), 
+                                        int(x[0].split(" ")[2])), l)
+#                   pdb.set_trace()
                     v = map(lambda x : x[2], l)
-                    i = v.index(max(v))
-                    maxS = (l[i][0] - 15, l[i][1])  # get the tuple with the maximal score
-                
-                    return maxS
+                    i = v.index(min(v))
+                    return self.non_tipping_moves[self.to_move][i]
                 else:
 #                    pdb.set_trace()
                     x = []
