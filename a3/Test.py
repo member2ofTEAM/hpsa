@@ -10,6 +10,7 @@ from Game_optimized_12 import alphabeta_search
 import random
 import pdb
 import sys
+from time import sleep
 
 A = NoTipping()
 #A.get_input(int(sys.argv[1]),int(sys.argv[2]))

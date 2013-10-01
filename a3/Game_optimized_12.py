@@ -75,7 +75,7 @@ class NoTipping:
                         temp_board = copy.deepcopy(self.board.board)
                         temp_board[move[0]] = move[1]
                         x = []
-                        x.append(self.to_move)
+                        x.append(self.to_move*-1)
                         x.append(self.phase)
                         inp = x + temp_board[16:32] + temp_board[0:16]
                         inp = map(lambda x : str(x), inp)
@@ -132,6 +132,8 @@ class NoTipping:
            (len(self.valid_moves[1])==0) and \
            (len(self.valid_moves[-1])==0)):
             self.phase = 2
+            
+        if(self.phase == 2):
             self.valid_moves = self._get_valid_moves() 
         self.non_tipping_moves = self._get_non_tipping_moves()
             
@@ -174,12 +176,26 @@ class NoTipping:
         else:
             moves_p1 = []
             moves_p2 = []
+            weights_left = self._weights_left_1()
             for x in range(-15, 16):
                 if(self.board.board[x]!=0):
-                    moves_p1.append((x,self.board.board[x]))
-                    moves_p2.append((x,self.board.board[x]))
+                    if self.board.board[x]<0:
+                        if weights_left:
+                            moves_p2.append((x,self.board.board[x]))
+                        else:
+                            moves_p1.append((x,self.board.board[x]))
+                            moves_p2.append((x,self.board.board[x]))
+                            
+                    else:
+                            moves_p1.append((x,self.board.board[x]))
+                            moves_p2.append((x,self.board.board[x]))
+                        
 
             return (0, moves_p1, moves_p2)
+        
+    def _weights_left_1(self):
+        return sum(map(lambda x : x > 0, self.board.board))
+        
 
     def _update_moves(self, pos, weight):
         move_1 = []
