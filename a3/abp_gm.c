@@ -15,7 +15,7 @@ int p1w[12];
 int p2w[12];
 int offset = 40;
 
-int d = 24;
+int d = 18;
 
 int w1 = 1;
 int w2 = 2;

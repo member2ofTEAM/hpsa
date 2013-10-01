@@ -40,11 +40,11 @@ while True:
             break
     else:
 
-#        move = A.magic_alphabeta_search()
-        x = raw_input()
-        y = x.split(" ")
-        move = (int(y[0]), int(y[1]))
-#        A = A.make_move(move)
+        move = A.magic_alphabeta_search()
+#        x = raw_input()
+#        y = x.split(" ")
+#        move = (int(y[0]), int(y[1]))
+        A = A.make_move(move)
 
         A.display()
         if A.board.tipped():
