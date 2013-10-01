@@ -21,7 +21,7 @@ class NoTipping:
         self.phase = 1
         self.valid_moves = self._get_valid_moves()
         self.non_tipping_moves = self._get_non_tipping_moves()
-    
+    #change
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
