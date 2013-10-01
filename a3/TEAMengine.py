@@ -26,7 +26,7 @@ class NoTipping:
     
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
-			parallel = 0
+			parallel = 1
 			if parallel:
 				l = []
 				for move in self.non_tipping_moves[self.to_move]:

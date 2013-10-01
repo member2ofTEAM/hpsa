@@ -14,10 +14,10 @@ int inf = 999999999;
 int p1w[12];
 int p2w[12];
 
-int d = 24;
+int d = 18;
 
 int w1 = 4;
-int w2 = 2;
+int w2 = 10;
 int w3 = 2;
 int w4 = 1;
 int w5 = 2;
@@ -189,7 +189,7 @@ int eval_fn(int exhausted, int phase)
     }
 
 
-    /* counts unstable  */
+    /* counts unstable 
     for(i = 3; i < 13; i++)
     {
        if(i == 3)
@@ -324,7 +324,7 @@ int eval_fn(int exhausted, int phase)
           }
        }
     }
-
+    */
 
     for(i = 0; i < 12; i++)
     {
