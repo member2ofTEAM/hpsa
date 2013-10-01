@@ -30,6 +30,7 @@ while True:
 #        y = x.split(" ")
 #        move = (int(y[0]), int(y[1]))
         A = A.make_move(move)
+		Player_before == A.to_move
 
         A.display()
         if A.board.tipped():
@@ -45,6 +46,7 @@ while True:
 #        y = x.split(" ")
 #        move = (int(y[0]), int(y[1]))
         A = A.make_move(move)
+		Player_before == A.to_move
 
         A.display()
         if A.board.tipped():
