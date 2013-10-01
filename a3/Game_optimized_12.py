@@ -12,48 +12,6 @@ import copy
 
 infinity = 1.0e400
 
-def alphabeta_search(game, d=4):
-    """Search game to determine best action; use alpha-beta pruning.
-    This version cuts off search and uses an evaluation function."""
-
-   # player = game.to_move
-
-    def max_value(game, alpha, beta, depth):
-        if cutoff_test(game, depth):
-            return eval_fn(game)
-        v = -infinity
-        for child in game[1].generate_children():
-            v = max(v, min_value(child, alpha, beta, depth+1))
-            if v >= beta:
-                return v
-            alpha = max(alpha, v)
-        return v
-
-    def min_value(game, alpha, beta, depth):
-        if cutoff_test(game, depth):
-            return eval_fn(game)
-        v = infinity
-        for child in game[1].generate_children():
-            v = min(v, max_value(child, alpha, beta, depth+1))
-            if v <= alpha:
-                return v
-            beta = min(beta, v)
-        return v
-
-    # Body of alphabeta_search starts here:
-    # The default test cuts off at depth d or at a terminal state
-    cutoff_test = lambda game,depth: depth>d or \
-                                      game[1].terminal_test()
-    eval_fn = lambda game: game[1].get_utility()
-
-    best_move = ((0, 0), infinity)
-    for game in game.generate_children():
-        x = min_value(game, -infinity, infinity, 0)
-        if x <= best_move[1]:
-            best_move = (game[0], x)
-
-    return best_move
-
 class NoTipping:
     
     def __init__(self):
@@ -68,7 +26,7 @@ class NoTipping:
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
             if(self.phase==1):
-                parallel = 0
+                parallel = 1
                 if parallel:
                     l = []
                     for move in self.non_tipping_moves[self.to_move]:
@@ -303,7 +261,7 @@ class NoTipping:
         self.phase = phase       
                     
         board = 31*[0]
-        f = open("C:\\Users\\Sven\\Desktop\\Architecture\\board2.txt")
+        f = open("board.txt")
         lines = f.readlines()
         for line in lines:
             indices = line.split()
