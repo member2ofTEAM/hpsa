@@ -57,7 +57,7 @@ class NoTipping:
 				result = Popen(['./TEAM.out'] + inp, stdout=PIPE)
 				result = result.communicate()
 				ints = result[0].split(" ")
-				if ((int(ints[0]) - 15, int(ints[1])) in self.non_tipping_moves[self.to_move]:
+				if((int(ints[0]) - 15, int(ints[1])) in self.non_tipping_moves[self.to_move]):
 					return (int(ints[0]) - 15, int(ints[1]))
 				else:
 					return random.choice(self.non_tipping_moves[self.to_move])
