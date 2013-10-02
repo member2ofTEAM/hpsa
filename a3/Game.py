@@ -3,7 +3,7 @@ import subprocess as sp
 import numpy as np
 import sys
 import time
-
+#asd
 def calc_torque(board_info,grav_center,support):
     board = np.vstack((board_info,grav_center))
     torque = 0

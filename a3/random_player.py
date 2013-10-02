@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 from random import choice
-
+#asd
 def adding_avail(board_info,player):
     bd = []
     plwt = range(1,13)
