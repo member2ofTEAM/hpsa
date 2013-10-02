@@ -1,5 +1,5 @@
-from subprocess import check_output as checkout
 import subprocess as sp
+from subprocess import check_output as checkout
 import numpy as np
 import sys
 import time
