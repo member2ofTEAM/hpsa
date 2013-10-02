@@ -273,11 +273,13 @@ class NoTipping:
                 if(phase == 1):
                     if(weight>0):
                         self._update_moves(pos, weight)
-            else:
+            elif player == 2:
                 board[pos] = -weight
                 if(phase == 1):
                     if(weight>0):
                         self._update_moves(pos, -weight)
+            else:
+                board[pos] = weight
         self.board.renew_board(board)
         self.non_tipping_moves = self._get_non_tipping_moves()
         if(phase == 2):
