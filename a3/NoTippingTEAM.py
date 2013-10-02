@@ -10,8 +10,8 @@ import sys
 
 A = NoTipping()
 A.get_input(int(sys.argv[2]),int(sys.argv[1]))
-A.display()
+#A.display()
 
-#move = A.magic_alphabeta_search()
+move = A.magic_alphabeta_search()
 #A.make_move(move)
-#print str(move[0]) + " " + str(move[1])
+print str(move[0]) + " " + str(abs(move[1]))
