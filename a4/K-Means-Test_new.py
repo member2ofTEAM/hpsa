@@ -144,12 +144,13 @@ for i in range(1):
             f = open("ambusamp2010_2.txt", 'rb')
             s = f.read()
             for line in s.split("\n")[1:]:
-                temp = line.split(',')
-                temp[2] = temp[2].replace("\n", "")
-                patients.append(Patient((int(temp[0]), int(temp[1])), int(temp[2]),id))
-                data.append([int(temp[0]), int(temp[1])])
-                id = id + 1
-                    
+                if line != "\n":
+                    temp = line.split(',')
+                    temp[2] = temp[2].replace("\n", "")
+                    patients.append(Patient((int(temp[0]), int(temp[1])), int(temp[2]),id))
+                    data.append([int(temp[0]), int(temp[1])])
+                    id = id + 1
+                        
             
             hospitals = kmeans(array(data), 5, 100)[0]
             cluster_distances = []
