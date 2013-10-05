@@ -71,7 +71,8 @@ class Ambulance():
                 self._sort_wrt(self.pos,timefactor)
                 if(not(self.patients)):
                     break
-                if(time_left < distance(self.patients[0].position, self.pos) + distance(self.patients[0].position, self.start) + 2):
+                if(time_left < distance(self.patients[0].position, self.pos) +\
+                               distance(self.patients[0].position, self.start) + 2):
                     break
                 route.append(self.patients[0])
                 time = distance(self.patients[0].position, self.pos)

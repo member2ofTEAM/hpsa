@@ -1,11 +1,12 @@
 '''
 Created on 03.10.2013
 
-@author: Sven
+@author: Sven, Christian, Colin
 '''
 
 from numpy import array
 from scipy.cluster.vq import kmeans
+import pdb
 
 def distance(x, y):
     return abs(x[0] - y[0]) + abs(x[1] - y[1])
@@ -29,8 +30,7 @@ class Hospital():
         clusters = kmeans(array(pos_patients), len(self.ambulances), 100)[0]
         no = int(round(len(self.patients) / len(self.ambulances)))
         for i in range(len(self.ambulances)):
-            clust = clusters[i]
-            self._sort_wrt(clust)
+            self._sort_wrt(clusters[i])
             for j in range(no):
                 try:
                     self.ambulances[i].assign(self.patients[0])
@@ -49,6 +49,7 @@ class Patient():
         self.time = time
         self.init_time = time
         self.id = id
+        self.saved = 0
     
     def __str__(self):
         return str(self.id) + " (" + str(self.position[0]) + ", "  + str(self.position[1]) + ", " + str(self.init_time) + ")"
@@ -60,9 +61,11 @@ class Ambulance():
         self.start = pos
         self.route = []
         self.patients = []
+        self.all_patients = []
         
     def assign(self, patient):
         self.patients.append(patient)
+        self.all_patients.append(patient)
         
     def _sort_wrt(self,(p1, p2),timefactor=0):
         self.patients.sort(key=lambda x: distance(x.position, [p1, p2])*(x.time)^timefactor)
@@ -74,14 +77,18 @@ class Ambulance():
         while(self.patients):
             route = []
             for i in range(4):
-                if(len(route)>0):
+                self._sort_wrt(self.pos,timefactor)
+                time_left = 10000
+                if(route):
                     time_left = min([patient.time for patient in route])
                 else:
-                    time_left = 300
-                self._sort_wrt(self.pos,timefactor)
+                    if (2 * distance(self.patients[0].position, self.pos) + 2 > self.patients[0].time):
+                        del self.patients[0]
+                        break
                 if(not(self.patients)):
                     break
-                if(time_left < distance(self.patients[0].position, self.pos) + distance(self.patients[0].position, self.start) + 2):
+                if(time_left < distance(self.patients[0].position, self.pos) + \
+                               distance(self.patients[0].position, self.start) + 2):
                     break
                 route.append(self.patients[0])
                 time = distance(self.patients[0].position, self.pos)
@@ -89,22 +96,24 @@ class Ambulance():
                 del self.patients[0]
                 self._update_time(time + 1)
                 
-            self._update_time(1 + distance(route[-1].position, self.start))             
-            self.pos = self.start                
-            
-            self.route.append(route)
+            if route:
+                self._update_time(1 + distance(route[-1].position, self.start)) 
+                for patient in route:
+                    if patient.time >= 0:
+                        patient.saved = 1;      
+                self.route.append(route)
+            self.pos = self.start
 
     
     def _update_time(self, time):
-        temp = []
-        for patient in self.patients:
+        for patient in self.all_patients:
              patient.time -= time
-             if patient.time <= 0:
-                 continue
-             else:
-                 temp.append(patient)
-        self.patients = temp
-                 
+        tmp = []
+        for i in range(len(self.patients)):
+            if self.patients[i].time >= 0:
+                tmp.append(self.patients[i])
+        self.patients = tmp
+
 
 def print_result(hospitalss, filename):
     f = open(filename, 'wb')
@@ -128,67 +137,53 @@ def print_result(hospitalss, filename):
 total_score = 0
 best_j = 0
 best_time = 0
-for i in range(1):
-    print i
-    for j in range(1):
-        for k in range(1):
+for trash in range(1):
+    print trash
+    for meansscale in range(0, 20, 2):
+        meansscale = meansscale / 10;
+        for timefactor in range(1):
             data = []
             times = []
             patients = []
             ambulances = []
-            hosp_ambulances = [(5,0), (9,1), (6,2), (11,3), (10,4)]
-            
-            hosp_ambulances.sort(key = lambda x: int(x[0]))
             
             id = 0
-            f = open("ambusamp2010_2.txt", 'rb')
-            s = f.read()
-            for line in s.split("\n")[1:]:
-                if line != "\n":
+            f = open("ambusamp2010.txt", 'rb')
+            lines = f.read().split("\n")
+            for line in lines[1:301]:
+                if line != "\n": 
+                    line.strip()
                     temp = line.split(',')
-                    temp[2] = temp[2].replace("\n", "")
                     patients.append(Patient((int(temp[0]), int(temp[1])), int(temp[2]),id))
                     data.append([int(temp[0]), int(temp[1])])
                     id = id + 1
+
+            hosp_ambulances = map(int, lines[304:-1])
+            hosp_ambulances = zip(hosp_ambulances, range(5))
+            hosp_ambulances.sort(key = lambda x: int(x[0]))
                         
-            
-            hospitals = kmeans(array(data), 5, 100)[0]
+            means = kmeans(array(data), 5, 100)[0]
             cluster_distances = []
             
-            urgent_patients = [patient for patient in patients if patient.time<120]
+            data = [patient.position for patient in patients if patient.time<120]
+            urg_means = list(kmeans(array(data),5,100)[0])
             
-            data = []
-            for up in urgent_patients:
-                data.append(up.position)
+            for i in range(len(means)):
+                l = map(lambda x: distance(x, means[i]), urg_means)
+                j = l.index(min(l))
+                means[i] = ((meansscale * urg_means[j][0] + means[i][0]) / (1 + meansscale), 
+                            (meansscale * urg_means[j][1] + means[i][1]) / (1 + meansscale))
+                del urg_means[j]
             
-            urg_hospitals = kmeans(array(data),5,100)[0]
-            
-            
-            for i in range(len(hospitals)):
-                dist = 100000
-                best = (0,0)
-                temp = []
-                for urg_hospital in urg_hospitals:
-                    new_dist = distance(hospitals[i],urg_hospital)
-                    if new_dist < dist:
-                        temp.append(best)
-                        best = urg_hospital
-                        dist = new_dist
-                    else:
-                        temp.append(urg_hospital)
-                hospitals[i] = [hospitals[i][0] + int((hospitals[i][0]-best[0])*(float(j)/10)),hospitals[i][1] + int((hospitals[i][1]-best[1])*(float(j)/10))]
-                urg_hospital = temp
-            
-            
-            for hospital in hospitals:
+            for mean in means:
                 cluster_distance = []
                 for patient in patients:
-                        cluster_distance.append(distance(patient.position, hospital))
-                cluster_distances.append([sum(cluster_distance), hospital[0], hospital[1]])
+                        cluster_distance.append(distance(patient.position, mean))
+                cluster_distances.append([sum(cluster_distance)] + list(mean))
                 
             cluster_distances.sort(key=lambda x: int(x[0]))
             
-            hospitalss = []
+            hospitals = []
             
             def sort_wrt((p1, p2)):
                 patients.sort(key=lambda x: distance(x.position, [p1, p2]))
@@ -196,27 +191,27 @@ for i in range(1):
             for i in range(len(cluster_distances)):
                 h = [cluster_distances[i][1],cluster_distances[i][2]]
                 sort_wrt(h)
-                no = int(round(300 * hosp_ambulances[i][0] / sum(map(lambda x : int(x[0]), hosp_ambulances))))
-                if(no<len(patients)):
-                    hospitalss.append(Hospital((h[0], h[1]) ,patients[0:no-1],  hosp_ambulances[i][0], hosp_ambulances[i][1]))
-                else:
-                    hospitalss.append(Hospital((h[1], h[2]), patients, hosp_ambulances[i][0], hosp_ambulances[i][1]))
+                no = int(round(300 * hosp_ambulances[i][0] / sum(map(lambda x : x[0], hosp_ambulances))))
+                hospitals.append(Hospital((h[0], h[1]), patients[0:no-1],  
+                                           hosp_ambulances[i][0], hosp_ambulances[i][1]))
                 del patients[0:no-1]
             
             total_saves = 0
             
-            for hospital in hospitalss:
+            for hospital in hospitals:
                 hospital.assign_patients()
                 for ambulance in hospital.ambulances:
-                    ambulance.get_route(k)
-                    for route in ambulance.get_route():
-                        total_saves += len(route)
+                    routes = ambulance.get_route(timefactor)
+                    for route in routes:
+                        for patient in route:
+                            if patient.saved:
+                                total_saves += 1
                 
             if total_saves > total_score:
                 total_score = total_saves
-                best_j = float(j)/float(10)
-                best_time = k          
-                print_result(hospitalss, "team_output.txt")
+                best_j = float(meansscale)
+                best_time = timefactor 
+                print_result(hospitals, "team_output.txt")
                 
     print "total_score " + str(total_score)
     print "best ratio " + str(best_j)
