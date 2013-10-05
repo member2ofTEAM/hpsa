@@ -12,11 +12,12 @@ def distance(x, y):
     
 class Hospital(): 
            
-    def __init__(self, position, patients, no_ambulances):
+    def __init__(self, position, patients, no_ambulances, id):
         self.position = position
         self.patients = patients 
         self.no_ambulances = no_ambulances
         self.ambulances = []
+        self.id = id
         for i in range(self.no_ambulances):
             self.ambulances.append(Ambulance(self.position))
                                 
@@ -37,13 +38,20 @@ class Hospital():
                 except IndexError:
                     assert i == len(self.ambulances) - 1
 
+    def __str__(self):
+        return str(self.id) + " (" + str(self.position[0]) + ", " + str(self.position[1]) +")"
 
 
 class Patient():
   
-    def __init__(self, position, time):
+    def __init__(self, position, time, id):
         self.position = position
         self.time = time
+        self.init_time = time
+        self.id = id
+    
+    def __str__(self):
+        return str(self.id) + " (" + str(self.position[0]) + ", "  + str(self.position[1]) + ", " + str(self.init_time) + ")"
         
 class Ambulance():
     
@@ -60,7 +68,9 @@ class Ambulance():
         self.patients.sort(key=lambda x: distance(x.position, [p1, p2])*(x.time)^timefactor)
         #self.patients.sort(key=lambda x: x.time)
         
-    def get_route(self,timefactor):
+    def get_route(self,timefactor=0):
+        if self.route:
+            return self.route
         while(self.patients):
             route = []
             for i in range(4):
@@ -96,24 +106,49 @@ class Ambulance():
         self.patients = temp
                  
 
+def print_result(hospitalss, filename):
+    f = open(filename, 'wb')
+    for i in range(len(hospitalss)):
+        if i:
+            f.write("; " + str(hospitalss[i]))
+        else:
+            f.write("hospitals " + str(hospitalss[i]))
+    f.write("\n")
+    id = 0
+    hospitalss.sort(key=lambda x: int(x.id))
+    for i in range(len(hospitalss)):
+        for ambu in hospitalss[i].ambulances:
+            for route in ambu.route:
+                f.write("ambulance " + str(id) + " ")
+                for patient in route:
+                    f.write(str(patient) + "; ")
+                f.write(str(hospitalss[i].position) + "\n")
+            id = id + 1
+
 total_score = 0
 best_j = 0
 best_time = 0
-for i in range(100):
+for i in range(1):
     print i
-    for j in range(10):
-        for k in range(5):
+    for j in range(1):
+        for k in range(1):
             data = []
             times = []
             patients = []
             ambulances = []
-            hosp_ambulances = [11, 10, 8, 5, 5]
+            hosp_ambulances = [(5,0), (9,1), (6,2), (11,3), (10,4)]
             
-            for line in open("ambu2009.txt", 'r'):
+            hosp_ambulances.sort(key = lambda x: int(x[0]))
+            
+            id = 0
+            f = open("ambusamp2010_2.txt", 'rb')
+            s = f.read()
+            for line in s.split("\n")[1:]:
                 temp = line.split(',')
                 temp[2] = temp[2].replace("\n", "")
-                patients.append(Patient((int(temp[0]), int(temp[1])), int(temp[2])))
+                patients.append(Patient((int(temp[0]), int(temp[1])), int(temp[2]),id))
                 data.append([int(temp[0]), int(temp[1])])
+                id = id + 1
                     
             
             hospitals = kmeans(array(data), 5, 100)[0]
@@ -157,15 +192,14 @@ for i in range(100):
             def sort_wrt((p1, p2)):
                 patients.sort(key=lambda x: distance(x.position, [p1, p2]))
                 
-            
             for i in range(len(cluster_distances)):
                 h = [cluster_distances[i][1],cluster_distances[i][2]]
                 sort_wrt(h)
-                no = int(round(300 * hosp_ambulances[i] / sum(hosp_ambulances)))
+                no = int(round(300 * hosp_ambulances[i][0] / sum(map(lambda x : int(x[0]), hosp_ambulances))))
                 if(no<len(patients)):
-                    hospitalss.append(Hospital((h[0], h[1]) ,patients[0:no-1],  hosp_ambulances[i]))
+                    hospitalss.append(Hospital((h[0], h[1]) ,patients[0:no-1],  hosp_ambulances[i][0], hosp_ambulances[i][1]))
                 else:
-                    hospitalss.append(Hospital((h[1], h[2]), patients, hosp_ambulances[i]))
+                    hospitalss.append(Hospital((h[1], h[2]), patients, hosp_ambulances[i][0], hosp_ambulances[i][1]))
                 del patients[0:no-1]
             
             total_saves = 0
@@ -174,16 +208,21 @@ for i in range(100):
                 hospital.assign_patients()
                 for ambulance in hospital.ambulances:
                     ambulance.get_route(k)
-                    total_saves += len(ambulance.route)
+                    for route in ambulance.get_route():
+                        total_saves += len(route)
                 
             if total_saves > total_score:
                 total_score = total_saves
                 best_j = float(j)/float(10)
-                best_time = k
+                best_time = k          
+                print_result(hospitalss, "team_output.txt")
                 
     print "total_score " + str(total_score)
     print "best ratio " + str(best_j)
     print "best time-factor " + str(best_time)
+    
+    
+    
 '''
 data = []
 times = []
