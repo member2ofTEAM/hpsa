@@ -3,7 +3,7 @@ Created on 03.10.2013
 
 @author: Sven, Christian, Colin
 '''
-
+#Comment
 from numpy import array
 from scipy.cluster.vq import kmeans
 import pdb
