@@ -226,7 +226,8 @@ int main(int argc, char *argv[])
             j = chooseTarget(&ant, patients, hosp, pheromones);
             moves[i][k] = ant.next; 
             k = k + 1;
-         printf("Ant.time = %d\n", ant.time);
+            if (ant.pat1 != -1)
+               printf("Ant patients: %d %d %d %d\n", ant.pat1, ant.pat2, ant.pat3, ant.pat4);
          }
   //       for(j = 0; j < 10; j++)
     //        printf("%d ", moves[i][j]);
@@ -392,7 +393,6 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones)
             ant->pat3 = best;
          else
             ant->pat4 = best;
-         printf("Ant patients: %d %d %d %d\n", ant->pat1, ant->pat2, ant->pat3, ant->pat4);
          pheromones[ant->next][best] += LOCAL_PHEROMONE; /* update pheromones */
          pheromones[best][ant->next] += LOCAL_PHEROMONE;
 
