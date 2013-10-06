@@ -300,6 +300,7 @@ person(xloc,yloc,rescuetime)
 37,96,155
 66,4,111
 
+
 hospital(numambulance)
 5
 10
