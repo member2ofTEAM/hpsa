@@ -226,12 +226,31 @@ int main(int argc, char *argv[])
             j = chooseTarget(&ant, patients, hosp, pheromones);
             moves[i][k] = ant.next; 
             k = k + 1;
-            if (ant.pat1 != -1)
-               printf("Ant patients: %d %d %d %d\n", ant.pat1, ant.pat2, ant.pat3, ant.pat4);
+            if (ant.pat4 != -1)
+               printf("Ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d)\n", r, 
+                                                                 ant.pat1, patients[ant.pat1].xcoord, patients[ant.pat1].ycoord, patients[ant.pat1].life,
+								 ant.pat2, patients[ant.pat2].xcoord, patients[ant.pat2].ycoord, patients[ant.pat2].life, 
+								 ant.pat3, patients[ant.pat3].xcoord, patients[ant.pat3].ycoord, patients[ant.pat3].life, 
+								 ant.pat4, patients[ant.pat4].xcoord, patients[ant.pat4].ycoord, patients[ant.pat4].life);
+
+            else if (ant.pat3 != -1)
+               printf("Ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d)\n", r, 
+                                                                 ant.pat1, patients[ant.pat1].xcoord, patients[ant.pat1].ycoord, patients[ant.pat1].life,
+								 ant.pat2, patients[ant.pat2].xcoord, patients[ant.pat2].ycoord, patients[ant.pat2].life, 
+								 ant.pat3, patients[ant.pat3].xcoord, patients[ant.pat3].ycoord, patients[ant.pat3].life); 
+
+            else if (ant.pat2 != -1)
+               printf("Ambulance %d %d (%d, %d, %d); %d (%d, %d, %d)\n", r, 
+                                                                 ant.pat1, patients[ant.pat1].xcoord, patients[ant.pat1].ycoord, patients[ant.pat1].life,
+								 ant.pat2, patients[ant.pat2].xcoord, patients[ant.pat2].ycoord, patients[ant.pat2].life);
+
+           else if (ant.pat1 != -1)
+               printf("Ambulance %d %d (%d, %d, %d)\n", r, 
+                                                                 ant.pat1, patients[ant.pat1].xcoord, patients[ant.pat1].ycoord, patients[ant.pat1].life);
+
          }
   //       for(j = 0; j < 10; j++)
     //        printf("%d ", moves[i][j]);
-         printf("\n");
       }
        
       /* reset used */
