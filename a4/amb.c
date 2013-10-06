@@ -332,7 +332,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones)
                /* ensures all other ants can still make it back given the new ant is picked up  */
               if(ant->pat1 != -1)
                {
-                if((patients[ant->pat1].life - ant->time) > dist1 + bestd2 + 2)
+                if((patients[ant->pat1].life - ant->time) < dist1 + bestd2 + 2)
                      continue;
                } 
               if(ant->pat2 != -1)
