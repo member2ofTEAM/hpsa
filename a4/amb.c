@@ -340,7 +340,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                   bestd2 = dist2;
             }
             /* ensures new patient could make it to a hospital */
-            if((patients[i].life - ant->time - dist1 - bestd2 - 2)>0)
+            if((patients[i].life - ant->time - dist1 - bestd2 - 2) > 0)
             {
                /* ensures all other ants can still make it back given the new ant is picked up  */
               if(ant->pat1 != -1)
