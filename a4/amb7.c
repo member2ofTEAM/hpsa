@@ -40,6 +40,7 @@ int hospital;
 typedef struct hosp_t {
 int xcoord;
 int ycoord;
+int no_ambu;
 } hosp_t;
 
 int savior = 0;
@@ -78,22 +79,33 @@ int main(int argc, char *argv[])
    /* will be amb[i] */
 
    savior = 0;
-   /* UPDATE THIS! */
-   hosp[0].xcoord = 49;
-   hosp[0].ycoord = 56;
-   hosp_0 = 5;
-   hosp[1].xcoord = 63;
-   hosp[1].ycoord = 47;
-   hosp_1 = 10;
-   hosp[2].xcoord = 48;
-   hosp[2].ycoord = 53;
-   hosp_2 = 11;
-   hosp[3].xcoord = 67;
-   hosp[3].ycoord = 50;
-   hosp_3 = 5;
-   hosp[4].xcoord = 31;
-   hosp[4].ycoord = 49;
-   hosp_4 = 8;
+
+   file = fopen("TEAMinput.txt", "r");
+   assert(file);
+
+   /*initialize patients */
+   for(i = 0; i < NUM_IN_FILE; i++)
+   {
+      fscanf(file, "%d", &patients[i].xcoord);
+      fscanf(file, "%d", &patients[i].ycoord);
+      fscanf(file, "%d", &patients[i].life);
+      patients[i].claim = 0;
+   }
+
+   for(i = 0; i < 5; i++)
+   {
+      fscanf(file, "%d", &hosp[i].xcoord);
+      fscanf(file, "%d", &hosp[i].ycoord);
+      fscanf(file, "%d", &hosp[i].no_ambu);
+      patients[i + NUM_IN_FILE].xcoord = hosp[i].xcoord;
+      patients[i + NUM_IN_FILE].ycoord = hosp[i].ycoord;
+   }
+
+   hosp_0 = hosp[0].no_ambu;
+   hosp_1 = hosp[1].no_ambu;
+   hosp_2 = hosp[2].no_ambu;
+   hosp_3 = hosp[3].no_ambu;
+   hosp_4 = hosp[4].no_ambu;
    total = hosp_0 + hosp_1 + hosp_2 + hosp_3 + hosp_4;
 
 
@@ -123,8 +135,6 @@ int main(int argc, char *argv[])
    assert(pheromones);
    amb = malloc(total * sizeof(amb_t));
    assert(amb);
-
-
 
    /* initialization of ambulances */
    for(i = 0; i < total; i++)
@@ -173,8 +183,7 @@ int main(int argc, char *argv[])
       amb[i + hosp_0 + hosp_1 + hosp_2 + hosp_3].hospital = 4;
       amb[i + hosp_0 + hosp_1 + hosp_2 + hosp_3].next = NUM_IN_FILE + 4;
    }
-
-   
+ 
    /* initialize pheromone array */
    for(i = 0; i < NUM_IN_FILE + 5; i++)
    {
@@ -184,24 +193,6 @@ int main(int argc, char *argv[])
          pheromones[i][j] = 0;
    }
   
-   file = fopen("ambu2009.txt", "r");
-   assert(file);
-
-   /* initialize patients and grid */
-   for(i = 0; i < NUM_IN_FILE; i++)
-   {
-      fscanf(file, "%d", &patients[i].xcoord);
-      fscanf(file, "%d", &patients[i].ycoord);
-      fscanf(file, "%d", &patients[i].life);
-      patients[i].claim = 0;
-   }
-   
-   for(i = 0; i < 5; i++)
-   {
-      patients[i + NUM_IN_FILE].xcoord = hosp[i].xcoord;
-      patients[i + NUM_IN_FILE].ycoord = hosp[i].ycoord;
-   }
-
 
 /* change this outer loop to while(TIMEVALID) */
    for(l = 0; l < 1; l++)
@@ -236,12 +227,13 @@ int main(int argc, char *argv[])
          {
             j = chooseTarget(&ant, patients, hosp, pheromones, r);
             moves[i][k] = ant.next; 
-            k = k + 1;
-            
+            k = k + 1;  
          }
       }
        
-      /* reset used */
+      /* reset array (may not be necessary */
+      for(i = 0; i < total; i++)
+         used[i] = i;
 
       /* check to see if this solution is better. If so, save it */
       if(max < savior)
@@ -278,6 +270,15 @@ int main(int argc, char *argv[])
    /* FREE MOVES AND BEST */
 
    /* free all arrays */
+   for(i = 0; i < 100; i++)
+   {
+      free(moves[i]);
+      free(best[i]);
+   }
+   free(moves);
+   free(best);
+   free(used);
+
    for(i = 0; i < NUM_IN_FILE + 5; i++)
       free(pheromones[i]);
    free(pheromones);
