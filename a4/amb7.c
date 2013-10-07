@@ -249,6 +249,7 @@ int main(int argc, char *argv[])
             amb[i].chosen = 0; /* make them no longer chosen */
          }
       }
+    
       /* reset savior and claimed patients */
       savior = 0;
       for(i = 0; i < NUM_IN_FILE; i++)
@@ -266,18 +267,15 @@ int main(int argc, char *argv[])
 
    printf("%d", max);
 
-
-   /* FREE MOVES AND BEST */
-
    /* free all arrays */
-   for(i = 0; i < 100; i++)
+   for(i = 0; i < total; i++)
    {
-      free(moves[i]);
-      free(best[i]);
-   }
+      free(moves[i]);  
+      free(best[i]); 
+   } 
    free(moves);
    free(best);
-   free(used);
+   free(used); 
 
    for(i = 0; i < NUM_IN_FILE + 5; i++)
       free(pheromones[i]);
