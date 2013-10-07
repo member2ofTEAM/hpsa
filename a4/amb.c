@@ -468,7 +468,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                savior++;
          } */
            if (ant->pat4 != -1)
-               printf("Ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
+               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
                                                                  ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
 								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life, 
 								 ant->pat3, patients[ant->pat3].xcoord, patients[ant->pat3].ycoord, patients[ant->pat3].life, 
@@ -476,20 +476,20 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
 								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
 
             else if (ant->pat3 != -1)
-               printf("Ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
+               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
                                                                  ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
 								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life, 
 								 ant->pat3, patients[ant->pat3].xcoord, patients[ant->pat3].ycoord, patients[ant->pat3].life,
 								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
 
             else if (ant->pat2 != -1)
-               printf("Ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
+               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
                                                                  ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
 								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life,
 								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
 
            else if (ant->pat1 != -1)
-               printf("Ambulance %d %d (%d, %d, %d); (%d, %d)\n", mo, 
+               printf("ambulance %d %d (%d, %d, %d); (%d, %d)\n", mo, 
                                                                  ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
 								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
      
