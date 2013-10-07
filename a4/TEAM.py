@@ -73,6 +73,7 @@ all_patients = []
 data = []
 id = 0
 lines = getData(s).split("\n")
+print lines
 for line in lines[1:301]:
     if line != "\n": 
         line.strip()
