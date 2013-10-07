@@ -36,6 +36,7 @@ int hospital;
 typedef struct hosp_t {
 int xcoord;
 int ycoord;
+int no_ambu;
 } hosp_t;
 
 int savior = 0;
@@ -66,18 +67,23 @@ int main(int argc, char *argv[])
    /* UPDATE THIS! */
    hosp[0].xcoord = 49;
    hosp[0].ycoord = 56;
+   hosp[0].no_ambu = 5;
    hosp_0 = 5;
    hosp[1].xcoord = 63;
    hosp[1].ycoord = 47;
+   hosp[1].no_ambu = 10;
    hosp_1 = 10;
    hosp[2].xcoord = 48;
    hosp[2].ycoord = 53;
+   hosp[2].no_ambu = 11;
    hosp_2 = 11;
    hosp[3].xcoord = 67;
    hosp[3].ycoord = 50;
+   hosp[3].no_ambu = 5;
    hosp_3 = 5;
    hosp[4].xcoord = 31;
    hosp[4].ycoord = 49;
+   hosp[4].no_ambu = 8;
    hosp_4 = 8;
    total = hosp_0 + hosp_1 + hosp_2 + hosp_3 + hosp_4;
 
@@ -169,7 +175,7 @@ int main(int argc, char *argv[])
          pheromones[i][j] = 0;
    }
   
-   file = fopen("ambu2009.txt", "r");
+   file = fopen("TEAMinput.txt", "r");
    assert(file);
 
    /* initialize patients and grid */
@@ -183,10 +189,18 @@ int main(int argc, char *argv[])
    
    for(i = 0; i < 5; i++)
    {
+      fscanf(file, "%d", &hosp[i].xcoord);
+      fscanf(file, "%d", &hosp[i].ycoord);
+      fscanf(file, "%d", &hosp[i].no_ambu);
       patients[i + NUM_IN_FILE].xcoord = hosp[i].xcoord;
       patients[i + NUM_IN_FILE].ycoord = hosp[i].ycoord;
    }
 
+   hosp_0 = hosp[0].no_ambu;
+   hosp_1 = hosp[1].no_ambu;
+   hosp_2 = hosp[2].no_ambu;
+   hosp_3 = hosp[3].no_ambu;
+   hosp_4 = hosp[4].no_ambu;
 
 /* change this outer loop to while(TIMEVALID) */
    for(l = 0; l < 1; l++)
@@ -263,7 +277,7 @@ int main(int argc, char *argv[])
 
    }
 
-   printf("SAVED = %d\n", max);
+   printf("%d", max);
 
 
    /* FREE MOVES AND BEST */
@@ -331,11 +345,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                /* ensures all other ants can still make it back given the new ant is picked up  */
               if(ant->pat1 != -1)
                {
-//<<<<<<< HEAD
-                if((patients[ant->pat1].life - ant->time) < dist1 + bestd2 + 2)
-/*=======*/
                 if((patients[ant->pat1].life - ant->time - dist1 - bestd2 - 2)<0)
-//>>>>>>> d9c7dbe446cc39abba2067e01be2fbb9eb747eca
                      continue;
                } 
               if(ant->pat2 != -1)
