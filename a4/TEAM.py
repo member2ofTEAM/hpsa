@@ -9,6 +9,7 @@ from scipy.cluster.vq import kmeans
 from subprocess import Popen, PIPE
 from sys import argv
 import socket
+import pdb
 
 teamName = "TeamTeam"
 eom = "<EOM>"
@@ -147,7 +148,6 @@ for trash in range(1):
             x = Popen(["./TEAM"], stdout = PIPE)
             output = x.communicate()[0].split("\n")
             ambulances = output[:300]
-            total_saves = int(output[-1])
 
             result = "hospitals "
             for hospital in hospitals:
