@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
          ant.pat2 = -1;
          ant.pat3 = -1;
          ant.pat4 = -1;
-         ant.next = ant.hospital + NUM_IN_FILE;
+         ant.next = amb[r].hospital + NUM_IN_FILE;
          k = 0;
          j = 0;
          while(j != 2)
@@ -331,11 +331,11 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                /* ensures all other ants can still make it back given the new ant is picked up  */
               if(ant->pat1 != -1)
                {
-<<<<<<< HEAD
+//<<<<<<< HEAD
                 if((patients[ant->pat1].life - ant->time) < dist1 + bestd2 + 2)
-=======
+/*=======*/
                 if((patients[ant->pat1].life - ant->time - dist1 - bestd2 - 2)<0)
->>>>>>> d9c7dbe446cc39abba2067e01be2fbb9eb747eca
+//>>>>>>> d9c7dbe446cc39abba2067e01be2fbb9eb747eca
                      continue;
                } 
               if(ant->pat2 != -1)
