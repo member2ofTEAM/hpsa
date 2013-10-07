@@ -10,9 +10,10 @@
 #define NUM_IN_FILE 300
 #define MAX_TIME 170
 #define PHEROMONE_REDUCTION 1
-#define LOCAL_PHEROMONE 5
-#define GLOBAL_PHEROMONE 35
-#define GLOBAL_PARAMETER 20
+#define LOCAL_PHEROMONE 3
+#define GLOBAL_PHEROMONE 20
+#define GLOBAL_PARAMETER 70
+#define MAX_ITER 5000
 
 /* patients structure */
 typedef struct pat_t {
@@ -20,6 +21,7 @@ int xcoord;
 int ycoord;
 int life;
 int claim;
+int saved;
 } pat_t;
 
 /* ambulances */
@@ -44,6 +46,16 @@ int no_ambu;
 } hosp_t;
 
 int savior = 0;
+int max = 1;
+double iterations = MAX_ITER;
+double w1, w2, w3, w4;
+
+int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo);
+int distance(int x1, int y1, int x2, int y2);
+int maxPheromone(int num);
+void updatePheromone(int **pheromones);
+void globalPheromone(int **pheromones, int **best, int total);
+
 
 int main(int argc, char *argv[])
 {
@@ -58,7 +70,7 @@ int main(int argc, char *argv[])
    FILE *file;
    int **pheromones;
    int i, j, k, l, life, dist, r, tmp;
-   int max = 0;
+   int maxi = 0;
    int count = 0;
    unsigned int random;
    tinymt32_t state;
@@ -69,8 +81,6 @@ int main(int argc, char *argv[])
 //      printf("%u ", (unsigned int) tinymt32_generate_uint32(&state));
 //   printf("\n");
 
-   int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo);
-   int distance(int x1, int y1, int x2, int y2);
 
    /* cluster to determine where hospitals go */
    /* assign x coordinates, y coordinates of hospitals */
@@ -195,8 +205,20 @@ int main(int argc, char *argv[])
   
 
 /* change this outer loop to while(TIMEVALID) */
-   for(l = 0; l < 1; l++)
+   for(l = 0; l < iterations; l++)
    {
+      random = (unsigned int) tinymt32_generate_uint32(&state);
+      random = random % 23429783;
+      w1 = (double) random / 23429783.0;
+      random = (unsigned int) tinymt32_generate_uint32(&state);
+      random = random % 243081;
+      w2 = (double) random / 243081.0; 
+      random = (unsigned int) tinymt32_generate_uint32(&state);
+      random = random % 97834897;
+      w3 = (double) random / 97834897.0;
+      random = (unsigned int) tinymt32_generate_uint32(&state);
+      random = random % 8273493;
+      w4 = (double) random / 8273493.0;
       for(k = total; k > 0; k--)
          {
             random = (unsigned int) tinymt32_generate_uint32(&state);
@@ -236,9 +258,9 @@ int main(int argc, char *argv[])
          used[i] = i;
 
       /* check to see if this solution is better. If so, save it */
-      if(max < savior)
+      if(maxi < savior)
       {
-         max = savior;
+         maxi = savior;
          for(i = 0; i < total; i++)
          {
             for(j = 0; j < 100; j++)
@@ -259,13 +281,12 @@ int main(int argc, char *argv[])
       if(count % GLOBAL_PARAMETER == 0)
       {
          /* reinforce current known best */
+         globalPheromone(pheromones, best, total);
       }
-
-   /*   updatePheromones(pheromones); */ /* update local pheromones */
+      updatePheromone(pheromones); /* update local pheromones */
 
    }
-
-   printf("%d", max);
+   printf("%d", maxi);
 
    /* free all arrays */
    for(i = 0; i < total; i++)
@@ -292,8 +313,9 @@ int main(int argc, char *argv[])
  * Returns 2 if time ran out. */
 int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo)
 {
-   int i, j, r, bestd = 10000, bestd2, best, dist, dist1, dist2, bestd1;
-   int score = 0, bestscore = 0, flag = 0;
+   int i, j, r, p, bestd = 10000, bestd2, best, dist, dist1, dist2, bestd1;
+   double score = 0, bestscore = 0;
+   int flag = 0;
    int pat_num = 0;
 
 
@@ -340,7 +362,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
               if(ant->pat1 != -1)
                {
 //<<<<<<< HEAD
-                if((patients[ant->pat1].life - ant->time) < dist1 + bestd2 + 2)
+ //               if((patients[ant->pat1].life - ant->time) < dist1 + bestd2 + 2)
 /*=======*/
                 if((patients[ant->pat1].life - ant->time - dist1 - bestd2 - 2)<0)
 //>>>>>>> d9c7dbe446cc39abba2067e01be2fbb9eb747eca
@@ -365,21 +387,19 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                {
                   bestd1 = dist1;
                   best = i;
-               }
-                  
-                  
-               /* SCORING */
+               } 
+         
+               p = pheromones[i][ant->next];
 
-
-               /* save best score and index of that ant */
-               /*
-               if(score > bestscore)
+               score = w1 * ((double)(200 - dist1) / 200.0) + w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
+               score += w3 * ((double)p/(double)max) + w4 * ((iterations - (double) patients[i].saved) / iterations);
+         
+               if(score >= bestscore)
                {
-                  bestd = dist1;
+                  bestd1 = dist1;
                   bestscore = score;
                   best = i; 
-               }
-               */
+               } 
 
             }
          }  
@@ -405,6 +425,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
             ant->pat4 = best;
          pheromones[ant->next][best] += LOCAL_PHEROMONE; /* update pheromones */
          pheromones[best][ant->next] += LOCAL_PHEROMONE;
+         max = maxPheromone(pheromones[best][ant->next]);
 
          ant->time = ant->time + bestd1 + 1; /* update time */
          ant->next = best; /* current patient */
@@ -454,27 +475,16 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
 
          savior += pat_num;
 
-         /* saves patients */
- /*        if(ant->pat1 != -1)
-         {
-            if(patients[ant->pat1].life - bestd - ant->time - 1 > -1)
-               savior++;
-         }
-         if(ant->pat2 != -1)
-         {
-            if(patients[ant->pat2].life - bestd - ant->time - 1 > -1)
-               savior++;
-         }
-         if(ant->pat3 != -1)
-         {
-            if(patients[ant->pat3].life - bestd - ant->time - 1 > -1)
-               savior++;
-         }
          if(ant->pat4 != -1)
-         {
-            if(patients[ant->pat4].life - bestd - ant->time - 1 > -1)
-               savior++;
-         } */
+            patients[ant->pat4].saved++;
+         if(ant->pat3 != -1)
+            patients[ant->pat3].saved++;
+         if(ant->pat2 != -1)
+            patients[ant->pat2].saved++;
+         if(ant->pat1 != -1)
+            patients[ant->pat1].saved++;
+
+
            if (ant->pat4 != -1)
                printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
                                                                  ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
@@ -532,6 +542,16 @@ int distance(int x1, int y1, int x2, int y2)
    return (dist);
 }
 
+
+int maxPheromone(int pheromone)
+{
+   if(max < pheromone)
+      max = pheromone;
+   if(max < 1)
+      max = 1;
+   return(max); 
+}
+
 /* Pheromones will be set to 3-10 when they are placed (number
  * subject to change) and will be reduced by 1 after an ant
  * explores a path. This will allow ants to have a small bias
@@ -542,8 +562,35 @@ void updatePheromone(int **pheromones)
 {
    int i, j;
 
-
+   for(i = 0; i < NUM_IN_FILE + 5; i++)
+   {
+      for(j = 0; j < NUM_IN_FILE + 5; j++)
+      {
+         if(pheromones[i][j] > 1)
+            pheromones[i][j] = pheromones[i][j] - 2;
+         if(pheromones[i][j] == 1)
+            pheromones[i][j] = 0;
+      }
+   }
    /* reduce pheromones */
 } /* end of updatePheromone */
 
+
+
+void globalPheromone(int **pheromones, int **best, int total)
+{
+   int i, j;
+
+   for(i = 0; i < total; i++)
+   {
+      j = 0;
+      while(best[i][j] != -1 && best[i][j+1] != -1)
+      {
+         pheromones[best[i][j]][best[i][j+1]] += GLOBAL_PHEROMONE;
+         pheromones[best[i][j+1]][best[i][j]] += GLOBAL_PHEROMONE;
+         j++;
+      }
+   }
+
+}
 
