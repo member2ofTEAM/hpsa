@@ -74,7 +74,6 @@ all_patients = []
 data = []
 id = 0
 lines = getData(s).split("\n")
-print lines
 for line in lines[1:301]:
     if line != "\n": 
         line.strip()
@@ -133,6 +132,7 @@ for trash in range(1):
                 hospitals.append(Hospital((h[0], h[1]), hosp_ambulances[i][0], hosp_ambulances[i][1]))
 
             patients.sort(key=lambda x: x.id)
+
             f = open("TEAMinput.txt", "wb")
             for patient in patients:
                 f.write(str(patient.position[0]) + " " +
@@ -144,10 +144,13 @@ for trash in range(1):
                 f.write(str(hospital.position[0]) + " " +
                         str(hospital.position[1]) + " " + 
                         str(hospital.no_ambulances) + "\n")
-            f.close() 
-            x = Popen(["./TEAM"], stdout = PIPE)
+            f.close()
+ 
+            x = Popen(["./TEAM"], stdout = PIPE, stderr=PIPE)
             output = x.communicate()[0].split("\n")
-            ambulances = output[:300]
+            pdb.set_trace()
+            ambulances = output[:-1]
+            total_saves = int(output[-1])
 
             result = "hospitals "
             for hospital in hospitals:
@@ -155,11 +158,12 @@ for trash in range(1):
                                 str(hospital.position[0]) + ", " + \
                                 str(hospital.position[1]) + "); "
             result = result[:-2] + "\n"
-            for ambulance in ambulances[:-1]:
+            for ambulance in ambulances:
                 result = result + str(ambulance) + "\n"
 
             f = open("TEAMoutput.txt", "wb")
             f.write(result)
+            f.close()
 
             sendResult(s, result)
             reply = getData(s)
