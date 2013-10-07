@@ -19,9 +19,7 @@ maxlen = 999999
 if argv[1]:
   port = int(argv[1])
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-s.connect(('127.0.0.1', port))
     
 def distance(x, y):
     return abs(x[0] - y[0]) + abs(x[1] - y[1])
@@ -70,6 +68,8 @@ class Patient():
         self.time = time
         self.id = id
 
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('127.0.0.1', port))
 all_patients = []
 data = []
 id = 0
@@ -86,13 +86,15 @@ hosp_ambulances = map(int, lines[304:309])
 hosp_ambulances = zip(hosp_ambulances, range(5))
 hosp_ambulances.sort(key = lambda x: int(x[0]))
 
+sendResult(s, "")
+getData(s)
 
 total_score = 0
 best_j = 0
 best_time = 0
-for trash in range(1):
+for trash in range(10):
     print trash
-    for meansscale in range(100, 101, 5):
+    for meansscale in range(1, 101, 5):
         meansscale = float(meansscale) / 100.0;
         for timefactor in range(1):
             times = []
@@ -148,9 +150,8 @@ for trash in range(1):
  
             x = Popen(["./TEAM"], stdout = PIPE, stderr=PIPE)
             output = x.communicate()[0].split("\n")
-            pdb.set_trace()
             ambulances = output[:-1]
-            total_saves = int(output[-1])
+            #print "Our saves: " + output[-1]
 
             result = "hospitals "
             for hospital in hospitals:
@@ -161,13 +162,14 @@ for trash in range(1):
             for ambulance in ambulances:
                 result = result + str(ambulance) + "\n"
 
-            f = open("TEAMoutput.txt", "wb")
-            f.write(result)
-            f.close()
-
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(('127.0.0.1', port))
+            getData(s)
             sendResult(s, result)
             reply = getData(s)
-            print reply
+            #print reply
+
+            total_saves = int(reply.split("\n")[0].split(" ")[-1])
  
             if total_saves > total_score:
                 total_score = total_saves

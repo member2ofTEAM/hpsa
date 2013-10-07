@@ -13,7 +13,7 @@
 #define LOCAL_PHEROMONE 3
 #define GLOBAL_PHEROMONE 20
 #define GLOBAL_PARAMETER 70
-#define MAX_ITER 5000
+#define MAX_ITER 1
 
 /* patients structure */
 typedef struct pat_t {
@@ -36,6 +36,7 @@ int pat2;
 int pat3;
 int pat4;
 int hospital;
+int ambu;
 } amb_t;
 
 /* hospitals */
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
    int **pheromones;
    int i, j, k, l, life, dist, r, tmp;
    int maxi = 0;
-   int count = 0;
+   int count = 0, rand_tmp = 0;
    unsigned int random;
    tinymt32_t state;
    uint32_t seed = time(0);
@@ -219,14 +220,14 @@ int main(int argc, char *argv[])
       random = (unsigned int) tinymt32_generate_uint32(&state);
       random = random % 8273493;
       w4 = (double) random / 8273493.0;
-      for(k = total; k > 0; k--)
+      for(k = total - 1; k > -1; k--)
          {
             random = (unsigned int) tinymt32_generate_uint32(&state);
             random = random % total;
+            rand_tmp = (int)random;
             tmp = used[k];
-            used[(int)random] = used[k];
-            used[k] = tmp;
-            break;
+            used[k] = used[rand_tmp];
+            used[rand_tmp] = tmp;
          }
       
       for(i = 0; i < total; i++)
@@ -243,12 +244,13 @@ int main(int argc, char *argv[])
          ant.pat3 = -1;
          ant.pat4 = -1;
          ant.next = amb[r].hospital + NUM_IN_FILE;
+         ant.ambu = r;
          k = 0;
          j = 0;
          while(j != 2)
          {
             j = chooseTarget(&ant, patients, hosp, pheromones, r);
-            moves[i][k] = ant.next; 
+            moves[ant.ambu][k] = ant.next; 
             k = k + 1;  
          }
       }
@@ -270,6 +272,13 @@ int main(int argc, char *argv[])
             }
             amb[i].chosen = 0; /* make them no longer chosen */
          }
+      }
+
+      
+      /* Print ambulances */
+      for (i = 0; i < total; i ++)
+      {
+          
       }
     
       /* reset savior and claimed patients */
