@@ -17,6 +17,7 @@
 #define GLOBAL_PHEROMONE 15
 #define GLOBAL_PARAMETER 50
 #define MAX_ITER 1000 //BEFORE CHANGING THIS, FIX BUG BELOW!!
+#define M_PI 3.14159265358979323846
 
 /* patients structure */
 typedef struct pat_t {
@@ -56,6 +57,7 @@ double w1, w2, w3, w4;
 int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo);
 int distance(int x1, int y1, int x2, int y2);
 int maxPheromone(int num);
+double scoring(int dist, int life, int saved, int p);
 void updatePheromone(int **pheromones);
 void globalPheromone(int **pheromones, int **best, int total);
 
@@ -217,10 +219,11 @@ int main(int argc, char *argv[])
           // initialize pheromone array
            for(i = 0; i < NUM_IN_FILE + 5; i++){
               for(j = 0; j < NUM_IN_FILE + 5; j++){
-                 random = (unsigned int) tinymt32_generate_uint32(&state);
-                 random = random % RAND_PHEROMONE + 3;
-                 pheromones[i][j] = random;
-              }}} 
+                random = (unsigned int) tinymt32_generate_uint32(&state);
+               random = random % RAND_PHEROMONE + 3;
+               pheromones[i][j] = random;
+              }}
+             } 
 
      if(count % 500 == 0){
          random = (unsigned int) tinymt32_generate_uint32(&state);
@@ -387,6 +390,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
    double score = 0, bestscore = 0;
    int flag = 0;
    int pat_num = 0;
+   double d_score;
 
 
    if(ant->pat1 != -1)
@@ -461,10 +465,13 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
          
                p = pheromones[i][ant->next];
 
-               score  = w1 * ((double)(200 - dist1) / 200.0); 
+               score = scoring(dist1, patients[i].life, patients[i].saved, p); 
+
+
+       /*        score  = w1 * ((double)(200 - dist1) / 200.0); 
                score += w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
                score += w3 * ((double)p/(double)max);
-               score += w4 * ((iterations - (double) patients[i].saved) / iterations);
+               score += w4 * ((iterations - (double) patients[i].saved) / iterations); */
          
                if(score >= bestscore)
                {
@@ -641,6 +648,33 @@ void globalPheromone(int **pheromones, int **best, int total)
 
 }
 
-void resetPheromone()
+
+double scoring(int dist, int life, int saved, int p)
 {
+   double score;
+   double d_score = 0, p_score = 0, s_score = 0, u_score = 0;
+
+   d_score = (-1.0) / (1.0 + exp((-1.0) * ((.17) * (double) dist - 5.0))) + 1;     
+ //  printf("%lf\n", d_score);
+
+   s_score = exp( -0.5 * pow( (dist-100)/20, 2.0 ) );
+  // printf("%lf\n", s_score);
+  
+   u_score = (4.0/7.0) * ((-1) *  ((life + 20) / (MAX_TIME / 2.83)    )
+                            * ((life + 20) / (MAX_TIME / 2.83) - 1)
+                            * ((life + 20) / (MAX_TIME / 2.83) - 2)
+                            * ((life + 20) / (MAX_TIME / 2.83) - 3) + .75);
+   // printf("%lf\n", u_score);
+   
+   p_score = (1.0) / (1.0 + exp((-1) * ((.2) * (double) p - 5.0)));
+//   printf("%lf\n", p_score);
+ //  printf("%d\n", p);
+//   p_score = ((double)p/(double)max);
+
+   score = w1 * d_score + w2 * p_score + w3 * s_score + w4 * u_score;
+
+   return(score);
+
+
 }
+

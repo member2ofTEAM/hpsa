@@ -16,7 +16,7 @@
 #define LOCAL_PHEROMONE 3
 #define GLOBAL_PHEROMONE 15
 #define GLOBAL_PARAMETER 50
-#define MAX_ITER 500 //BEFORE CHANGING THIS, FIX BUG BELOW!!
+#define MAX_ITER 1000 //BEFORE CHANGING THIS, FIX BUG BELOW!!
 
 /* patients structure */
 typedef struct pat_t {
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
    amb_t ant;
    int hosp_0, hosp_1, hosp_2, hosp_3, hosp_4, total, test1, test2;
    int **moves;
-   int **best;
+   int **best, **best2;
    int *used;
    FILE *file;
    int **pheromones;
@@ -149,6 +149,13 @@ int main(int argc, char *argv[])
    amb = malloc(total * sizeof(amb_t));
    assert(amb);
 
+   for(i = 0; i < NUM_IN_FILE + 5; i++)
+   {
+      pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
+      assert(pheromones[i]);
+   }
+
+
    /* initialization of ambulances */
    for(i = 0; i < total; i++)
    {
@@ -197,47 +204,26 @@ int main(int argc, char *argv[])
       amb[i + hosp_0 + hosp_1 + hosp_2 + hosp_3].next = NUM_IN_FILE + 4;
    }
 
-   
-
-/* change this outer loop to while(TIMEVALID) */
-   for(l = 0; l < iterations; l++)
-   {
- 
-      /* ATTEMPT AT RESETTING THE VALUES
-      TODO THIS IS WRONG!!!!!!!!!!! */
-//IF THERE IS MORE THAN 250 ITERATOINS THIS FUCKS SHIT UP!
-       if (count % 500 == 0)
-       { 
-           // initialize pheromone array
-           for(i = 0; i < NUM_IN_FILE + 5; i++)
-           {
-              pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
-              assert(pheromones[i]);
-              for(j = 0; j < NUM_IN_FILE + 5; j++)
-              {
-                 random = (unsigned int) tinymt32_generate_uint32(&state);
-                 random = random % RAND_PHEROMONE + 3;
-                 pheromones[i][j] = random;
-              }
-           }
-           for(i = 0; i < total; i++)
-           {
-               for(j = 0; j < 100; j++)
-               {
-                   moves[i][j] = -1;
-                   best[i][j] = -1;
-               }
-           }
-      }   
-
-//CHANGE THE BEHAVIOR WITH THIS
+ //CHANGE THE BEHAVIOR WITH THIS
 //THERE ARE FOUR BEHAVIOR PATTERNS
 //SWITCH TO THE NEXT ONE HERE
 //GO THROUGH ALL FOUR
 //HARDCORE THEM!!
+  
 
-     if(count % 500 == 0)
-     {
+/* change this outer loop to while(TIMEVALID) */
+   for(l = 0; l < iterations; l++){ 
+       if (count % 500 == 0){ 
+          // initialize pheromone array
+           for(i = 0; i < NUM_IN_FILE + 5; i++){
+              for(j = 0; j < NUM_IN_FILE + 5; j++){
+                random = (unsigned int) tinymt32_generate_uint32(&state);
+               random = random % RAND_PHEROMONE + 3;
+               pheromones[i][j] = random;
+              }}
+             } 
+
+     if(count % 500 == 0){
          random = (unsigned int) tinymt32_generate_uint32(&state);
          random = random % 23429783;
          w1 = (double) random / 23429783.0;
@@ -256,8 +242,7 @@ int main(int argc, char *argv[])
 //         w4 = 0.4 + 0.2*w4;
          fprintf(stderr, "%f %f %f %f\n", w1, w2, w3, w4);
       }
-      for(k = total - 1; k > -1; k--)
-         {
+      for(k = total - 1; k > -1; k--){
             random = (unsigned int) tinymt32_generate_uint32(&state);
             random = random % total;
             rand_tmp = (int)random;
@@ -265,25 +250,18 @@ int main(int argc, char *argv[])
             used[k] = used[rand_tmp];
             used[rand_tmp] = tmp;
          }
-      
-      for(i = 0; i < total; i++)
-      {
+      for(i = 0; i < total; i++){
          r = used[i];
          amb[r].chosen = 1;  //reset these outside for loop 
-         ant.xcoord = amb[r].xcoord;
-         ant.ycoord = amb[r].ycoord;
+         ant.xcoord = amb[r].xcoord; ant.ycoord = amb[r].ycoord;
          ant.chosen = amb[r].chosen;
          ant.hospital = amb[r].hospital; 
          ant.time = 0;
-         ant.pat1 = -1;
-         ant.pat2 = -1;
-         ant.pat3 = -1;
-         ant.pat4 = -1;
+         ant.pat1 = -1; ant.pat2 = -1; ant.pat3 = -1; ant.pat4 = -1;
          ant.next = amb[r].hospital + NUM_IN_FILE;
          k = 0;
          j = 0;
-         while(j != 2)
-         {
+         while(j != 2){
       //     if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
       //       ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
       //       ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
@@ -299,22 +277,18 @@ int main(int argc, char *argv[])
          used[i] = i;
 
       /* check to see if this solution is better. If so, save it */
-      if(maxi < savior)
-      {
+      if(maxi < savior){
          maxi = savior;
-         for(i = 0; i < total; i++)
-         {
-            for(j = 0; j < 100; j++)
-            {
+         for(i = 0; i < total; i++){
+            for(j = 0; j < 100; j++){
                 best[i][j] = -1;
-                best[i][j] = moves[i][j]; /* store best */
+                best[i][j] = moves[i][j];
             }
             amb[i].chosen = 0; /* make them no longer chosen */
          }
       }
 
-      for (i = 0; i < total; i++)
-      {
+      for (i = 0; i < total; i++){
           for (j = 0; j < 100; j++)
               moves[i][j] = -1;
       }
@@ -326,8 +300,7 @@ int main(int argc, char *argv[])
          patients[i].claim = 0;
    
       count++;
-      if(count % GLOBAL_PARAMETER == 0)
-      {
+      if(count % GLOBAL_PARAMETER == 0){
          /* reinforce current known best */
          globalPheromone(pheromones, best, total);
       }
@@ -383,7 +356,7 @@ int main(int argc, char *argv[])
                }
                j = j + 1;
           } 
-      }  
+      } 
    printf("%d", maxi);
 
    /* free all arrays */
@@ -488,6 +461,8 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                } 
          
                p = pheromones[i][ant->next];
+
+             /*  score = scoring(dist1, patient[i].life, patients[i].saved); */
 
                score  = w1 * ((double)(200 - dist1) / 200.0); 
                score += w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
@@ -666,6 +641,16 @@ void globalPheromone(int **pheromones, int **best, int total)
          j++;
       }
    }
+
+}
+
+
+int scoring(int dist, int life, int saved)
+{
+     
+
+
+
 
 }
 
