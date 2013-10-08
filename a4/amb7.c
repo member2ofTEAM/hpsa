@@ -51,10 +51,11 @@ int no_ambu;
 
 int savior = 0;
 int max = 1;
+int maxlife = -1;
 double iterations = MAX_ITER;
 double w1, w2, w3, w4;
 
-int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo);
+int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo, int ch);
 int distance(int x1, int y1, int x2, int y2);
 int maxPheromone(int num);
 double scoring(int dist, int life, int saved, int p);
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
    int i, j, k, l, life, dist, r, tmp;
    int maxi = 0;
    int count = 0, rand_tmp = 0;
+   int ch;
    unsigned int random;
    tinymt32_t state;
    uint32_t seed = (int) getpid();
@@ -105,6 +107,8 @@ int main(int argc, char *argv[])
       fscanf(file, "%d", &patients[i].ycoord);
       fscanf(file, "%d", &patients[i].life);
       patients[i].claim = 0;
+      if(patients[i].life > maxlife)
+         maxlife = patients[i].life;
    }
 
    for(i = 0; i < 5; i++)
@@ -211,7 +215,7 @@ int main(int argc, char *argv[])
 //SWITCH TO THE NEXT ONE HERE
 //GO THROUGH ALL FOUR
 //HARDCORE THEM!!
-  
+ 
 
 /* change this outer loop to while(TIMEVALID) */
    for(l = 0; l < iterations; l++){ 
@@ -242,7 +246,11 @@ int main(int argc, char *argv[])
          random = random % 8273493;
          w4 =  (double) random / 8273493.0;
 //         w4 = 0.4 + 0.2*w4;
-         fprintf(stderr, "%f %f %f %f\n", w1, w2, w3, w4);
+//
+         ch = (unsigned int) tinymt32_generate_uint32(&state);
+         ch = ch % 3; 
+//         fprintf(stderr, "%f %f %f %f\n", w1, w2, w3, w4);
+   
       }
       for(k = total - 1; k > -1; k--){
             random = (unsigned int) tinymt32_generate_uint32(&state);
@@ -264,11 +272,11 @@ int main(int argc, char *argv[])
          k = 0;
          j = 0;
          while(j != 2){
-      //     if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
-      //       ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
-      //       ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
+     //      if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
+     //        ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
+     //        ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
       //         break;
-            j = chooseTarget(&ant, patients, hosp, pheromones, r);
+            j = chooseTarget(&ant, patients, hosp, pheromones, r, ch);
             moves[r][k] = ant.next; 
             k = k + 1;  
          }
@@ -384,7 +392,7 @@ int main(int argc, char *argv[])
 /* returns 0 if a new patient was selected successfully. Returns 1 if
  * it just visited a hospital, thus indicating it needs a new patient
  * Returns 2 if time ran out. */
-int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo)
+int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo, int ch)
 {
    int i, j, r, p, bestd = 10000, bestd2, best, dist, dist1, dist2, bestd1;
    double score = 0, bestscore = 0;
@@ -465,14 +473,18 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
          
                p = pheromones[i][ant->next];
 
-               score = scoring(dist1, patients[i].life, patients[i].saved, p); 
+         //      score = scoring(dist1, patients[i].life, patients[i].saved, p); 
 
+               if(ch = 0)
+               {
+                  score  = w1 * ((double)(200 - dist1) / 200.0); 
+                  score += w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
+                  score += w3 * ((double)p/(double)max);
+                  score += w4 * ((iterations - (double) patients[i].saved) / iterations); 
+               }
+               else
+                  score = scoring(dist1, patients[i].life, patients[i].saved, p); 
 
-       /*        score  = w1 * ((double)(200 - dist1) / 200.0); 
-               score += w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
-               score += w3 * ((double)p/(double)max);
-               score += w4 * ((iterations - (double) patients[i].saved) / iterations); */
-         
                if(score >= bestscore)
                {
                   bestd1 = dist1;
@@ -660,10 +672,10 @@ double scoring(int dist, int life, int saved, int p)
    s_score = exp( -0.5 * pow( (dist-100)/20, 2.0 ) );
   // printf("%lf\n", s_score);
   
-   u_score = (4.0/7.0) * ((-1) *  ((life + 20) / (MAX_TIME / 2.83)    )
-                            * ((life + 20) / (MAX_TIME / 2.83) - 1)
-                            * ((life + 20) / (MAX_TIME / 2.83) - 2)
-                            * ((life + 20) / (MAX_TIME / 2.83) - 3) + .75);
+   u_score = (4.0/7.0) * ((-1) *  ((life + 20) / (maxlife / 2.83)    )
+                            * ((life + 20) / (maxlife / 2.83) - 1)
+                            * ((life + 20) / (maxlife / 2.83) - 2)
+                            * ((life + 20) / (maxlife / 2.83) - 3) + .75);
    // printf("%lf\n", u_score);
    
    p_score = (1.0) / (1.0 + exp((-1) * ((.2) * (double) p - 5.0)));
