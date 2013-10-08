@@ -9,11 +9,12 @@
 
 #define NUM_IN_FILE 300
 #define MAX_TIME 170
+#define RAND_PHEROMONE 6
 #define PHEROMONE_REDUCTION 1
 #define LOCAL_PHEROMONE 3
 #define GLOBAL_PHEROMONE 20
-#define GLOBAL_PARAMETER 70
-#define MAX_ITER 1
+#define GLOBAL_PARAMETER 50
+#define MAX_ITER 250
 
 /* patients structure */
 typedef struct pat_t {
@@ -36,7 +37,6 @@ int pat2;
 int pat3;
 int pat4;
 int hospital;
-int ambu;
 } amb_t;
 
 /* hospitals */
@@ -201,25 +201,32 @@ int main(int argc, char *argv[])
       pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
       assert(pheromones[i]);
       for(j = 0; j < NUM_IN_FILE + 5; j++)
-         pheromones[i][j] = 0;
+      {
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % RAND_PHEROMONE + 1;
+         pheromones[i][j] = random;
+      }
    }
   
 
 /* change this outer loop to while(TIMEVALID) */
    for(l = 0; l < iterations; l++)
    {
-      random = (unsigned int) tinymt32_generate_uint32(&state);
-      random = random % 23429783;
-      w1 = (double) random / 23429783.0;
-      random = (unsigned int) tinymt32_generate_uint32(&state);
-      random = random % 243081;
-      w2 = (double) random / 243081.0; 
-      random = (unsigned int) tinymt32_generate_uint32(&state);
-      random = random % 97834897;
-      w3 = (double) random / 97834897.0;
-      random = (unsigned int) tinymt32_generate_uint32(&state);
-      random = random % 8273493;
-      w4 = (double) random / 8273493.0;
+      if(count % 250 == 0)
+      {
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 23429783;
+         w1 = (double) random / 23429783.0;
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 243081;
+         w2 = (double) random / 243081.0; 
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 97834897;
+         w3 = (double) random / 97834897.0;
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 8273493;
+         w4 =  (double) random / 8273493.0;
+      }
       for(k = total - 1; k > -1; k--)
          {
             random = (unsigned int) tinymt32_generate_uint32(&state);
@@ -244,13 +251,16 @@ int main(int argc, char *argv[])
          ant.pat3 = -1;
          ant.pat4 = -1;
          ant.next = amb[r].hospital + NUM_IN_FILE;
-         ant.ambu = r;
          k = 0;
          j = 0;
          while(j != 2)
          {
+           if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
+             ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
+             ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
+               break;
             j = chooseTarget(&ant, patients, hosp, pheromones, r);
-            moves[ant.ambu][k] = ant.next; 
+            moves[r][k] = ant.next; 
             k = k + 1;  
          }
       }
@@ -267,19 +277,19 @@ int main(int argc, char *argv[])
          {
             for(j = 0; j < 100; j++)
             {
-               best[i][j] = moves[i][k]; /* store best */
-               moves[i][k] = -1; /* reset moves */
+                best[i][j] = -1;
+                best[i][j] = moves[i][j]; /* store best */
             }
             amb[i].chosen = 0; /* make them no longer chosen */
          }
       }
 
-      
-      /* Print ambulances */
-      for (i = 0; i < total; i ++)
+      for (i = 0; i < total; i++)
       {
-          
+          for (j = 0; j < 100; j++)
+              moves[i][j] = -1;
       }
+      
     
       /* reset savior and claimed patients */
       savior = 0;
@@ -295,6 +305,56 @@ int main(int argc, char *argv[])
       updatePheromone(pheromones); /* update local pheromones */
 
    }
+      int pat[4], hospt;     
+      pat[0] = 0; pat[1] = 0; pat[2] = 0; pat[3] = 0; 
+   /* Print ambulances */
+      for (i = 0; i < total; i ++)
+      {
+          j = 0;
+          k = 0;
+          while (best[i][j] >= 0)
+          {
+              if(best[i][j] >= 300)
+              {
+                  hospt = best[i][j];
+                 if (pat[3] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", i, 
+								 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+                                                                 pat[1], patients[pat[1]].xcoord, patients[pat[1]].ycoord, patients[pat[1]].life,
+								 pat[2], patients[pat[2]].xcoord, patients[pat[2]].ycoord, patients[pat[2]].life, 
+								 pat[3], patients[pat[3]].xcoord, patients[pat[3]].ycoord, patients[pat[3]].life, 
+								 patients[hospt].xcoord, patients[hospt].ycoord);
+
+                  else if (pat[2] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", i, 
+								 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+                                                                 pat[1], patients[pat[1]].xcoord, patients[pat[1]].ycoord, patients[pat[1]].life,
+								 pat[2], patients[pat[2]].xcoord, patients[pat[2]].ycoord, patients[pat[2]].life, 
+								 patients[hospt].xcoord, patients[hospt].ycoord);
+
+                  else if (pat[1] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", i,
+								 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+                                                                 pat[1], patients[pat[1]].xcoord, patients[pat[1]].ycoord, patients[pat[1]].life,
+								 patients[hospt].xcoord, patients[hospt].ycoord);
+
+                  else if (pat[0] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); (%d, %d)\n", i,
+                                                                 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+								 patients[hospt].xcoord, patients[hospt].ycoord);
+                   for (k = 0; k < 4; k++)
+                      pat[k] = -1;
+                   k = 0;
+ 
+               }
+               else
+               {
+                   pat[k] = best[i][j];
+                   k = k + 1;
+               }
+               j = j + 1;
+          } 
+      }  
    printf("%d", maxi);
 
    /* free all arrays */
@@ -494,32 +554,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
             patients[ant->pat1].saved++;
 
 
-           if (ant->pat4 != -1)
-               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life, 
-								 ant->pat3, patients[ant->pat3].xcoord, patients[ant->pat3].ycoord, patients[ant->pat3].life, 
-								 ant->pat4, patients[ant->pat4].xcoord, patients[ant->pat4].ycoord, patients[ant->pat4].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
-
-            else if (ant->pat3 != -1)
-               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life, 
-								 ant->pat3, patients[ant->pat3].xcoord, patients[ant->pat3].ycoord, patients[ant->pat3].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
-
-            else if (ant->pat2 != -1)
-               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
-
-           else if (ant->pat1 != -1)
-               printf("ambulance %d %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
-     
+    
          ant->pat1 = -1; /* empties ambulance */
          ant->pat2 = -1;
          ant->pat3 = -1;

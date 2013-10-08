@@ -92,7 +92,7 @@ getData(s)
 total_score = 0
 best_j = 0
 best_time = 0
-for trash in range(10):
+for trash in range(1):
     print trash
     for meansscale in range(1, 101, 5):
         meansscale = float(meansscale) / 100.0;
@@ -148,28 +148,29 @@ for trash in range(10):
                         str(hospital.no_ambulances) + "\n")
             f.close()
  
-            x = Popen(["./TEAM"], stdout = PIPE, stderr=PIPE)
-            output = x.communicate()[0].split("\n")
-            ambulances = output[:-1]
-            #print "Our saves: " + output[-1]
+            total_saves = 0
+            l = [Popen(["./TEAM"], stdout = PIPE, stderr=PIPE) for x in range(8)]
+            outputs = map(lambda x: x.communicate()[0].split("\n"), l)
+            for output in outputs:
+                ambulances = output[:-1]
+                #print "Our saves: " + output[-1]
 
-            result = "hospitals "
-            for hospital in hospitals:
-                result = result + str(hospital.id) + " (" + \
-                                str(hospital.position[0]) + ", " + \
-                                str(hospital.position[1]) + "); "
-            result = result[:-2] + "\n"
-            for ambulance in ambulances:
-                result = result + str(ambulance) + "\n"
+                result = "hospitals "
+                for hospital in hospitals:
+                    result = result + str(hospital.id) + " (" + \
+                                    str(hospital.position[0]) + ", " + \
+                                    str(hospital.position[1]) + "); "
+                result = result[:-2] + "\n"
+                for ambulance in ambulances:
+                    result = result + str(ambulance) + "\n"
 
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(('127.0.0.1', port))
-            getData(s)
-            sendResult(s, result)
-            reply = getData(s)
-            #print reply
-
-            total_saves = int(reply.split("\n")[0].split(" ")[-1])
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect(('127.0.0.1', port))
+                getData(s)
+                sendResult(s, result)
+                reply = getData(s)
+                #print reply
+                total_saves = max(int(reply.split("\n")[0].split(" ")[-1]), total_saves)
  
             if total_saves > total_score:
                 total_score = total_saves
