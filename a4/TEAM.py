@@ -11,7 +11,7 @@ from sys import argv
 import socket
 import pdb
 
-teamName = "TeamTeam"
+teamName = "TEAM"
 eom = "<EOM>"
 port = 5555
 maxlen = 999999
@@ -92,9 +92,9 @@ getData(s)
 total_score = 0
 best_j = 0
 best_time = 0
-for trash in range(1):
+for trash in range(10):
     print trash
-    for meansscale in range(1, 101, 5):
+    for meansscale in range(100, 101, 5):
         meansscale = float(meansscale) / 100.0;
         for timefactor in range(1):
             times = []
@@ -149,7 +149,7 @@ for trash in range(1):
             f.close()
  
             total_saves = 0
-            l = [Popen(["./TEAM"], stdout = PIPE, stderr=PIPE) for x in range(8)]
+            l = [Popen(["./TEAM"], stdout = PIPE) for x in range(8)]
             outputs = map(lambda x: x.communicate()[0].split("\n"), l)
             for output in outputs:
                 ambulances = output[:-1]
@@ -163,6 +163,15 @@ for trash in range(1):
                 result = result[:-2] + "\n"
                 for ambulance in ambulances:
                     result = result + str(ambulance) + "\n"
+
+                #our output
+                print output[-1]
+
+#TODO SAVE BEST RESULT!!!
+#TODO MAKE SCORE INDEPENDENT OF SERVER REPLY!
+#TODO REMOVE AMBULANCE RESTRICTION IN C FILE
+
+#TODO IMPLEMENT THE MEANS STUFF!
 
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect(('127.0.0.1', port))

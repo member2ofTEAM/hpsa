@@ -6,15 +6,17 @@
 #include <inttypes.h>
 #include "tinymt32.c"
 #include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define NUM_IN_FILE 300
 #define MAX_TIME 170
-#define RAND_PHEROMONE 6
-#define PHEROMONE_REDUCTION 1
+#define RAND_PHEROMONE 4
+#define PHEROMONE_REDUCTION 2
 #define LOCAL_PHEROMONE 3
-#define GLOBAL_PHEROMONE 20
+#define GLOBAL_PHEROMONE 15
 #define GLOBAL_PARAMETER 50
-#define MAX_ITER 250
+#define MAX_ITER 500 //BEFORE CHANGING THIS, FIX BUG BELOW!!
 
 /* patients structure */
 typedef struct pat_t {
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
    int count = 0, rand_tmp = 0;
    unsigned int random;
    tinymt32_t state;
-   uint32_t seed = time(0);
+   uint32_t seed = (int) getpid();
  
    tinymt32_init(&state, seed);
 //   for(i = 0; i < 10; i++)
@@ -194,38 +196,65 @@ int main(int argc, char *argv[])
       amb[i + hosp_0 + hosp_1 + hosp_2 + hosp_3].hospital = 4;
       amb[i + hosp_0 + hosp_1 + hosp_2 + hosp_3].next = NUM_IN_FILE + 4;
    }
- 
-   /* initialize pheromone array */
-   for(i = 0; i < NUM_IN_FILE + 5; i++)
-   {
-      pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
-      assert(pheromones[i]);
-      for(j = 0; j < NUM_IN_FILE + 5; j++)
-      {
-         random = (unsigned int) tinymt32_generate_uint32(&state);
-         random = random % RAND_PHEROMONE + 1;
-         pheromones[i][j] = random;
-      }
-   }
-  
+
+   
 
 /* change this outer loop to while(TIMEVALID) */
    for(l = 0; l < iterations; l++)
    {
-      if(count % 250 == 0)
-      {
+ 
+      /* ATTEMPT AT RESETTING THE VALUES
+      TODO THIS IS WRONG!!!!!!!!!!! */
+//IF THERE IS MORE THAN 250 ITERATOINS THIS FUCKS SHIT UP!
+       if (count % 500 == 0)
+       { 
+           // initialize pheromone array
+           for(i = 0; i < NUM_IN_FILE + 5; i++)
+           {
+              pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
+              assert(pheromones[i]);
+              for(j = 0; j < NUM_IN_FILE + 5; j++)
+              {
+                 random = (unsigned int) tinymt32_generate_uint32(&state);
+                 random = random % RAND_PHEROMONE + 3;
+                 pheromones[i][j] = random;
+              }
+           }
+           for(i = 0; i < total; i++)
+           {
+               for(j = 0; j < 100; j++)
+               {
+                   moves[i][j] = -1;
+                   best[i][j] = -1;
+               }
+           }
+      }   
+
+//CHANGE THE BEHAVIOR WITH THIS
+//THERE ARE FOUR BEHAVIOR PATTERNS
+//SWITCH TO THE NEXT ONE HERE
+//GO THROUGH ALL FOUR
+//HARDCORE THEM!!
+
+     if(count % 500 == 0)
+     {
          random = (unsigned int) tinymt32_generate_uint32(&state);
          random = random % 23429783;
          w1 = (double) random / 23429783.0;
+//         w1 = 0.7 + 0.2*w1;
          random = (unsigned int) tinymt32_generate_uint32(&state);
          random = random % 243081;
          w2 = (double) random / 243081.0; 
+//         w2 = 0.5 + 0.1*w2;
          random = (unsigned int) tinymt32_generate_uint32(&state);
          random = random % 97834897;
          w3 = (double) random / 97834897.0;
+//         w3 = 0.6 + 0.1*w3;
          random = (unsigned int) tinymt32_generate_uint32(&state);
          random = random % 8273493;
          w4 =  (double) random / 8273493.0;
+//         w4 = 0.4 + 0.2*w4;
+         fprintf(stderr, "%f %f %f %f\n", w1, w2, w3, w4);
       }
       for(k = total - 1; k > -1; k--)
          {
@@ -255,10 +284,10 @@ int main(int argc, char *argv[])
          j = 0;
          while(j != 2)
          {
-           if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
-             ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
-             ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
-               break;
+      //     if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
+      //       ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
+      //       ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
+      //         break;
             j = chooseTarget(&ant, patients, hosp, pheromones, r);
             moves[r][k] = ant.next; 
             k = k + 1;  
@@ -460,8 +489,10 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
          
                p = pheromones[i][ant->next];
 
-               score = w1 * ((double)(200 - dist1) / 200.0) + w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
-               score += w3 * ((double)p/(double)max) + w4 * ((iterations - (double) patients[i].saved) / iterations);
+               score  = w1 * ((double)(200 - dist1) / 200.0); 
+               score += w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
+               score += w3 * ((double)p/(double)max);
+               score += w4 * ((iterations - (double) patients[i].saved) / iterations);
          
                if(score >= bestscore)
                {
@@ -611,7 +642,7 @@ void updatePheromone(int **pheromones)
       for(j = 0; j < NUM_IN_FILE + 5; j++)
       {
          if(pheromones[i][j] > 1)
-            pheromones[i][j] = pheromones[i][j] - 2;
+            pheromones[i][j] = pheromones[i][j] - PHEROMONE_REDUCTION;
          if(pheromones[i][j] == 1)
             pheromones[i][j] = 0;
       }
