@@ -2,13 +2,21 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include "tinymt32.c"
+#include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define NUM_IN_FILE 300
 #define MAX_TIME 170
-#define PHEROMONE_REDUCTION 1
-#define LOCAL_PHEROMONE 5
-#define GLOBAL_PHEROMONE 35
-#define GLOBAL_PARAMETER 20
+#define RAND_PHEROMONE 4
+#define PHEROMONE_REDUCTION 2
+#define LOCAL_PHEROMONE 3
+#define GLOBAL_PHEROMONE 15
+#define GLOBAL_PARAMETER 50
+#define MAX_ITER 500 //BEFORE CHANGING THIS, FIX BUG BELOW!!
 
 /* patients structure */
 typedef struct pat_t {
@@ -16,6 +24,7 @@ int xcoord;
 int ycoord;
 int life;
 int claim;
+int saved;
 } pat_t;
 
 /* ambulances */
@@ -40,6 +49,16 @@ int no_ambu;
 } hosp_t;
 
 int savior = 0;
+int max = 1;
+double iterations = MAX_ITER;
+double w1, w2, w3, w4;
+
+int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo);
+int distance(int x1, int y1, int x2, int y2);
+int maxPheromone(int num);
+void updatePheromone(int **pheromones);
+void globalPheromone(int **pheromones, int **best, int total);
+
 
 int main(int argc, char *argv[])
 {
@@ -53,9 +72,18 @@ int main(int argc, char *argv[])
    int *used;
    FILE *file;
    int **pheromones;
-   int i, j, k, l, life, dist, r;
-   int max = 0;
-   int count = 0;
+   int i, j, k, l, life, dist, r, tmp;
+   int maxi = 0;
+   int count = 0, rand_tmp = 0;
+   unsigned int random;
+   tinymt32_t state;
+   uint32_t seed = (int) getpid();
+ 
+   tinymt32_init(&state, seed);
+//   for(i = 0; i < 10; i++)
+//      printf("%u ", (unsigned int) tinymt32_generate_uint32(&state));
+//   printf("\n");
+
 
    /* cluster to determine where hospitals go */
    /* assign x coordinates, y coordinates of hospitals */
@@ -64,27 +92,33 @@ int main(int argc, char *argv[])
    /* will be amb[i] */
 
    savior = 0;
-   /* UPDATE THIS! */
-   hosp[0].xcoord = 49;
-   hosp[0].ycoord = 56;
-   hosp[0].no_ambu = 5;
-   hosp_0 = 5;
-   hosp[1].xcoord = 63;
-   hosp[1].ycoord = 47;
-   hosp[1].no_ambu = 10;
-   hosp_1 = 10;
-   hosp[2].xcoord = 48;
-   hosp[2].ycoord = 53;
-   hosp[2].no_ambu = 11;
-   hosp_2 = 11;
-   hosp[3].xcoord = 67;
-   hosp[3].ycoord = 50;
-   hosp[3].no_ambu = 5;
-   hosp_3 = 5;
-   hosp[4].xcoord = 31;
-   hosp[4].ycoord = 49;
-   hosp[4].no_ambu = 8;
-   hosp_4 = 8;
+
+   file = fopen("TEAMinput.txt", "r");
+   assert(file);
+
+   /*initialize patients */
+   for(i = 0; i < NUM_IN_FILE; i++)
+   {
+      fscanf(file, "%d", &patients[i].xcoord);
+      fscanf(file, "%d", &patients[i].ycoord);
+      fscanf(file, "%d", &patients[i].life);
+      patients[i].claim = 0;
+   }
+
+   for(i = 0; i < 5; i++)
+   {
+      fscanf(file, "%d", &hosp[i].xcoord);
+      fscanf(file, "%d", &hosp[i].ycoord);
+      fscanf(file, "%d", &hosp[i].no_ambu);
+      patients[i + NUM_IN_FILE].xcoord = hosp[i].xcoord;
+      patients[i + NUM_IN_FILE].ycoord = hosp[i].ycoord;
+   }
+
+   hosp_0 = hosp[0].no_ambu;
+   hosp_1 = hosp[1].no_ambu;
+   hosp_2 = hosp[2].no_ambu;
+   hosp_3 = hosp[3].no_ambu;
+   hosp_4 = hosp[4].no_ambu;
    total = hosp_0 + hosp_1 + hosp_2 + hosp_3 + hosp_4;
 
 
@@ -106,7 +140,7 @@ int main(int argc, char *argv[])
          moves[i][j] = -1;
          best[i][j] = -1;
       }
-      used[i] = 0;
+      used[i] = i;
    }
 
    
@@ -114,8 +148,6 @@ int main(int argc, char *argv[])
    assert(pheromones);
    amb = malloc(total * sizeof(amb_t));
    assert(amb);
-
-
 
    /* initialization of ambulances */
    for(i = 0; i < total; i++)
@@ -166,62 +198,77 @@ int main(int argc, char *argv[])
    }
 
    
-   /* initialize pheromone array */
-   for(i = 0; i < NUM_IN_FILE + 5; i++)
-   {
-      pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
-      assert(pheromones[i]);
-      for(j = 0; j < NUM_IN_FILE + 5; j++)
-         pheromones[i][j] = 0;
-   }
-  
-   file = fopen("TEAMinput.txt", "r");
-   assert(file);
-
-   /* initialize patients and grid */
-   for(i = 0; i < NUM_IN_FILE; i++)
-   {
-      fscanf(file, "%d", &patients[i].xcoord);
-      fscanf(file, "%d", &patients[i].ycoord);
-      fscanf(file, "%d", &patients[i].life);
-      patients[i].claim = 0;
-   }
-   
-   for(i = 0; i < 5; i++)
-   {
-      fscanf(file, "%d", &hosp[i].xcoord);
-      fscanf(file, "%d", &hosp[i].ycoord);
-      fscanf(file, "%d", &hosp[i].no_ambu);
-      patients[i + NUM_IN_FILE].xcoord = hosp[i].xcoord;
-      patients[i + NUM_IN_FILE].ycoord = hosp[i].ycoord;
-   }
-
-   hosp_0 = hosp[0].no_ambu;
-   hosp_1 = hosp[1].no_ambu;
-   hosp_2 = hosp[2].no_ambu;
-   hosp_3 = hosp[3].no_ambu;
-   hosp_4 = hosp[4].no_ambu;
 
 /* change this outer loop to while(TIMEVALID) */
-   for(l = 0; l < 1; l++)
+   for(l = 0; l < iterations; l++)
    {
+ 
+      /* ATTEMPT AT RESETTING THE VALUES
+      TODO THIS IS WRONG!!!!!!!!!!! */
+//IF THERE IS MORE THAN 250 ITERATOINS THIS FUCKS SHIT UP!
+       if (count % 500 == 0)
+       { 
+           // initialize pheromone array
+           for(i = 0; i < NUM_IN_FILE + 5; i++)
+           {
+              pheromones[i] = malloc((NUM_IN_FILE + 5) * sizeof(int));
+              assert(pheromones[i]);
+              for(j = 0; j < NUM_IN_FILE + 5; j++)
+              {
+                 random = (unsigned int) tinymt32_generate_uint32(&state);
+                 random = random % RAND_PHEROMONE + 3;
+                 pheromones[i][j] = random;
+              }
+           }
+           for(i = 0; i < total; i++)
+           {
+               for(j = 0; j < 100; j++)
+               {
+                   moves[i][j] = -1;
+                   best[i][j] = -1;
+               }
+           }
+      }   
+
+//CHANGE THE BEHAVIOR WITH THIS
+//THERE ARE FOUR BEHAVIOR PATTERNS
+//SWITCH TO THE NEXT ONE HERE
+//GO THROUGH ALL FOUR
+//HARDCORE THEM!!
+
+     if(count % 500 == 0)
+     {
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 23429783;
+         w1 = (double) random / 23429783.0;
+//         w1 = 0.7 + 0.2*w1;
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 243081;
+         w2 = (double) random / 243081.0; 
+//         w2 = 0.5 + 0.1*w2;
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 97834897;
+         w3 = (double) random / 97834897.0;
+//         w3 = 0.6 + 0.1*w3;
+         random = (unsigned int) tinymt32_generate_uint32(&state);
+         random = random % 8273493;
+         w4 =  (double) random / 8273493.0;
+//         w4 = 0.4 + 0.2*w4;
+         fprintf(stderr, "%f %f %f %f\n", w1, w2, w3, w4);
+      }
+      for(k = total - 1; k > -1; k--)
+         {
+            random = (unsigned int) tinymt32_generate_uint32(&state);
+            random = random % total;
+            rand_tmp = (int)random;
+            tmp = used[k];
+            used[k] = used[rand_tmp];
+            used[rand_tmp] = tmp;
+         }
+      
       for(i = 0; i < total; i++)
       {
-         while(1)
-         {
-            /* UPDATE THIS TO BE FASTER AT CHOOSING ONE THAT HASN'T BEEN CHOSEN */            
-           /* srand(time(NULL));
-         a   r = rand() % total;
-            if(used[r] != 1)
-            {
-               used[r] = 1;
-               break;
-            } 
-             GENERATE RANDOM NUMBER BETWEEN 0 AND total. CALL IT r */
-            /* only use non chosen ants. Break when successful. */
-            r = i;
-            break;
-         }
+         r = used[i];
          amb[r].chosen = 1;  //reset these outside for loop 
          ant.xcoord = amb[r].xcoord;
          ant.ycoord = amb[r].ycoord;
@@ -237,31 +284,42 @@ int main(int argc, char *argv[])
          j = 0;
          while(j != 2)
          {
+      //     if (used[i] == 4 || used[i] == 12 || used[i] == 18 || used[i] == 25 || used[i] == 35
+      //       ||used[i] == 3 || used[i] == 11 || used[i] == 17 || used[i] == 24 || used[i] == 34
+      //       ||used[i] == 2 || used[i] == 10 || used[i] == 16 || used[i] == 23 || used[i] == 33)
+      //         break;
             j = chooseTarget(&ant, patients, hosp, pheromones, r);
-            moves[i][k] = ant.next; 
-            k = k + 1;
-            
+            moves[r][k] = ant.next; 
+            k = k + 1;  
          }
-  //       for(j = 0; j < 10; j++)
-    //        printf("%d ", moves[i][j]);
       }
        
-      /* reset used */
+      /* reset array (may not be necessary */
+      for(i = 0; i < total; i++)
+         used[i] = i;
 
       /* check to see if this solution is better. If so, save it */
-      if(max < savior)
+      if(maxi < savior)
       {
-         max = savior;
+         maxi = savior;
          for(i = 0; i < total; i++)
          {
             for(j = 0; j < 100; j++)
             {
-               best[i][j] = moves[i][k]; /* store best */
-               moves[i][k] = -1; /* reset moves */
+                best[i][j] = -1;
+                best[i][j] = moves[i][j]; /* store best */
             }
             amb[i].chosen = 0; /* make them no longer chosen */
          }
       }
+
+      for (i = 0; i < total; i++)
+      {
+          for (j = 0; j < 100; j++)
+              moves[i][j] = -1;
+      }
+      
+    
       /* reset savior and claimed patients */
       savior = 0;
       for(i = 0; i < NUM_IN_FILE; i++)
@@ -271,18 +329,73 @@ int main(int argc, char *argv[])
       if(count % GLOBAL_PARAMETER == 0)
       {
          /* reinforce current known best */
+         globalPheromone(pheromones, best, total);
       }
-
-   /*   updatePheromones(pheromones); */ /* update local pheromones */
+      updatePheromone(pheromones); /* update local pheromones */
 
    }
+      int pat[4], hospt;     
+      pat[0] = 0; pat[1] = 0; pat[2] = 0; pat[3] = 0; 
+   /* Print ambulances */
+      for (i = 0; i < total; i ++)
+      {
+          j = 0;
+          k = 0;
+          while (best[i][j] >= 0)
+          {
+              if(best[i][j] >= 300)
+              {
+                  hospt = best[i][j];
+                 if (pat[3] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", i, 
+								 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+                                                                 pat[1], patients[pat[1]].xcoord, patients[pat[1]].ycoord, patients[pat[1]].life,
+								 pat[2], patients[pat[2]].xcoord, patients[pat[2]].ycoord, patients[pat[2]].life, 
+								 pat[3], patients[pat[3]].xcoord, patients[pat[3]].ycoord, patients[pat[3]].life, 
+								 patients[hospt].xcoord, patients[hospt].ycoord);
 
-   printf("%d", max);
+                  else if (pat[2] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", i, 
+								 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+                                                                 pat[1], patients[pat[1]].xcoord, patients[pat[1]].ycoord, patients[pat[1]].life,
+								 pat[2], patients[pat[2]].xcoord, patients[pat[2]].ycoord, patients[pat[2]].life, 
+								 patients[hospt].xcoord, patients[hospt].ycoord);
 
+                  else if (pat[1] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", i,
+								 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+                                                                 pat[1], patients[pat[1]].xcoord, patients[pat[1]].ycoord, patients[pat[1]].life,
+								 patients[hospt].xcoord, patients[hospt].ycoord);
 
-   /* FREE MOVES AND BEST */
+                  else if (pat[0] != -1)
+                      printf("ambulance %d %d (%d, %d, %d); (%d, %d)\n", i,
+                                                                 pat[0], patients[pat[0]].xcoord, patients[pat[0]].ycoord, patients[pat[0]].life,
+								 patients[hospt].xcoord, patients[hospt].ycoord);
+                   for (k = 0; k < 4; k++)
+                      pat[k] = -1;
+                   k = 0;
+ 
+               }
+               else
+               {
+                   pat[k] = best[i][j];
+                   k = k + 1;
+               }
+               j = j + 1;
+          } 
+      }  
+   printf("%d", maxi);
 
    /* free all arrays */
+   for(i = 0; i < total; i++)
+   {
+      free(moves[i]);  
+      free(best[i]); 
+   } 
+   free(moves);
+   free(best);
+   free(used); 
+
    for(i = 0; i < NUM_IN_FILE + 5; i++)
       free(pheromones[i]);
    free(pheromones);
@@ -298,8 +411,9 @@ int main(int argc, char *argv[])
  * Returns 2 if time ran out. */
 int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, int mo)
 {
-   int i, j, r, bestd = 10000, bestd2, best, dist, dist1, dist2, bestd1;
-   int score = 0, bestscore = 0, flag = 0;
+   int i, j, r, p, bestd = 10000, bestd2, best, dist, dist1, dist2, bestd1;
+   double score = 0, bestscore = 0;
+   int flag = 0;
    int pat_num = 0;
 
 
@@ -340,12 +454,16 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                   bestd2 = dist2;
             }
             /* ensures new patient could make it to a hospital */
-            if((patients[i].life - ant->time - dist1 - bestd2 - 2) > 0)
+            if((patients[i].life - ant->time - dist1 - bestd2 - 2)>0)
             {
                /* ensures all other ants can still make it back given the new ant is picked up  */
               if(ant->pat1 != -1)
                {
+//<<<<<<< HEAD
+ //               if((patients[ant->pat1].life - ant->time) < dist1 + bestd2 + 2)
+/*=======*/
                 if((patients[ant->pat1].life - ant->time - dist1 - bestd2 - 2)<0)
+//>>>>>>> d9c7dbe446cc39abba2067e01be2fbb9eb747eca
                      continue;
                } 
               if(ant->pat2 != -1)
@@ -367,21 +485,21 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
                {
                   bestd1 = dist1;
                   best = i;
-               }
-                  
-                  
-               /* SCORING */
+               } 
+         
+               p = pheromones[i][ant->next];
 
-
-               /* save best score and index of that ant */
-               /*
-               if(score > bestscore)
+               score  = w1 * ((double)(200 - dist1) / 200.0); 
+               score += w2 * ((double)(MAX_TIME - patients[i].life) / (double) MAX_TIME);
+               score += w3 * ((double)p/(double)max);
+               score += w4 * ((iterations - (double) patients[i].saved) / iterations);
+         
+               if(score >= bestscore)
                {
-                  bestd = dist1;
+                  bestd1 = dist1;
                   bestscore = score;
                   best = i; 
-               }
-               */
+               } 
 
             }
          }  
@@ -407,6 +525,7 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
             ant->pat4 = best;
          pheromones[ant->next][best] += LOCAL_PHEROMONE; /* update pheromones */
          pheromones[best][ant->next] += LOCAL_PHEROMONE;
+         max = maxPheromone(pheromones[best][ant->next]);
 
          ant->time = ant->time + bestd1 + 1; /* update time */
          ant->next = best; /* current patient */
@@ -456,53 +575,17 @@ int chooseTarget(amb_t *ant, pat_t *patients, hosp_t *hosp, int **pheromones, in
 
          savior += pat_num;
 
-         /* saves patients */
- /*        if(ant->pat1 != -1)
-         {
-            if(patients[ant->pat1].life - bestd - ant->time - 1 > -1)
-               savior++;
-         }
-         if(ant->pat2 != -1)
-         {
-            if(patients[ant->pat2].life - bestd - ant->time - 1 > -1)
-               savior++;
-         }
-         if(ant->pat3 != -1)
-         {
-            if(patients[ant->pat3].life - bestd - ant->time - 1 > -1)
-               savior++;
-         }
          if(ant->pat4 != -1)
-         {
-            if(patients[ant->pat4].life - bestd - ant->time - 1 > -1)
-               savior++;
-         } */
-           if (ant->pat4 != -1)
-               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life, 
-								 ant->pat3, patients[ant->pat3].xcoord, patients[ant->pat3].ycoord, patients[ant->pat3].life, 
-								 ant->pat4, patients[ant->pat4].xcoord, patients[ant->pat4].ycoord, patients[ant->pat4].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
+            patients[ant->pat4].saved++;
+         if(ant->pat3 != -1)
+            patients[ant->pat3].saved++;
+         if(ant->pat2 != -1)
+            patients[ant->pat2].saved++;
+         if(ant->pat1 != -1)
+            patients[ant->pat1].saved++;
 
-            else if (ant->pat3 != -1)
-               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life, 
-								 ant->pat3, patients[ant->pat3].xcoord, patients[ant->pat3].ycoord, patients[ant->pat3].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
 
-            else if (ant->pat2 != -1)
-               printf("ambulance %d %d (%d, %d, %d); %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 ant->pat2, patients[ant->pat2].xcoord, patients[ant->pat2].ycoord, patients[ant->pat2].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
-
-           else if (ant->pat1 != -1)
-               printf("ambulance %d %d (%d, %d, %d); (%d, %d)\n", mo, 
-                                                                 ant->pat1, patients[ant->pat1].xcoord, patients[ant->pat1].ycoord, patients[ant->pat1].life,
-								 patients[best+NUM_IN_FILE].xcoord, patients[best+NUM_IN_FILE].ycoord);
-     
+    
          ant->pat1 = -1; /* empties ambulance */
          ant->pat2 = -1;
          ant->pat3 = -1;
@@ -534,6 +617,16 @@ int distance(int x1, int y1, int x2, int y2)
    return (dist);
 }
 
+
+int maxPheromone(int pheromone)
+{
+   if(max < pheromone)
+      max = pheromone;
+   if(max < 1)
+      max = 1;
+   return(max); 
+}
+
 /* Pheromones will be set to 3-10 when they are placed (number
  * subject to change) and will be reduced by 1 after an ant
  * explores a path. This will allow ants to have a small bias
@@ -544,8 +637,35 @@ void updatePheromone(int **pheromones)
 {
    int i, j;
 
-
+   for(i = 0; i < NUM_IN_FILE + 5; i++)
+   {
+      for(j = 0; j < NUM_IN_FILE + 5; j++)
+      {
+         if(pheromones[i][j] > 1)
+            pheromones[i][j] = pheromones[i][j] - PHEROMONE_REDUCTION;
+         if(pheromones[i][j] == 1)
+            pheromones[i][j] = 0;
+      }
+   }
    /* reduce pheromones */
 } /* end of updatePheromone */
 
+
+
+void globalPheromone(int **pheromones, int **best, int total)
+{
+   int i, j;
+
+   for(i = 0; i < total; i++)
+   {
+      j = 0;
+      while(best[i][j] != -1 && best[i][j+1] != -1)
+      {
+         pheromones[best[i][j]][best[i][j+1]] += GLOBAL_PHEROMONE;
+         pheromones[best[i][j+1]][best[i][j]] += GLOBAL_PHEROMONE;
+         j++;
+      }
+   }
+
+}
 
