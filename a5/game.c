@@ -159,6 +159,8 @@ void test_algorithm()
         //Log results etc. - maybe use csv for sorting actions later
         //Only log if we lose?
     }
+    //printf("them: %d %d; ", move[0], move[1]);
+    print_board();
     printf("Final score: %d\n", score);
 
 }
