@@ -42,11 +42,11 @@ double distance_squared(int x0, int y0, int x1, int y1)
 //returns the area owned by us
 int do_move(int *move)
 {
-    int our_area, i, j, d;
+    int our_area = 0, i, j;
+    double d;
     if (move[0] < 0 || move[0] > 999 || move[1] < 0 || move[1] > 999)
-    {
         return -1;
-    }
+    
     //Make sure stone can be placed
     if (abs(board[move[0]][move[1]]) == INF)
         return -1;
@@ -62,21 +62,24 @@ int do_move(int *move)
     {
         for (j = 0; j < BOARD_SIZE; j++)
         {
+            d = 0.0;
             //Ignore pixels with stones set
-            if (abs(board[i][j]) == INF || i == j)
+            if (abs(board[i][j]) == INF)
+                continue;
+            if(move[0] == i && move[1] == j)
                 continue;
             d = distance_squared(move[0], move[1], i, j);
             //If we are not next_to_set subtract the pull
             if (!next_to_set)
                 d = -d;
-            board[i][j] += 1 / d;
+            board[i][j] += 1.0 / d;
             //Our area only have positive pull
             if (board[i][j] > 0)
                 our_area++;
         }
      }
      //Flip the player
-     next_to_set = !next_to_set;
+     next_to_set = next_to_set > 0 ? 0 : 1;
      return our_area;
 }
 
@@ -97,7 +100,8 @@ void print_board()
 //move is in the format [x, y] as a 2 dim array
 int undo_move(int *move)
 {
-    int our_area, i, j, d;
+    int our_area = 0, i, j;
+    double d = 0.0;
     if (move[0] < 0 || move[0] > 999 || move[1] < 0 || move[1] > 999)
     {
         return -1;
@@ -143,7 +147,7 @@ int undo_move(int *move)
 void test_algorithm()
 {
     int i, score;
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < 1; i++)
     {
         int move[2];
         do_move_random(move);
@@ -190,5 +194,6 @@ int do_move_random(int *move)
     }
     return score;
 }
+
 
 
