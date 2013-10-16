@@ -124,8 +124,6 @@ int undo_move(int *move)
     {
         for (j = 0; j < BOARD_SIZE; j++)
         {
-            if (i == j)
-                continue;
             d = distance_squared(move[0], move[1], i, j);
             if (!next_to_set)
                 d = -d;
@@ -189,7 +187,7 @@ void test_algorithm()
         //Only log if we lose?
     }
     //printf("them: %d %d; ", move[0], move[1]);
-    print_board();
+ //   print_board();
     printf("Final score: %d\n", score);
     if(score <= 500000)
        save_stats(score, p1moves, p2moves);
@@ -204,7 +202,7 @@ int main(int argc, char *argv[])
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
 
-    for(i = 0; i < 2; i++)
+    for(i = 0; i < 15; i++)
        test_algorithm();
     return 0;
 }
@@ -251,4 +249,10 @@ void decent_random(int *move)
     }
     undo_move(move);
 }
+
+
+void greedy(int *move)
+{
+   
+} 
 
