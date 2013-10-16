@@ -150,12 +150,12 @@ void test_algorithm()
     for (i = 0; i < 1; i++)
     {
         int move[2];
-        do_move_random(move);
-        //printf("us: %d %d; ", move[0], move[1]);
-        print_board();
         score = do_move_random(move);
+        //printf("us: %d %d; ", move[0], move[1]);
+        //print_board();
+        //score = do_move_random(move);
         //printf("them: %d %d; ", move[0], move[1]);
-        print_board();
+        //print_board();
         //Log results etc. - maybe use csv for sorting actions later
         //Only log if we lose?
     }
