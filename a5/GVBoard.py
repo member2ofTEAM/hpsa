@@ -14,11 +14,11 @@ canvas_width = 1000
 canvas_height = 1000
 
 #COLORS
-player1_area = (1,1,0) # yellow
+player1_area = (0,0,1) # yellow
 player2_area = (1,0,0) # red
 
 player1 = (0,0,1)
-player2 = (0,1,1)
+player2 = (1,0,0)
 
 border = (0,0,0) #black 
 background = (255,255,255) #white
@@ -101,13 +101,13 @@ def create_image():
             elif(board[i][j]>0):
                 p_color = colorsys.rgb_to_hsv(player1_area[0], player1_area[1], player1_area[2])
                 value = [p_color[0],p_color[1],p_color[2]]
-                value[1] = math.sqrt(math.sqrt(math.sqrt(board[i][j])))
+                value[1] = math.sqrt(math.sqrt(math.sqrt(abs(board[i][j]))))
                 value = colorsys.hsv_to_rgb(value[0], value[1], value[2])
                 pixels[i,j] = (int(value[0]*255),int(value[1]*255),int(value[2]*255)) # set the colour accordingly
             elif(board[i][j]<0):
                 p_color = colorsys.rgb_to_hsv(player2_area[0], player2_area[1], player2_area[2])
                 value = [p_color[0],p_color[1],p_color[2]]
-                value[1] = math.sqrt(math.sqrt(math.sqrt(board[i][j])))
+                value[1] = math.sqrt(math.sqrt(math.sqrt(abs(board[i][j]))))
                 value = colorsys.hsv_to_rgb(value[0], value[1], value[2])
                 pixels[i,j] = (int(value[0]*255),int(value[1]*255),int(value[2]*255)) # set the colour accordingly
             else:
