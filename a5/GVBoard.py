@@ -14,7 +14,7 @@ canvas_width = 1000
 canvas_height = 1000
 
 #COLORS
-player1_area = (0,0,1) # yellow
+player1_area = (0,0,1) # blue
 player2_area = (1,0,0) # red
 
 player1 = (0,0,1)
