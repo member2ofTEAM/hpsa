@@ -4,19 +4,25 @@
 #include <math.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include "tinymt32.c"
 #include <time.h>
+#include <assert.h>
 
 void test_algorithm();
 int do_move_random(int *move);
+int do_move_algorithm(int *move);
 void print_board();
+void decent_random(int *move);
 
 const int BOARD_SIZE = 1000;
 const double INF = 10000;
 double board[1000][1000];
+int NUM_MOVES_REMAINING = 15;
 // 1 is us, 0 is the other guy
 // We assume, that we always start!
 int next_to_set = 1;
+tinymt32_t state;
 
 void init_board()
 {
@@ -144,13 +150,36 @@ int undo_move(int *move)
      return our_area;
 }
 
+void save_stats(int score, int *p1moves, int *p2moves)
+{
+    FILE *stats;
+    int i;
+    stats = fopen("output.csv", "a+");
+    assert(stats);
+    fprintf(stats, "%d", score);
+    for(i = 0; i < NUM_MOVES_REMAINING; i++)
+    {
+       fprintf(stats, ", %d %d", p1moves[i * 2], p1moves[(i * 2) + 1]);
+       fprintf(stats, ", %d %d", p2moves[i * 2], p2moves[(i * 2) + 1]); 
+    }
+    fprintf(stats, "\n");
+    
+}
+
 void test_algorithm()
 {
+    int p1moves[30] = {-1}, p2moves[30] = {-1};
     int i, score;
-    for (i = 0; i < 1; i++)
+    for (i = 0; i < NUM_MOVES_REMAINING; i++)
     {
         int move[2];
+        score = do_move_algorithm(move);
+        p1moves[i * 2] = move[0];
+        p1moves[(i * 2) + 1] = move[1];
+        do_move_random(move);
         score = do_move_random(move);
+        p2moves[i * 2] = move[0];
+        p2moves[(i * 2) + 1] = move[1];
         //printf("us: %d %d; ", move[0], move[1]);
         //print_board();
         //score = do_move_random(move);
@@ -162,26 +191,39 @@ void test_algorithm()
     //printf("them: %d %d; ", move[0], move[1]);
     print_board();
     printf("Final score: %d\n", score);
-
+    if(score <= 500000)
+       save_stats(score, p1moves, p2moves);
 }
 
-int main()
+
+int main(int argc, char *argv[])
 {
+    //NUM_MOVES_REMAINING = atoi(argv[1]);
     //init_board();
-    test_algorithm();
+    int i;
+    uint32_t seed = getpid();
+    tinymt32_init(&state, seed);
+
+    for(i = 0; i < 2; i++)
+       test_algorithm();
     return 0;
 }
 
-void do_move_algorithm(int *move)
+
+// ALGORITHMS ALGORITHMS ALGORITMHS
+
+int do_move_algorithm(int *move)
 {
-    int i;
-    i = i + 1;
+    int score;
+    decent_random(move);
+    score = do_move(move);
+    return(score);
 }
 
 //Between 0 and 999 inclusive
 int get_random_int()
 {
-    return (int) (rand() % 1000);
+    return ((int)((unsigned int) tinymt32_generate_uint32(&state) % 1000));
 }
 
 int do_move_random(int *move)
@@ -197,5 +239,16 @@ int do_move_random(int *move)
     return score;
 }
 
-
+// Randomly where we don't own 
+void decent_random(int *move)
+{
+    move[0] = get_random_int();
+    move[1] = get_random_int();
+    while(do_move(move) < 0 || board[move[0]][move[1]] > 0)
+    {
+        move[0] = get_random_int();
+        move[1] = get_random_int();
+    }
+    undo_move(move);
+}
 
