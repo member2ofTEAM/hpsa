@@ -12,11 +12,24 @@
 void test_algorithm();
 int do_move_random(int *move);
 int do_move_algorithm(int *move);
+int do_move_manual(int *move);
 void print_board();
 void decent_random(int *move);
 void alpha_better(int *move);
 int value(int alpha, int beta, int depth, int max);
 int eval_fn();
+int our_area();
+
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+          __typeof__ (b) _b = (b); \
+               _a > _b ? _a : _b; })
+
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+          __typeof__ (b) _b = (b); \
+               _a < _b ? _a : _b; })
+
 
 const int BOARD_SIZE = 1000;
 const double INF = 10000;
@@ -67,9 +80,9 @@ int do_move(int *move)
         board[move[0]][move[1]] = -INF;
 
     //Update the board
-    for (i = 0; i < BOARD_SIZE; i++)
+    for (i = max(move[0] - 300, 0); i < min(BOARD_SIZE, move[0] + 300); i++)
     {
-        for (j = 0; j < BOARD_SIZE; j++)
+        for (j = max(move[1] - 300, 0); j < min(BOARD_SIZE, move[1] + 300); j++)
         {
             d = 0.0;
             //Ignore pixels with stones set
@@ -89,6 +102,8 @@ int do_move(int *move)
      }
      //Flip the player
      next_to_set = next_to_set > 0 ? 0 : 1;
+     //Decrease number of moves remaining;
+     NUM_MOVES_REMAINING--;
      return our_area;
 }
 
@@ -123,9 +138,9 @@ int undo_move(int *move)
     board[move[0]][move[1]] = 0;
 
     //Update the board
-    for (i = 0; i < BOARD_SIZE; i++)
+    for (i = max(move[0] - 300, 0); i < min(BOARD_SIZE, move[0] + 300); i++)
     {
-        for (j = 0; j < BOARD_SIZE; j++)
+        for (j = max(move[1] - 300, 0); j < min(BOARD_SIZE, move[1] + 300); j++)
         {
             d = distance_squared(move[0], move[1], i, j);
             if (!next_to_set)
@@ -148,6 +163,8 @@ int undo_move(int *move)
      }
      //Flip the player
      next_to_set = !next_to_set;
+     //Increase number of moves remaining
+     NUM_MOVES_REMAINING++;
      return our_area;
 }
 
@@ -167,6 +184,20 @@ void save_stats(int score, int *p1moves, int *p2moves)
     
 }
 
+int our_area()
+{
+    int i, j, area;
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        for (int j = 0; j < BOARD_SIZE; j++)
+        {
+        if (board[i][j] >= 0)
+            area++;
+        }
+    }
+    return area;
+}
+
 void test_algorithm()
 {
     int p1moves[30] = {-1}, p2moves[30] = {-1};
@@ -177,20 +208,16 @@ void test_algorithm()
         score = do_move_algorithm(move);
         p1moves[i * 2] = move[0];
         p1moves[(i * 2) + 1] = move[1];
-        do_move_random(move);
-        score = do_move_random(move);
+//        score = do_move_random(move);
+        score = do_move_manual(move);
+        printf("%d %d", move[0], move[1]);
         p2moves[i * 2] = move[0];
         p2moves[(i * 2) + 1] = move[1];
-        //printf("us: %d %d; ", move[0], move[1]);
-        //print_board();
-        //score = do_move_random(move);
-        //printf("them: %d %d; ", move[0], move[1]);
-        //print_board();
         //Log results etc. - maybe use csv for sorting actions later
         //Only log if we lose?
     }
-    //printf("them: %d %d; ", move[0], move[1]);
-    print_board();
+    printf("%d", our_area());
+    //print_board();
     if(score <= 500000)
        save_stats(score, p1moves, p2moves);
 }
@@ -198,25 +225,36 @@ void test_algorithm()
 
 int main(int argc, char *argv[])
 {
-    //NUM_MOVES_REMAINING = atoi(argv[1]);
-    //init_board();
-    int i;
+//    NUM_MOVES_REMAINING = atoi(argv[1]);
+//    init_board();
+    int i, move[2];
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
 
-    for(i = 0; i < 5; i++)
+    for(i = 0; i < 1; i++)
        test_algorithm();
     return 0;
 }
 
+int do_move_manual(int *move)
+{
+    int score = -1;
+    while(score < 0)
+    {
+        scanf("%d,%d", &move[0], &move[1]);
+        printf("move received\n");
+        score = do_move(move);
+    }
+    return score;
+}
 
 // ALGORITHMS ALGORITHMS ALGORITMHS
 
 int do_move_algorithm(int *move)
 {
     int score;
-    decent_random(move);
-    score = alpha_better(move);
+    alpha_better(move);
+    score = do_move(move);
     return(score);
 }
 
@@ -254,38 +292,30 @@ void decent_random(int *move)
 
 int eval_fn()
 {
-    //can potential hack this by using the return value of do move
-    int i, j, area;
-    for (int i = 0; i < BOARD_SIZE; i++)
-    {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-        if (board[i][j] > 0)
-            area++;
-        }
-    }
-    return area;
+    return our_area();
 }
 
  int value(int alpha, int beta, int depth, int max)
 {
-    int v = -INF, i, next = 0, j;
-    if (depth > 3){
-        return eval_fn(0, phase);
+    int v = -INF, i, next = 0, j, move[2];
+    if (depth > min(0, NUM_MOVES_REMAINING)){
+        return eval_fn();
     }
     
-    for (j = 0; j < BOARD_SIZE; j = j + 10)
+    for (j = 0; j < BOARD_SIZE; j = j + 50)
     {
-        for (i = 0; i < BOARD_SIZE; i = i + 10)
+        for (i = 0; i < BOARD_SIZE; i = i + 50)
         {
-            if(do_move(i, j) > 0)
+            move[0] = i;
+            move[1] = j;
+            if(do_move(move) > 0)
             {
                 if (max)
                 {
                     v = max(v, value(alpha, beta, depth + 1, 0));
                     if (v >= beta)
                     {
-                        undo_move(i,j);
+                        undo_move(move);
                         return v;
                     }
                     alpha = max(alpha, v);
@@ -295,12 +325,12 @@ int eval_fn()
                     v = min(v, value(alpha, beta, depth + 1, 1));
                     if (v <= alpha)
                     {
-                        undo_move(i,j);
+                        undo_move(move);
                         return v;
                     }
                     beta = min(beta, v);
                 }
-                undo_move(i,j);
+                undo_move(move);
             }
          }
     }
@@ -315,11 +345,13 @@ void alpha_better(int *move)
     int best_v = -2 * INF, v = INF;
     int i, j;
     int best_move[2];
-    for (j = 0; j < BOARD_SIZE; j = j + 10)
+    for (j = 0; j < BOARD_SIZE; j = j + 50)
     {
-        for (i = 0; i < BOARD_SIZE; i = i + 10)
+        for (i = 0; i < BOARD_SIZE; i = i + 50)
         {
-            if (do_move(i, j) > 0)
+            move[0] = i;
+            move[1] = j;
+            if (do_move(move) > 0)
             {
                 v = value(-1 * INF, INF, 1, 0);
                 if (v > best_v)
@@ -328,7 +360,7 @@ void alpha_better(int *move)
                     best_move[0] = i;
                     best_move[1] = j;
                 }
-	        undo_move(i,j);
+	        undo_move(move);
             }
         }
     }
