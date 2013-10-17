@@ -187,8 +187,7 @@ void test_algorithm()
         //Only log if we lose?
     }
     //printf("them: %d %d; ", move[0], move[1]);
- //   print_board();
-    printf("Final score: %d\n", score);
+    print_board();
     if(score <= 500000)
        save_stats(score, p1moves, p2moves);
 }
@@ -202,7 +201,7 @@ int main(int argc, char *argv[])
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
 
-    for(i = 0; i < 15; i++)
+    for(i = 0; i < 5; i++)
        test_algorithm();
     return 0;
 }
@@ -250,9 +249,87 @@ void decent_random(int *move)
     undo_move(move);
 }
 
-
-void greedy(int *move)
+int eval_fn()
 {
-   
+    //can potential hack this by using the return value of do move
+    int i, j, area;
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        for (int j = 0; j < BOARD_SIZE; j++)
+        {
+        if (board[i][j] > 0)
+            area++;
+        }
+    }
+    return area;
+}
+
+ int value(int alpha, int beta, int depth, int max)
+{
+    int v = -inf, i, next = 0, j;
+    if (depth > 3){
+        return eval_fn(0, phase);
+    }
+    
+    for (j = 0; j < BOARD_SIZE; j++)
+    {
+        for (i = 0; i < BOARD_SIZE; i++)
+        {
+            if(do_move(i, j))
+            {
+                if (max)
+                {
+                    v = max(v, value(alpha, beta, depth + 1, 0));
+                    if (v >= beta)
+                    {
+                        undo_move(i,j);
+                        return v;
+                    }
+                    alpha = max(alpha, v);
+                }
+                else
+                {
+                    v = min(v, value(alpha, beta, depth + 1, 1));
+                    if (v <= alpha)
+                    {
+                        undo_move(i,j);
+                        return v;
+                    }
+                    beta = min(beta, v);
+                }
+                undo_move(i,j);
+            }
+         }
+    }
+    return v;
+}
+                                 
+/* Recrusively realizes feasible sequences of moves and calls
+ * the evaulation function
+ */
+void alpha_better(int *move)
+{
+    int best_v = -2 * INF, v = INF;
+    int i, j;
+    int best_move[2];
+    for (j = 0; j < BOARD_SIZE; j++)
+    {
+        for (i = 0; i < BOARD_SIZE; i++)
+        {
+            if (do_move(i, j))
+            {
+                v = value(-1 * INF, INF, 1, 0);
+                if (v > best_v)
+                {
+                    best_v = v;
+                    best_move[0] = i;
+                    best_move[1] = j;
+                }
+	        undo_move(i,j);
+            }
+        }
+    }
+    move[0] = best_move[0];
+    printf("%d %d %d\n", best_move[0], abs(best_move[1]), best_v);
 } 
 
