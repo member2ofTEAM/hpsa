@@ -14,6 +14,9 @@ int do_move_random(int *move);
 int do_move_algorithm(int *move);
 void print_board();
 void decent_random(int *move);
+void alpha_better(int *move);
+int value(int alpha, int beta, int depth, int max);
+int eval_fn();
 
 const int BOARD_SIZE = 1000;
 const double INF = 10000;
@@ -213,7 +216,7 @@ int do_move_algorithm(int *move)
 {
     int score;
     decent_random(move);
-    score = do_move(move);
+    score = alpha_better(move);
     return(score);
 }
 
@@ -266,16 +269,16 @@ int eval_fn()
 
  int value(int alpha, int beta, int depth, int max)
 {
-    int v = -inf, i, next = 0, j;
+    int v = -INF, i, next = 0, j;
     if (depth > 3){
         return eval_fn(0, phase);
     }
     
-    for (j = 0; j < BOARD_SIZE; j++)
+    for (j = 0; j < BOARD_SIZE; j = j + 10)
     {
-        for (i = 0; i < BOARD_SIZE; i++)
+        for (i = 0; i < BOARD_SIZE; i = i + 10)
         {
-            if(do_move(i, j))
+            if(do_move(i, j) > 0)
             {
                 if (max)
                 {
@@ -312,11 +315,11 @@ void alpha_better(int *move)
     int best_v = -2 * INF, v = INF;
     int i, j;
     int best_move[2];
-    for (j = 0; j < BOARD_SIZE; j++)
+    for (j = 0; j < BOARD_SIZE; j = j + 10)
     {
-        for (i = 0; i < BOARD_SIZE; i++)
+        for (i = 0; i < BOARD_SIZE; i = i + 10)
         {
-            if (do_move(i, j))
+            if (do_move(i, j) > 0)
             {
                 v = value(-1 * INF, INF, 1, 0);
                 if (v > best_v)
@@ -330,6 +333,6 @@ void alpha_better(int *move)
         }
     }
     move[0] = best_move[0];
-    printf("%d %d %d\n", best_move[0], abs(best_move[1]), best_v);
+    move[1] = best_move[1];
 } 
 
