@@ -233,13 +233,15 @@ void test_algorithm()
         NUM_MOVES_REMAINING++;
         p1moves[i * 2] = move[0];
         p1moves[(i * 2) + 1] = move[1];
+        print_board();
         score = do_move_algorithm(move);
-        printf("%d %d\n", move[0], move[1]);
+       // printf("%d %d\n", move[0], move[1]);
         p2moves[i * 2] = move[0];
         p2moves[(i * 2) + 1] = move[1];
+        print_board();
         i++;
     }
-    printf("%d", our_area());
+    //printf("%d", our_area());
     //print_board();
     if(score <= 500000)
        save_stats(score, p1moves, p2moves);
@@ -265,7 +267,7 @@ int do_move_manual(int *move)
     while(score < 0)
     {
         scanf("%d,%d", &move[0], &move[1]);
-        printf("move received\n");
+       // printf("move received\n");
         score = do_undo(move, 1, 1000);
     }
     return score;
