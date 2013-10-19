@@ -38,20 +38,25 @@ def read_game_states():
     state = []
     while(True):
         if(((i%1000)==0) and (i!=0)):
-            game_states.append(state)
-            state = []
-            read_board(j)
-            create_image()
-            display_image()
-            j = j+1
+	    #f.close()
+	    #f = open('a', 'r')
+	    game_states.append(state)
+	    state = []
+	    global board
+	    board = []
+	    read_board(j)
+	    create_image()
+	    display_image()
+	    j = j+1
+	    print f.readline()   
+	    print j
             
         a = f.readline()
         b = a.split()
         if(len(a)>0):
             state.append(b)
             i = i+1
-            print i
-        else:
+	else:
             break
 
 
