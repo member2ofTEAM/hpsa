@@ -13,10 +13,13 @@ void test_algorithm();
 int do_move_random(int *move);
 int do_move_algorithm(int *move);
 int do_move_manual(int *move);
+int do_move(int *move, int mesh);
+int undo_move(int *move, int mesh);
+int do_undo(int *move, int state, int mesh);
 void print_board();
 void decent_random(int *move);
 void alpha_better(int *move);
-int value(int alpha, int beta, int depth, int max);
+int value(int alpha, int beta, int depth, int max, int mesh);
 int eval_fn();
 int our_area();
 
@@ -34,7 +37,7 @@ int our_area();
 const int BOARD_SIZE = 1000;
 const double INF = 10000000;
 double board[1000][1000];
-int NUM_MOVES_REMAINING = 15;
+int NUM_MOVES_REMAINING = 4;
 int MAX_NUMBER_OF_POINTS = 1000000;
 // 1 is us, 0 is the other guy
 // We assume, that we always start!
@@ -61,9 +64,28 @@ double distance_squared(int x0, int y0, int x1, int y1)
 }
 
 
+int do_undo(int *move, int state, int mesh)
+{
+   int score;
+
+   /* state 0: undo_move
+    * state 1: do_move
+    * state 2: do_move_manual
+    */
+   
+   if(state == 1)
+      score = do_move(move, mesh);
+   else if(state == 0)
+      score = undo_move(move, mesh);
+   else if (state == 2)
+      score = do_move_manual(move);
+   return(score);   
+}
+
+
 //move is in the format [x, y] as a 2 dim array
 //returns the area owned by us
-int do_move(int *move)
+int do_move(int *move, int mesh)
 {
     int our_area = 0, i, j;
     double d;
@@ -81,9 +103,9 @@ int do_move(int *move)
         board[move[0]][move[1]] = -INF;
 
     //Update the board
-    for (i = max(move[0] - 300, 0); i < min(BOARD_SIZE, move[0] + 300); i++)
+    for (i = max(move[0] - mesh, 0); i < min(BOARD_SIZE, move[0] + mesh); i++)
     {
-        for (j = max(move[1] - 300, 0); j < min(BOARD_SIZE, move[1] + 300); j++)
+        for (j = max(move[1] - mesh, 0); j < min(BOARD_SIZE, move[1] + mesh); j++)
         {
             d = 0.0;
             //Ignore pixels with stones set
@@ -123,7 +145,7 @@ void print_board()
 }
 
 //move is in the format [x, y] as a 2 dim array
-int undo_move(int *move)
+int undo_move(int *move, int mesh)
 {
     int our_area = 0, i, j;
     double d = 0.0;
@@ -139,9 +161,9 @@ int undo_move(int *move)
     board[move[0]][move[1]] = 0;
 
     //Update the board
-    for (i = max(move[0] - 300, 0); i < min(BOARD_SIZE, move[0] + 300); i++)
+    for (i = max(move[0] - mesh, 0); i < min(BOARD_SIZE, move[0] + mesh); i++)
     {
-        for (j = max(move[1] - 300, 0); j < min(BOARD_SIZE, move[1] + 300); j++)
+        for (j = max(move[1] - mesh, 0); j < min(BOARD_SIZE, move[1] + mesh); j++)
         {
             d = distance_squared(move[0], move[1], i, j);
             if (!next_to_set)
@@ -202,20 +224,20 @@ int our_area()
 void test_algorithm()
 {
     int p1moves[30] = {-1}, p2moves[30] = {-1};
-    int i, score;
-    for (i = 0; i < NUM_MOVES_REMAINING; i++)
+    int i = 0, score;
+    while(NUM_MOVES_REMAINING > 0)
     {
         int move[2];
 
         score = do_move_manual(move);
+        NUM_MOVES_REMAINING++;
         p1moves[i * 2] = move[0];
         p1moves[(i * 2) + 1] = move[1];
-
         score = do_move_algorithm(move);
         printf("%d %d\n", move[0], move[1]);
         p2moves[i * 2] = move[0];
         p2moves[(i * 2) + 1] = move[1];
-
+        i++;
     }
     printf("%d", our_area());
     //print_board();
@@ -244,7 +266,7 @@ int do_move_manual(int *move)
     {
         scanf("%d,%d", &move[0], &move[1]);
         printf("move received\n");
-        score = do_move(move);
+        score = do_undo(move, 1, 1000);
     }
     return score;
 }
@@ -255,7 +277,7 @@ int do_move_algorithm(int *move)
 {
     int score;
     alpha_better(move);
-    score = do_move(move);
+    score = do_undo(move, 1, 1000);
     return(score);
 }
 
@@ -270,7 +292,7 @@ int do_move_random(int *move)
     move[0] = get_random_int();
     move[1] = get_random_int();
     int score;
-    while((score = do_move(move)) < 0)
+    while((score = do_undo(move, 1, 1000)) < 0)
     {
         move[0] = get_random_int();
         move[1] = get_random_int();
@@ -281,14 +303,15 @@ int do_move_random(int *move)
 // Randomly where we don't own 
 void decent_random(int *move)
 {
+    int mesh = 1000;
     move[0] = get_random_int();
     move[1] = get_random_int();
-    while(do_move(move) < 0 || board[move[0]][move[1]] > 0)
+    while(do_undo(move, 1, mesh) < 0 || board[move[0]][move[1]] > 0)
     {
         move[0] = get_random_int();
         move[1] = get_random_int();
     }
-    undo_move(move);
+    do_undo(move, 0, mesh);
 }
 
 int eval_fn()
@@ -310,7 +333,7 @@ int next_point(int *move, int which, int algo)
     }
     if (algo == 2)
     {
-        MAX_POINTS = 400;
+        MAX_POINTS = 525;
         if (which >= MAX_POINTS)
             return 0;
         move[0] = (which / 20) * 50;
@@ -329,7 +352,7 @@ int next_point(int *move, int which, int algo)
      }
 }
 
- int value(int alpha, int beta, int depth, int max)
+ int value(int alpha, int beta, int depth, int max, int mesh)
 {
     int v = -INF, i, next = 0, j, move[2];
     if (depth > min(0, NUM_MOVES_REMAINING)){
@@ -340,29 +363,29 @@ int next_point(int *move, int which, int algo)
     {
         if(!next_point(move, i, 2))
             break;
-        if(do_move(move) > 0)
+        if(do_undo(move, 1, mesh) > 0)
         {
             if (max)
             {
-                v = max(v, value(alpha, beta, depth + 1, 0));
+                v = max(v, value(alpha, beta, depth + 1, 0, mesh));
                 if (v >= beta)
                 {
-                    undo_move(move);
+                    do_undo(move, 0, mesh);
                     return v;
                 }
                 alpha = max(alpha, v);
             }
             else
             {
-                v = min(v, value(alpha, beta, depth + 1, 1));
+                v = min(v, value(alpha, beta, depth + 1, 1, mesh));
                 if (v <= alpha)
                 {
-                    undo_move(move);
+                    do_undo(move, 0, mesh);
                     return v;
                 }
                 beta = min(beta, v);
             }
-            undo_move(move);
+            do_undo(move, 0, mesh);
         }
     }
     return v;
@@ -377,6 +400,7 @@ void alpha_better(int *move)
     int i, j;
     int best_move[2];
     int max = next_to_set;
+    int mesh = 300;
 
     if(max)
         best_v = -2 * INF;
@@ -385,11 +409,11 @@ void alpha_better(int *move)
     {
         if(!next_point(move, i, 2))
             break;
-        if (do_move(move) > 0)
+        if (do_undo(move, 1, mesh) > 0)
         {
             if (max)
             {
-                v = value(-1 * INF, INF, 1, 0);
+                v = value(-1 * INF, INF, 1, 0, mesh);
                 if (v > best_v)
                 {
                     best_v = v;
@@ -399,7 +423,7 @@ void alpha_better(int *move)
             }
             else
             {
-                v = value(-1 * INF, INF, 1, 1);
+                v = value(-1 * INF, INF, 1, 1, mesh);
                 if (v < best_v)
                 {
                     best_v = v;
@@ -407,7 +431,7 @@ void alpha_better(int *move)
                     best_move[1] = move[1];
                 }
             }
-            undo_move(move);
+            do_undo(move, 0, mesh);
         }
     }
     move[0] = best_move[0];
