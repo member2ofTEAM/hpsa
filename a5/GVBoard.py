@@ -32,7 +32,7 @@ minval = 0
 game_states = []
 
 def read_game_states():
-    f = open('a.out', 'r')
+    f = open('a', 'r')
     i = 0
     j = 0
     state = []
@@ -97,6 +97,8 @@ def create_image():
      
     for i in range(img.size[0]):    # for every pixel:
         for j in range(img.size[1]):
+    	    if(board[i][j]==float("Inf")):
+		continue
             if(board[i][j]==10000000):
                 print "player1"
 		pixels[i,j] = (player1[0]*255,player1[1]*255,player1[2]*255)
