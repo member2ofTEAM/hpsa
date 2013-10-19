@@ -92,10 +92,10 @@ def create_image():
      
     for i in range(img.size[0]):    # for every pixel:
         for j in range(img.size[1]):
-            if(board[i][j]==10000):
+            if(board[i][j]==10000000):
                 print "player1"
 		pixels[i,j] = (player1[0]*255,player1[1]*255,player1[2]*255)
-            elif(board[i][j]==-10000):
+            elif(board[i][j]==-10000000):
                 print "player2"
                 pixels[i,j] = (player2[0]*255,player2[1]*255,player2[2]*255)
             elif(board[i][j]>0):
