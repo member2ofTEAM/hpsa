@@ -32,7 +32,7 @@ minval = 0
 game_states = []
 
 def read_game_states():
-    f = open('a', 'r')
+    f = open('a.out', 'r')
     i = 0
     j = 0
     state = []
