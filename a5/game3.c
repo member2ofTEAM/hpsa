@@ -19,6 +19,7 @@ void alpha_better(int *move);
 int value(int alpha, int beta, int depth, int max);
 int eval_fn();
 int our_area();
+int
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -36,6 +37,7 @@ const double INF = 10000000;
 double board[1000][1000];
 int NUM_MOVES_REMAINING = 15;
 int MAX_NUMBER_OF_POINTS = 1000000;
+int p1moves[30] = {-1}, p2moves[30] = {-1};
 // 1 is us, 0 is the other guy
 // We assume, that we always start!
 int next_to_set = 1;
@@ -60,6 +62,22 @@ double distance_squared(int x0, int y0, int x1, int y1)
     return (x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1);
 }
 
+//check whether point is on board
+int border_check(int x, int y){
+  if((x<0)||(x>=BOARD_SIZE)||(y<0)||(y>=BOARD_SIZE)){
+    return 0;
+  }
+  return 1;
+}
+
+//check whether there is already a stone placed
+int already_placed(int x, int y){
+  if(abs(board[x][y])==INF)
+  {
+    return 0;
+  }
+  return 1;
+}
 
 //move is in the format [x, y] as a 2 dim array
 //returns the area owned by us
@@ -71,7 +89,7 @@ int do_move(int *move)
         return -1;
     
     //Make sure stone can be placed
-    if (abs(board[move[0]][move[1]]) == INF)
+    if (abs(board[move[0]][move[1]]) == INF || !NUM_MOVES_REMAINING)
         return -1;
 
     //Place the stone
@@ -101,6 +119,11 @@ int do_move(int *move)
                 our_area++;
         }
      }
+     i = 15 - NUM_MOVES_REMAINING;
+     p1moves[i * 2] = move[0];
+     p1moves[(i * 2) + 1] = move[1];
+     p2moves[i * 2] = move[0];
+     p2moves[(i * 2) + 1] = move[1];
      //Flip the player
      next_to_set = next_to_set > 0 ? 0 : 1;
      //Decrease number of moves remaining;
@@ -164,12 +187,17 @@ int undo_move(int *move)
      }
      //Flip the player
      next_to_set = !next_to_set;
+     i = 15 - NUM_MOVES_REMAINING;
+     p1moves[i * 2] = -1;
+     p1moves[(i * 2) + 1] = -1;
+     p2moves[i * 2] = -1;
+     p2moves[(i * 2) + 1] = -1;
      //Increase number of moves remaining
      NUM_MOVES_REMAINING++;
      return our_area;
 }
 
-void save_stats(int score, int *p1moves, int *p2moves)
+void save_stats(int score)
 {
     FILE *stats;
     int i;
@@ -201,21 +229,13 @@ int our_area()
 
 void test_algorithm()
 {
-    int p1moves[30] = {-1}, p2moves[30] = {-1};
-    int i, score;
-    for (i = 0; i < NUM_MOVES_REMAINING; i++)
+    int i, score = 1;
+    while(score > 0)
     {
         int move[2];
-
         score = do_move_manual(move);
-        p1moves[i * 2] = move[0];
-        p1moves[(i * 2) + 1] = move[1];
-
         score = do_move_algorithm(move);
         printf("%d %d\n", move[0], move[1]);
-        p2moves[i * 2] = move[0];
-        p2moves[(i * 2) + 1] = move[1];
-
     }
     printf("%d", our_area());
     //print_board();
@@ -240,7 +260,7 @@ int main(int argc, char *argv[])
 int do_move_manual(int *move)
 {
     int score = -1;
-    while(score < 0)
+    while(score > 0)
     {
         scanf("%d,%d", &move[0], &move[1]);
         printf("move received\n");
@@ -327,6 +347,33 @@ int next_point(int *move, int which, int algo)
         //SET MOVE TO which POINT
         return 1;
      }
+     if ( algo == 4)
+     {
+	MAX_POINTS = 400;
+        if (which >= MAX_POINTS)
+	{
+	  move[0] = (which / 20) * 50;
+	  move[1] = (which % 20) * 50;
+	}
+	else
+	{
+	  j = which - 400
+	  k = j % 8;
+	  j = j / 8;
+	  get_move_player
+	  return 1;
+	}
+        return 1;
+     }
+}
+
+int get_move_player(int j, int p, int *move)
+{
+  if(p)
+  {
+    move =  p1moves[j * 2][j * 2 + 1];
+  }
+  move = p2moves[j * 2][j * 2 + 1
 }
 
  int value(int alpha, int beta, int depth, int max)

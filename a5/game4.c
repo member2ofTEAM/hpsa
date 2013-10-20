@@ -82,6 +82,13 @@ int do_undo(int *move, int state, int mesh)
    return(score);   
 }
 
+int border_check(int x, int y){
+  if((x<0)||(x>=BOARD_SIZE)||(y<0)||(y>=BOARD_SIZE)){
+    return 0;
+  }
+  return 1;
+}
+
 
 //move is in the format [x, y] as a 2 dim array
 //returns the area owned by us
