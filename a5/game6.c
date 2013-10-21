@@ -368,25 +368,25 @@ int next_point(int *move, int which, int algo)
      {
         move[0] = -1;
         move[1] = -1;
+        MAX_POINTS = (MAX_NUMBER_OF_MOVES / 2);
         if(NUM_MOVES_REMAINING == MAX_NUMBER_OF_MOVES)
         {
            move[0] = 500;
            move[1] = 500;
            return 1;
         }
-        MAX_POINTS = (MAX_NUMBER_OF_MOVES / 2);
-        if (which > MAX_POINTS)
+        if (which >= MAX_POINTS)
            return 0;
-        if(!next_to_set)
+        if(next_to_set)
         {
-           x = moves[(which * 2) - 2];
-           y = moves[(which * 2) - 2 + 1];
+           x = moves[which * 4 + 2];
+           y = moves[which * 4 + 2 + 1];
            highest_value_greedy(move, x, y);
         }
         else
         {
-           x = moves[which * 2];
-           y = moves[which * 2 + 1];
+           x = moves[which * 4];
+           y = moves[which * 4 + 1];
            highest_value_greedy(move, x, y);
         } 
         if(move[0] == -1 && move[1] == -1)
