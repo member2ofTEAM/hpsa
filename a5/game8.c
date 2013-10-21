@@ -668,13 +668,15 @@ int eval_fn()
 int value(int alpha, int beta, int depth, int max)
 {
     int v = -INF, i, move[2];
+    int algo = 4;
+
     if (depth > min(0, NUM_MOVES_REMAINING)){
         return eval_fn();
     }
     
     for (i = 0; i < MAX_NUMBER_OF_POINTS; i++)
     {
-        if(!next_point(move, i, 2))
+        if(!next_point(move, i, algo))
             break;
         if(do_move(move) > 0)
         {
@@ -712,7 +714,7 @@ void alpha_better(int *move)
     int best_v = 2 * INF, v = INF, i;
     int best_move[2];
     int max = next_to_set;
-    int algo = 2;
+    int algo = 4;
 
     if(max)
         best_v = -2 * INF;
