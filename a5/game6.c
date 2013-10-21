@@ -228,7 +228,7 @@ void highest_value_greedy(int *move, int x, int y)
    {
       for(j = -1; j <= 1; j++)
       {
-         if((x + i < 0) || (x + i > BOARD_SIZE) || (y + i < 0) || (y + i > BOARD_SIZE))
+         if((x + i < 0) || (x + i >= BOARD_SIZE) || (y + i < 0) || (y + i >= BOARD_SIZE))
             continue;
          if(!stone_check(x + i, y + j))
             continue;
@@ -253,7 +253,7 @@ void nearby_greedy(int *move, int x, int y)
    {
       for(j = -1; j <= 1; j++)
       {
-         if((x + i < 0) || (x + i > BOARD_SIZE) || (y + i < 0) || (y + i > BOARD_SIZE))
+         if((x + i < 0) || (x + i >= BOARD_SIZE) || (y + i < 0) || (y + i >= BOARD_SIZE))
             continue;
          if(!stone_check(x + i, y + j))
             continue;
@@ -379,8 +379,8 @@ int next_point(int *move, int which, int algo)
            return 0;
         if(!next_to_set)
         {
-           x = moves[(which * 2) + 2];
-           y = moves[(which * 2) + 2 + 1];
+           x = moves[(which * 2) - 2];
+           y = moves[(which * 2) - 2 + 1];
            highest_value_greedy(move, x, y);
         }
         else
@@ -682,7 +682,7 @@ void alpha_better(int *move)
     int best_v = 2 * INF, v = INF, i;
     int best_move[2];
     int max = next_to_set;
-    int algo = 2;
+    int algo = 4;
 
     if(max)
         best_v = -2 * INF;
