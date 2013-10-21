@@ -98,7 +98,9 @@ if __name__=="__main__":
                 print "Thinking really hard"
                 print state.moves
                 f = open("input", "wb")
-                f.write(str(state.moves))
+                for move in state.moves:
+                    for x in move:
+                        f.write(str(x) + " ")
                 out = Popen(["TEAM"] + [str(our_pid)], stdout = PIPE)
                 move = out.communicate()[0].split(" ")
                 print "Score: " + str(move[2])
