@@ -458,18 +458,18 @@ int next_point(int *move, int which, int algo)
         MAX_POINTS = 30;
         if(which > MAX_POINTS)
            return 0;
-        if(NUM_MOVES_REMAINING < 6)
+        if(NUM_MOVES_REMAINING < 5)
         {
            flag = get_random_int() / 501;
            if(flag)
            {
-              move[0] = get_random_int() % 200 + 650;
-              move[1] = get_random_int() % 200 + 650;
+              move[0] = get_random_int() % 100 + 600;
+              move[1] = get_random_int() % 100 + 600;
            }
            else
            {
-              move[0] = get_random_int() % 200 + 150;
-              move[1] = get_random_int() % 200 + 150;
+              move[0] = get_random_int() % 100 + 200;
+              move[1] = get_random_int() % 100 + 200;
            }
            return 1;
         }
@@ -630,9 +630,9 @@ int main(int argc, char *argv[])
        algo_1 = 4;
     else
        algo_1 = 5;  */
-    if(NUM_MOVES_REMAINING >= 6)
-       algo_0 = 4;
-    else
+    //if(NUM_MOVES_REMAINING > 4)
+   //    algo_0 = 4;
+  //  else
        algo_0 = 6;
     if (next_to_set)
         alpha_better(move, algo_1, 0); 
