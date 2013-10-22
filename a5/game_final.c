@@ -470,8 +470,14 @@ int next_point(int *move, int which, int algo)
      //lowest value from random values
      if(algo == 8)
      {
+        if(MAX_NUMBER_OF_MOVES == NUM_MOVES_REMAINING)
+        {
+           move[0] = 500;
+           move[1] = 500;
+           return 1;
+        }
         MAX_POINTS = 300;
-        if(which > MAX_POINTS)
+        if(which >= MAX_POINTS)
            return 0;
         lowest_random(move, 25, .00003);
         return 1;
