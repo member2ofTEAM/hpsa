@@ -15,7 +15,7 @@ int do_move_algorithm(int *move);
 int do_move_manual(int *move);
 void print_board();
 void decent_random(int *move);
-void alpha_better(int *move, int algo);
+void alpha_better(int *move, int algo, int max_depth);
 int value(int alpha, int beta, int depth, int max, int algo, int max_depth);
 int eval_fn();
 int our_area();
@@ -587,7 +587,7 @@ int main(int argc, char *argv[])
     if (next_to_set)
         alpha_better(move, 4, 0); 
     else
-        alpha_better(move, 4, 0); 
+        alpha_better(move, 7, 0); 
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
 }
@@ -612,9 +612,10 @@ int do_move_manual(int *move)
 
 int do_move_algorithm(int *move)
 {
-    int score;
-    alpha_better(move, 1);
-    score = do_move(move);
+    int score = 0;
+    score = score + 1;
+//    alpha_better(move, 1);
+//    score = do_move(move);
     return(score);
 }
 
