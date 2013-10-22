@@ -327,6 +327,8 @@ void lowest_random(int *move, int dist_from_border, double threshold)
             k += 2;
             j += 24;
             found = 1;
+            if(k >= 20000)
+               break;
          }
       }
       if(found)
@@ -461,10 +463,16 @@ int next_point(int *move, int which, int algo)
      //lowest value on the board 
      if(algo == 7)
      {
+        if(MAX_NUMBER_OF_MOVES == NUM_MOVES_REMAINING)
+        {
+           move[0] = 500;
+           move[1] = 500;
+           return 1;
+        }
         MAX_POINTS = 1;
         if(which > MAX_POINTS)
            return 0;
-        lowest_value(move, 25);
+        lowest_value(move, 50);
         return 1;
      }
      //lowest value from random values
@@ -476,8 +484,8 @@ int next_point(int *move, int which, int algo)
            move[1] = 500;
            return 1;
         }
-        MAX_POINTS = 300;
-        if(which >= MAX_POINTS)
+        MAX_POINTS = 2;
+        if(which > MAX_POINTS)
            return 0;
         lowest_random(move, 25, .00003);
         return 1;
