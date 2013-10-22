@@ -617,6 +617,11 @@ int main(int argc, char *argv[])
         alpha_better(move, algo_1, 0); 
     else
         alpha_better(move, algo_0, 0); 
+    while(abs(board[move[0]][move[1]]) == INF)
+    {
+       move[0] = get_random_int();
+       move[1] = get_random_int();
+    }
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
 }
