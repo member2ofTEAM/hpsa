@@ -609,10 +609,10 @@ int main(int argc, char *argv[])
        next_to_set = next_to_set > 0 ? 0 : 1;
     }
     init_board();
-    if(NUM_MOVES_REMAINING > 5)
+   /* if(NUM_MOVES_REMAINING >= 10)
        algo_1 = 4;
     else
-       algo_1 = 5;
+       algo_1 = 5; */
     if (next_to_set)
         alpha_better(move, algo_1, 0); 
     else
