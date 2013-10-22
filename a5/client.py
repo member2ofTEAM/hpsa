@@ -102,11 +102,11 @@ if __name__=="__main__":
                     for x in move:
                         f.write(str(x) + " ")
         		print str(our_pid)
-		f.close()
+        		f.close()
                 out = Popen(["./TEAM"], stdout = PIPE)
                 move = out.communicate()[0]
-		print move
-		move = move.split(" ")
+        		print move
+        		move = move.split(" ")
                 print move
                 print "Score: " + str(move[2])
                 makemove(s, our_pid + 1, int(move[0]), int(move[1]))
