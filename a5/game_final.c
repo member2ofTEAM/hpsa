@@ -351,7 +351,7 @@ int next_point(int *move, int which, int algo)
 {
     int MAX_POINTS;
     int x, y;
-    int flag;
+    int flag, tmp;
 
     if (algo == 1)
     {
@@ -460,21 +460,28 @@ int next_point(int *move, int which, int algo)
            return 0;
         if(NUM_MOVES_REMAINING < 5)
         {
-           flag = get_random_int() / 501;
+           flag = (get_random_int() % 1000) / 501;
            if(flag)
            {
-              move[0] = get_random_int() % 100 + 600;
-              move[1] = get_random_int() % 100 + 600;
+              tmp = (get_random_int() % 100) + 600;
+            // move[0] = (get_random_int() % 100) + 600;
+            //  move[1] = (get_random_int() % 100) + 600;
+              move[1] = tmp; 
+              move[0] = tmp;
            }
            else
            {
-              move[0] = get_random_int() % 100 + 200;
-              move[1] = get_random_int() % 100 + 200;
+
+              tmp = (get_random_int() % 100) + 600;
+           //   move[0] = (get_random_int() % 100) + 200;
+           //  move[1] = (get_random_int() % 100) + 200;
+              move[1] = tmp;
+              move[0] = tmp;
            }
            return 1;
         }
-        move[0] = get_random_int() % 200 + 400;
-        move[1] = get_random_int() % 200 + 400;
+        move[0] = (get_random_int() % 200) + 400;
+        move[1] = (get_random_int() % 200) + 400;
         return 1;
      }
      //lowest value on the board 
@@ -634,6 +641,7 @@ int main(int argc, char *argv[])
    //    algo_0 = 4;
   //  else
        algo_0 = 6;
+    NUM_MOVES_REMAINING = 4;
     if (next_to_set)
         alpha_better(move, algo_1, 0); 
     else
