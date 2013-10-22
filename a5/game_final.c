@@ -117,7 +117,7 @@ double exact_pull(int *pos)
 
 int execute_move(int *move, int do_flag, int algo)
 {
-    int next[2], i;
+    int next[2], i, j, k;
     
     //Make sure the move is valid
     if (move[0] < 0 || move[0] > 999 || move[1] < 0 || move[1] > 999)
@@ -142,7 +142,27 @@ int execute_move(int *move, int do_flag, int algo)
         //Restore its value
         board[move[0]][move[1]] = exact_pull(move); //is this necessary?
     }
+    
+    if (algo == 11)
+    {
+       for(i = 0; i < MAX_NUMBER_OF_POINTS; i++)
+       {
+           if (!next_point(next, i, 11))
+               break;
+           //If we are not next_to_set subtract the pull
+           update_point(next, next_to_set, move);
+           for(j = next[0]; j < next[0] + 2; j++)
+           {
+              for(k = next[1]; k < next[1] + 2; k++)
+              {
+                 if(abs(board[j][k]) == INF) 
+                    continue;
+                 board[j][k] = board[next[0]][next[1]];   
+              }
+           }
+    }
 
+    }
     //Update the board
     for(i = 0; i < MAX_NUMBER_OF_POINTS; i++)
     {
@@ -352,7 +372,16 @@ int next_point(int *move, int which, int algo)
     int MAX_POINTS;
     int x, y;
     int flag, tmp;
-
+    
+    if (algo == 11)
+    {
+        MAX_POINTS = 250000;
+        if (which >= MAX_POINTS)
+            return 0;
+        move[0] = (which / 500) * 2;
+        move[1] = (which % 500) * 2;
+        return 1;
+    }
     if (algo == 1)
     {
         MAX_POINTS = 1000000;
@@ -747,14 +776,14 @@ int value(int alpha, int beta, int depth, int max, int algo, int max_depth)
     {
         if(!next_point(move, i, algo))
             break;
-        if(do_move(move) > 0)
+        if(do_move_coarse(move, 11) > 0)
         {
             if (max)
             {
                 v = max(v, value(alpha, beta, depth + 1, 0, algo, max_depth));
                 if (v >= beta)
                 {
-                    undo_move(move);
+                    undo_move_coarse(move, 11);
                     return v;
                 }
                 alpha = max(alpha, v);
@@ -764,12 +793,12 @@ int value(int alpha, int beta, int depth, int max, int algo, int max_depth)
                 v = min(v, value(alpha, beta, depth + 1, 1, algo, max_depth));
                 if (v <= alpha)
                 {
-                    undo_move(move);
+                    undo_move_coarse(move, 11);
                     return v;
                 }
                 beta = min(beta, v);
             }
-            undo_move(move);
+            undo_move_coarse(move, 11);
         }
     }
     return v;
