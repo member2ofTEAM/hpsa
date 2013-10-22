@@ -641,7 +641,6 @@ int main(int argc, char *argv[])
    //    algo_0 = 4;
   //  else
        algo_0 = 6;
-    NUM_MOVES_REMAINING = 4;
     if (next_to_set)
         alpha_better(move, algo_1, 0); 
     else
