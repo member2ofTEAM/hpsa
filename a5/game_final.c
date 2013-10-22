@@ -419,15 +419,16 @@ int next_point(int *move, int which, int algo)
      {
         move[0] = -1;
         move[1] = -1;
+        MAX_POINTS = (MAX_NUMBER_OF_MOVES / 2);
+        if (which >= MAX_POINTS)
+           return 0;
         if(NUM_MOVES_REMAINING == MAX_NUMBER_OF_MOVES)
         {
            move[0] = 500;
            move[1] = 500;
+           which = MAX_POINTS;
            return 1;
         }
-        MAX_POINTS = (MAX_NUMBER_OF_MOVES / 2);
-        if (which > MAX_POINTS)
-           return 0;
         if(!next_to_set)
         { 
            x = moves[(which * 2) - 2];
@@ -585,9 +586,9 @@ int main(int argc, char *argv[])
     }
     init_board();
     if (next_to_set)
-        alpha_better(move, 4, 0); 
+        alpha_better(move, 5, 0); 
     else
-        alpha_better(move, 7, 0); 
+        alpha_better(move, 4, 0); 
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
 }
