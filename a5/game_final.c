@@ -391,8 +391,8 @@ int next_point(int *move, int which, int algo)
            return 0;
         if(NUM_MOVES_REMAINING == MAX_NUMBER_OF_MOVES)
         {
-           move[0] = 500;
-           move[1] = 500;
+           move[0] = 499;
+           move[1] = 499;
            which = MAX_POINTS;
            return 1;
         }
@@ -426,8 +426,8 @@ int next_point(int *move, int which, int algo)
            return 0;
         if(NUM_MOVES_REMAINING == MAX_NUMBER_OF_MOVES)
         {
-           move[0] = 500;
-           move[1] = 500;
+           move[0] = 499;
+           move[1] = 499;
            which = MAX_POINTS;
            return 1;
         }
@@ -465,8 +465,8 @@ int next_point(int *move, int which, int algo)
      {
         if(MAX_NUMBER_OF_MOVES == NUM_MOVES_REMAINING)
         {
-           move[0] = 500;
-           move[1] = 500;
+           move[0] = 499;
+           move[1] = 499;
            return 1;
         }
         MAX_POINTS = 1;
@@ -480,8 +480,8 @@ int next_point(int *move, int which, int algo)
      {
         if(MAX_NUMBER_OF_MOVES == NUM_MOVES_REMAINING)
         {
-           move[0] = 500;
-           move[1] = 500;
+           move[0] = 499;
+           move[1] = 499;
            return 1;
         }
         MAX_POINTS = 2;
@@ -581,6 +581,8 @@ int main(int argc, char *argv[])
 //        INPUT_FILENAME[i] = argv[i];
 //    init_board();
     int move[2], i;
+    int algo_0 = 5;
+    int algo_1 = 4;
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
     for(i = 0; i < 60; i++)                                         
@@ -599,10 +601,14 @@ int main(int argc, char *argv[])
        next_to_set = next_to_set > 0 ? 0 : 1;
     }
     init_board();
-    if (next_to_set)
-        alpha_better(move, 5, 0); 
+    if(NUM_MOVES_REMAINING > 5)
+       algo_1 == 4;
     else
-        alpha_better(move, 4, 0); 
+       algo_1 == 5;
+    if (next_to_set)
+        alpha_better(move, algo_0, 0); 
+    else
+        alpha_better(move, algo_1, 0); 
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
 }
