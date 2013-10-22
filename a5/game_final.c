@@ -490,6 +490,14 @@ int next_point(int *move, int which, int algo)
         lowest_random(move, 25, .00003);
         return 1;
      }     
+     if(algo == 9)
+     {
+        MAX_POINTS = 91;
+        if(which >= 91)
+           return 0;
+        move[0] = (which / 9) * 50 + 300;
+        move[1] = (which % 9) * 50 + 300;
+     }
 
      return 0;
 }
@@ -581,7 +589,7 @@ int main(int argc, char *argv[])
 //        INPUT_FILENAME[i] = argv[i];
 //    init_board();
     int move[2], i;
-    int algo_0 = 5;
+    int algo_0 = 4;
     int algo_1 = 4;
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
@@ -602,13 +610,13 @@ int main(int argc, char *argv[])
     }
     init_board();
     if(NUM_MOVES_REMAINING > 5)
-       algo_1 == 4;
+       algo_1 = 4;
     else
-       algo_1 == 5;
+       algo_1 = 5;
     if (next_to_set)
-        alpha_better(move, algo_0, 0); 
-    else
         alpha_better(move, algo_1, 0); 
+    else
+        alpha_better(move, algo_0, 0); 
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
 }
