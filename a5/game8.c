@@ -48,7 +48,7 @@ int next_to_set;
 int player_to_start = 0;
 tinymt32_t state;
 
-char INPUT_FILENAME[8];
+//char INPUT_FILENAME[8];
 
 /*
  *
@@ -60,7 +60,7 @@ void init_board()
 {                                                                   
     int pos[2], i = 0, inmove[2];                                   
     FILE *file;                                                     
-    file = fopen(INPUT_FILENAME, "r");
+    file = fopen("input", "r");
     assert(file);                                                   
                                                                     
     for(i = 0; i < 60; i++)                                         
@@ -577,9 +577,9 @@ void test_algorithm()
 int main(int argc, char *argv[])
 {
     //TODO: READ IN NAME OF INPUT FILE
-    int i;
-    for (i = 1; i < argc; i++)
-        INPUT_FILENAME[i] = argv[i];
+//    int i;
+//    for (i = 1; i < argc; i++)
+//        INPUT_FILENAME[i] = argv[i];
 //    init_board();
     int move[2];
     uint32_t seed = getpid();

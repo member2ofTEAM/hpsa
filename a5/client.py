@@ -1,6 +1,7 @@
-
+import pdb
 import socket, sys
 import time
+import itertools as it
 from exceptions import ZeroDivisionError
 from subprocess import Popen, PIPE
 
@@ -12,6 +13,8 @@ dim=1000
 print(sys.argv)
 if len(sys.argv)>1:
     port = int(sys.argv[1])
+if len(sys.argv)>2:
+    teamname = str(sys.argv[2])
   
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', port))
@@ -53,7 +56,8 @@ def distance_squared(x0, y0, x1, y1):
 class State:
     def __init__(self):
         # personal
-        self.moves=[]
+        self.moves = []
+        self.somezip = lambda *x: it.islice(it.izip_longest(*x), len(x[0]))
 
     def update_state(self, statestr):
         statestr = statestr.split("\n")
@@ -66,7 +70,7 @@ class State:
                     p1moves.append(move[1:])
                 else:
                     p2moves.append(move[1:])
-            self.moves = zip(p1moves, p2moves)
+            self.moves = self.somezip(p1moves, p2moves)
             self.moves = [item for sublist in self.moves for item in sublist]
 
 if __name__=="__main__":
@@ -93,20 +97,16 @@ if __name__=="__main__":
     for turn in xrange(max_stones):
         #OUR PLAYER CONVENTION IS DIFFERENT FROM THE PROTOCOL
         for pl in range(2):
-            state.update_state(readsocket(s))
+            servstr = readsocket(s)
+            state.update_state(servstr)
             if pl == our_pid:
-                print "Thinking really hard"
-                print state.moves
-                f = open("input", "wb")
+                input_args = []
                 for move in state.moves:
-                    for x in move:
-                        f.write(str(x) + " ")
-        		print str(our_pid)
-        		f.close()
-                out = Popen(["./TEAM"], stdout = PIPE)
-                move = out.communicate()[0]
-        		print move
-        		move = move.split(" ")
+                    if move:
+                        for x in move:
+                            input_args.append(str(x))
+                out = Popen(["./TEAM"] + input_args, stdout = PIPE)
+                move = out.communicate()[0].split(" ")
                 print move
                 print "Score: " + str(move[2])
                 makemove(s, our_pid + 1, int(move[0]), int(move[1]))
