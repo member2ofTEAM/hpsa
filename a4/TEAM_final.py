@@ -11,12 +11,13 @@ from sys import argv
 import socket
 import pdb
 from time import time
+from scipy.stats.mstats import mquantiles
 
 teamName = "TEAM"
 eom = "<EOM>"
 port = 5555
 maxlen = 999999
-TIME_CUTOFF = 100
+TIME_CUTOFF = 105
 
 if argv[1]:
   port = int(argv[1])
@@ -79,6 +80,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', port))
 all_patients = []
 data = []
+urgencies = []
 id = 0
 lines = getData(s).split("\n")
 for line in lines[1:301]:
@@ -87,21 +89,25 @@ for line in lines[1:301]:
         temp = line.split(',')
         all_patients.append(Patient((int(temp[0]), int(temp[1])), int(temp[2]),id))
         data.append([int(temp[0]), int(temp[1])])
+        urgencies.append(int(temp[2]))
         id = id + 1
+
+urgency_quants = list(mquantiles(array(urgencies), [0.25, 0.5, 0.75, 1]))
 
 hosp_ambulances = map(int, lines[304:309])
 hosp_ambulances = zip(hosp_ambulances, range(5))
 hosp_ambulances.sort(key = lambda x: int(x[0]))
 
-very_urgent = array([patient.position for patient in all_patients if patient.time<90])
-urgent      = array([patient.position for patient in all_patients if patient.time<120])
-bulk        = array([patient.position for patient in all_patients if patient.time>120 and patient.time<170])
+very_urgent = array([patient.position for patient in all_patients if patient.time<urgency_quants[0]])
+urgent      = array([patient.position for patient in all_patients if patient.time<urgency_quants[1]])
+bulk        = array([patient.position for patient in all_patients if patient.time>urgency_quants[1] and patient.time<urgency_quants[2]])
 all         = array([patient.position for patient in all_patients])
 
 mean_weights = [[4, 2, 1, 0],
                 [2, 4, 4, 1],
                 [1, 2, 6, 2],
-                [0, 1, 2, 5]]
+                [0, 1, 2, 5], 
+                [0, 1, 0, 1]]
 
 total_score = 0
 best_j = 0
@@ -120,7 +126,12 @@ for trash in range(10):
     _sort_wrt(all_means, bulk_means)
     means = 5 * [0]
     print trash
+#    for meansscale in range(0, 101, 20):
+#        meansscale = float(meansscale) / 100.0;
     for weight_config in range(4):
+#        urgent_means = list(kmeans(urgent, 5, 50)[0])
+        _sort_wrt(all_means, urgent_means)
+
         for timefactor in range(1):
             if (time() - start_time > TIME_CUTOFF):
                 break;
@@ -130,6 +141,7 @@ for trash in range(10):
             cluster_distances = []
 
             mw = mean_weights[weight_config]
+#            mw = mean_weights[4]
             for i in range(len(means)):
                 means[i] = ((very_urgent_means[i][0] * mw[0] + 
                                   urgent_means[i][0] * mw[1] + 
@@ -142,14 +154,41 @@ for trash in range(10):
                 means[i] = (int(round(means[i][0])), int(round(means[i][1])))
 
             #THIS IS NOT FACTORING URGENCY AT ALL
-            #TODO WE HAVE TO MODIFY THE WAY WE ASSIGN AMBULANCES  
+            #TODO WE HAVE TO MODIFY THE WAY WE ASSIGN AMBULANCES
+            mw = mean_weights[weight_config]
 	    for mean in means:
-                cluster_distance = []
-                for patient in patients:
-                        cluster_distance.append(distance(patient.position, mean))
-                cluster_distances.append([sum(cluster_distance)] + list(mean))
+                cluster_distance = 4*[[]]
+                for patient in very_urgent:
+                        cluster_distance[0].append(distance(tuple(patient), mean))
+                for patient in urgent:
+                        cluster_distance[1].append(distance(tuple(patient), mean))
+                for patient in bulk:
+                        cluster_distance[2].append(distance(tuple(patient), mean))
+                for patient in all:
+                        cluster_distance[3].append(distance(tuple(patient), mean))
+                sumcdist = sum(map(lambda x, y: sum(x)*y, cluster_distance, mw))
+                cluster_distances.append([sumcdist] + list(mean))
                 
             cluster_distances.sort(key=lambda x: int(x[0]))
+
+
+#            for i in range(len(means)):
+#                l = map(lambda x: distance(tuple(x), all_means[i]), urgent_means)
+#                j = l.index(min(l))
+#                means[i] = (((urgent_means[j][0] - all_means[i][0]) * meansscale) + all_means[i][0],
+#                            ((urgent_means[j][1] - all_means[i][1]) * meansscale) + all_means[i][1])
+#                del urgent_means[j]
+#                means[i] = (int(round(means[i][0])), int(round(means[i][1])))
+
+
+#            for mean in means:
+#                cluster_distance = []
+#                for patient in patients:
+#                        cluster_distance.append(distance(patient.position, mean))
+#                cluster_distances.append([sum(cluster_distance)] + list(mean))
+
+#            cluster_distances.sort(key=lambda x: int(x[0]))
+
             
             hospitals = []
             def sort_wrt((p1, p2)):

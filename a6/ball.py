@@ -35,63 +35,70 @@ y = y0
 x_prey = 330
 y_prey = 200
 
+can_set = 1
+
+N = 10
+
 canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
 
 def handler(event):
-    if event.char in ('v'):
-	global wall_vertical
-	global wall_horizontal
-	wall_vertical.append(x)
-	wall_vertical.sort()
-	for (y_i, y_j) in zip(wall_horizontal, wall_horizontal[1:]):
-	    if y_i < y and y < y_j:
-                canvas.create_line(x, y_i, x, y_j, fill="black")
-		canvas.update()
-        print wall_vertical
+    if can_set:
+        if event.char in ('v'):
+            global wall_vertical
+            global wall_horizontal
+            wall_vertical.append(x)
+            wall_vertical.sort()
+            for (y_i, y_j) in zip(wall_horizontal, wall_horizontal[1:]):
+                if y_i < y and y < y_j:
+                    canvas.create_line(x, y_i, x, y_j, fill="black")
+                    canvas.update()
+                    can_set = 0
+            print wall_vertical
 
-    if event.char in ('h'):
-	global wall_horizontal
-	global wall_vertical
-	wall_horizontal.append(y)
-	wall_horizontal.sort()
-	for (x_i, x_j) in zip(wall_vertical, wall_vertical[1:]):
-	    if x_i < x and x < x_j:
-                canvas.create_line(x_i, y, x_j, y, fill="black")
-		canvas.update()
-	print wall_horizontal
+        if event.char in ('h'):
+            global wall_horizontal
+            global wall_vertical
+            wall_horizontal.append(y)
+            wall_horizontal.sort()
+            for (x_i, x_j) in zip(wall_vertical, wall_vertical[1:]):
+                if x_i < x and x < x_j:
+                    canvas.create_line(x_i, y, x_j, y, fill="black")
+                    canvas.update()
+                    can_set = 0
+            print wall_horizontal
+
     if tick % 2:
-    if event.char in ('w'):
-        global y_prey
-        if not (y_prey - 1) in wall_horizontal:
-	    y_prey -= 1
-        canvas.delete('prey')
-        canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
-	canvas.update()
+        if event.char in ('w'):
+            global y_prey
+            if not (y_prey - 1) in wall_horizontal:
+                y_prey -= 1
+            canvas.delete('prey')
+            canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
+            canvas.update()
 
-    if event.char in ('a'):
-	global x_prey
-        if not (x_prey - 1) in wall_vertical:
-	    x_prey -= 1
-        canvas.delete('prey')
-        canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
-	canvas.update()
+        if event.char in ('a'):
+            global x_prey
+            if not (x_prey - 1) in wall_vertical:
+                x_prey -= 1
+            canvas.delete('prey')
+            canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
+            canvas.update()
 
-    if event.char in ('s'):
-	global y_prey
-        if not (y_prey + 1) in wall_horizontal:
-            y_prey += 1
-        canvas.delete('prey')
-        canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
-	canvas.update()
+        if event.char in ('s'):
+            global y_prey
+            if not (y_prey + 1) in wall_horizontal:
+                y_prey += 1
+            canvas.delete('prey')
+            canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
+            canvas.update()
 
-    if event.char in ('d'):
-	global x_prey
-        if not (x_prey + 1) in wall_vertical:
-            x_prey += 1
-        canvas.delete('prey')
-        canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
-	canvas.update()
-
+        if event.char in ('d'):
+            global x_prey
+            if not (x_prey + 1) in wall_vertical:
+                x_prey += 1
+            canvas.delete('prey')
+            canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
+            canvas.update()
 
 window.bind('<Key>', handler)
 
@@ -115,7 +122,7 @@ while(1):
 
     if x_prey in range(x - 4, x + 5) and y_prey in range(y - 4, y + 5):
         print "Hinter wina witha " + str(tick) + " stepsaaa"
-	break
+    break
 
     canvas.update()
 
@@ -123,6 +130,8 @@ while(1):
     time.sleep(0.005)
     canvas.delete('blueball')
     tick += 1
+    if tick % N:
+        can_set = 1
 
 # I don't know what this does but the script won't run without it.
 window.mainloop()
