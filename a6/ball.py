@@ -25,7 +25,7 @@ y_min = 0
 x_max = 500
 y_max = 500
 
-
+ 
 wall_vertical = [x_min, x_max]
 wall_horizontal = [y_min, y_max]
 
@@ -42,10 +42,16 @@ N = 10
 canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
 
 def handler(event):
+    global wall_vertical
+    global wall_horizontal
+    global x
+    global y
+    global x_prey
+    global y_prey
+    global can_set
+
     if can_set:
         if event.char in ('v'):
-            global wall_vertical
-            global wall_horizontal
             wall_vertical.append(x)
             wall_vertical.sort()
             for (y_i, y_j) in zip(wall_horizontal, wall_horizontal[1:]):
@@ -56,8 +62,6 @@ def handler(event):
             print wall_vertical
 
         if event.char in ('h'):
-            global wall_horizontal
-            global wall_vertical
             wall_horizontal.append(y)
             wall_horizontal.sort()
             for (x_i, x_j) in zip(wall_vertical, wall_vertical[1:]):
@@ -69,7 +73,6 @@ def handler(event):
 
     if tick % 2:
         if event.char in ('w'):
-            global y_prey
             if not (y_prey - 1) in wall_horizontal:
                 y_prey -= 1
             canvas.delete('prey')
@@ -77,7 +80,6 @@ def handler(event):
             canvas.update()
 
         if event.char in ('a'):
-            global x_prey
             if not (x_prey - 1) in wall_vertical:
                 x_prey -= 1
             canvas.delete('prey')
@@ -85,7 +87,6 @@ def handler(event):
             canvas.update()
 
         if event.char in ('s'):
-            global y_prey
             if not (y_prey + 1) in wall_horizontal:
                 y_prey += 1
             canvas.delete('prey')
@@ -93,7 +94,6 @@ def handler(event):
             canvas.update()
 
         if event.char in ('d'):
-            global x_prey
             if not (x_prey + 1) in wall_vertical:
                 x_prey += 1
             canvas.delete('prey')
@@ -122,7 +122,7 @@ while(1):
 
     if x_prey in range(x - 4, x + 5) and y_prey in range(y - 4, y + 5):
         print "Hinter wina witha " + str(tick) + " stepsaaa"
-    break
+        break
 
     canvas.update()
 
