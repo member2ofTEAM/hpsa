@@ -151,9 +151,9 @@ int execute_move(int *move, int do_flag, int algo)
                break;
            //If we are not next_to_set subtract the pull
            update_point(next, next_to_set, move);
-           for(j = next[0]; j < next[0] + 2; j++)
+           for(j = next[0]; j < next[0] + 4; j++)
            {
-              for(k = next[1]; k < next[1] + 2; k++)
+              for(k = next[1]; k < next[1] + 4; k++)
               {
                  if(abs(board[j][k]) == INF) 
                     continue;
@@ -370,17 +370,49 @@ void lowest_random(int *move, int dist_from_border, double threshold)
 int next_point(int *move, int which, int algo)
 {
     int MAX_POINTS;
-    int x, y;
-    int flag, tmp;
+    int x, y, i;
+    int flag, tmp, cogx, cogy, delta;
     
     if (algo == 11)
     {
-        MAX_POINTS = 250000;
+        MAX_POINTS = 62500;
         if (which >= MAX_POINTS)
             return 0;
-        move[0] = (which / 500) * 2;
-        move[1] = (which % 500) * 2;
+        move[0] = (which / 250) * 4;
+        move[1] = (which % 250) * 4;
         return 1;
+    }
+    if (algo == 12)
+    {
+       MAX_POINTS = 1;
+       if (which >= MAX_POINTS)
+           return 0;
+       cogx = 0;
+       cogy = 0;
+       delta = MAX_NUMBER_OF_MOVES - NUM_MOVES_REMAINING;
+       if(!delta)
+       {
+           move[0] = 500;
+           move[1] = 500;
+           while(abs(board[move[0]][move[1]]) == INF)
+           {
+               move[0] += 1;
+               move[1] += 1;
+           }
+           return 1;
+       }
+       for (i = 0; i < delta; i++)
+       {
+           cogx += i * moves[i * 2];
+           cogy += i * moves[i * 2 + 1];
+       }
+       cogx = cogx / (delta * (1 + delta) / 2);
+       cogx = cogx / 2;
+       cogy = cogy / (delta * (1 + delta) / 2);
+       cogy = cogy / 2;
+       move[0] = cogx;
+       move[1] = cogy;
+       return 1;
     }
     if (algo == 1)
     {
@@ -393,11 +425,16 @@ int next_point(int *move, int which, int algo)
     }
     if (algo == 2)
     {
-        MAX_POINTS = 100;
+        MAX_POINTS = 25;
         if (which >= MAX_POINTS)
             return 0;
-        move[0] = (which / 10) * 100;
-        move[1] = (which % 10) * 100;
+        move[0] = (which / 5) * 50 + 400;
+        move[1] = (which % 5) * 50 + 400;
+        while (abs(board[move[0]][move[1]]) == INF)
+        {
+            move[0] -= 1;
+            move[1] -= 1;
+        }
         return 1;
     }
     if (algo == 3)
@@ -642,8 +679,8 @@ int main(int argc, char *argv[])
 //        INPUT_FILENAME[i] = argv[i];
 //    init_board();
     int move[2], i;
-    int algo_0 = 4;
-    int algo_1 = 4;
+    int algo_0 = 2;
+    int algo_1 = 5;
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
     for(i = 0; i < 60; i++)                                         
@@ -666,18 +703,18 @@ int main(int argc, char *argv[])
        algo_1 = 4;
     else
        algo_1 = 5;  */
-    //if(NUM_MOVES_REMAINING > 4)
-   //    algo_0 = 4;
-  //  else
-       algo_0 = 6;
+    if(NUM_MOVES_REMAINING > 4)
+       algo_0 = 4;
+    else
+       algo_0 = 5;
     if (next_to_set)
-        alpha_better(move, algo_1, 0); 
+        alpha_better(move, algo_0, 0);
     else
         alpha_better(move, algo_0, 0); 
     while(abs(board[move[0]][move[1]]) == INF)
     {
-       move[0] = get_random_int();
-       move[1] = get_random_int();
+       move[0] = get_random_int() % 1000;
+       move[1] = get_random_int() % 1000;
     }
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
@@ -771,6 +808,10 @@ int value(int alpha, int beta, int depth, int max, int algo, int max_depth)
     if (depth > min(max_depth, NUM_MOVES_REMAINING)){
         return eval_fn();
     }
+    if (next_to_set)
+        algo = 4;
+    else
+        algo = 2;
     
     for (i = 0; i < MAX_NUMBER_OF_POINTS; i++)
     {

@@ -452,11 +452,12 @@ int next_point(int *move, int which, int algo)
      // Random algorithm
      if (algo == 6)
      {
-        MAX_POINTS = 400;
+        MAX_POINTS = 5;
         if(which > MAX_POINTS)
            return 0;
-        move[0] = get_random_int();
-        move[1] = get_random_int();
+        move[0] = get_random_int() % 400 + 300;
+        move[1] = get_random_int() % 400 + 300;
+        return 1;
      }
      //lowest value on the board 
      if(algo == 7)
@@ -585,10 +586,21 @@ int main(int argc, char *argv[])
        next_to_set = next_to_set > 0 ? 0 : 1;
     }
     init_board();
-    if (next_to_set)
-        alpha_better(move, 5, 0); 
+    if (NUM_MOVES_REMAINING > 3)
+    {
+        if (next_to_set)
+            alpha_better(move, 4, 0); 
+        else
+            alpha_better(move, 6, 0); 
+    }
     else
-        alpha_better(move, 4, 0); 
+    {
+        if (next_to_set)
+            alpha_better(move, 5, 0); 
+        else
+            alpha_better(move, 6, 0); 
+    }
+
     while(abs(board[move[0]][move[1]]) == INF)
     {
        move[0] = get_random_int() % 1000;

@@ -10,11 +10,14 @@ port=4567
 eom = "<EOM>"
 maxlen = 999999
 dim=1000
+automatic=1
 print(sys.argv)
 if len(sys.argv)>1:
     port = int(sys.argv[1])
 if len(sys.argv)>2:
     teamname = str(sys.argv[2])
+if len(sys.argv)>3:
+    automatic = int(sys.argv[3])
   
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', port))
@@ -42,7 +45,7 @@ def sendsocket(sock,msg):
         if sent == 0:
             raise RuntimeError("socket connection broken")
         totalsent = totalsent + sent
-#    isaid(msg)
+    isaid(msg)
     
 def serversaid(msg):
     print("Server: %s"%msg[:80])
@@ -105,9 +108,12 @@ if __name__=="__main__":
                     if move:
                         for x in move:
                             input_args.append(str(x))
-                out = Popen(["./TEAM"] + input_args, stdout = PIPE)
-                move = out.communicate()[0].split(" ")
-                print move
+                if (automatic):
+                    out = Popen(["./TEAM"] + input_args, stdout = PIPE)
+                    move = out.communicate()[0].split(" ")
+                else:
+                    move = raw_input("Input move string")
+                    move = move.split(" ")
                 print "Score: " + str(move[2])
                 makemove(s, our_pid + 1, int(move[0]), int(move[1]))
 
