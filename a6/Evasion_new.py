@@ -82,7 +82,7 @@ def vertical_check(pos_x):
 def horizontal_check(pos_y):
     return pos_y >= y_max or pos_y <= y_min or pos_y in wall_horizontal.values()
         
-def l1d((x, y), mid_x, mid_y):
+def lmd((x, y), mid_x, mid_y):
     return max(abs(mid_x - x), abs(mid_y - y))   
     
 #Returns bounds on x and y
@@ -129,49 +129,32 @@ def prey_pos_in_box(pos):
 def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):   
     pot_x = hunter_x
     pot_y = hunter_y
-    
     pot_vx = hunter_vx
     pot_vy = hunter_vy
         
 #    pdb.set_trace()
     pos = ((x_prey,y_prey),0)
     pos_set = [pos]
-    visited = []
-    visited.append(pos[0])
     heatmap[pos[0][0]][pos[0][1]] = pos[1]
-    temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
-        
-    # Distance in which Prey can move within 30 steps                    
-    while pos_set:
-        pos = pos_set.pop(0)
-        for move in temp_moves:
-            mx = pos[0][0]+move[0]
-            my = pos[0][1]+move[1]
-            if (((mx,my) not in visited) and (pos[1]+2<=30) 
-                    and not(vertical_check(mx) or horizontal_check(my))):
-                        pos_set.append(((mx,my),pos[1]+2))
-                        visited.append((mx,my))
-                        heatmap[mx][my] = pos[1]+2
-                        
+
+    # Distance in which Prey can move within 30 steps
+    for i in range(-15 + x_prey, 16 + x_prey):
+        for j in range(-15 + y_prey, 16 + y_prey):
+             if prey_pos_in_box((i, j)):
+                 heatmap[i][j] = lmd((i, j), x_prey, y_prey)
     
     # Gravity
-    mid_x = 0
-    mid_y = 0
     ((x_i, x_j), (y_i, y_j)) = prey_boundary 
     mid_x = x_i+(x_j-x_i)/2
     mid_y = y_i+(y_j-y_i)/2
     
-    init = ((mid_x,mid_y),0)
-        
     for i in range(500):
         for j in range(500):
-            heatmap[i][j] = heatmap[i][j] + 1000*(l1d((i, j), mid_x, mid_y))
+            heatmap[i][j] = heatmap[i][j] + 1000*(lmd((i, j), mid_x, mid_y))
           
     # Prediction of Hunter Moves            
-    for i in range(steps):        
-        canvas.delete('predict'+str(i))
     for i in range(steps): 
-        print i
+        canvas.delete('predict'+str(i))
         for k in range(pot_x - 5, pot_x + 5):
             for l in range(pot_y - 5, pot_y + 5):
                 if hunter_pos_in_box((k, l)):
@@ -207,7 +190,6 @@ def find_safest_path(pos, prey_queue):
             for move in temp_moves:
                 mx = pos[0]+move[0]
                 my = pos[1]+move[1]
-                
                 if prey_pos_in_box((mx, my)):
                    score = heatmap[mx][my] + 10000*euclidean_distance((mx,my), (x_prey, y_prey))
                    if score < best_next[0]:
@@ -244,46 +226,26 @@ while(1):
     if can_set and len(wall_horizontal.keys()+wall_vertical.keys())<max_walls:
     
     #build vertical wall
-        if ((((x_prey-h_x)<=6 and (x_prey-h_x)>=2 and prey_moves[(vx,vy)] in ('NE','EE','SE'))) 
-           or (((h_x-x_prey)<=6 and (h_x-x_prey)>=2 and prey_moves[(vx,vy)] in ('NW','WW','SW')))
-           and prey_pos_in_box((h_x, h_y))):
-
-           for i in range(len(wall_vertical.keys()+wall_horizontal.keys())):
-               if str(i) in wall_vertical.keys()+wall_horizontal.keys():
-                   continue
-               else:
-                   id = i
-                   break
+        if abs(x_prey-h_x) <= 4 and abs(h_x-x_prey) > 0 and prey_pos_in_box((h_x, h_y)):
+           id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
            wall_vertical[str(id)] = h_x
            prey_boundary = prey_update_box()
-           pdb.set_trace()
            hunter_boundary = hunter_update_box()
            (y_i, y_j) = hunter_boundary[1]
            wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
-           #pdb.set_trace()
            canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
            canvas.update()
            can_set = 0
            set_count = 0                           
                             
         #build horizontal wall
-        if ((((y_prey-h_y)<=6 and (y_prey-h_y)>=2 and prey_moves[(vx,vy)] in ('NE','NN','NW'))) 
-           or (((y_prey-h_y)>=-6 and (y_prey-h_y)<=-2 and prey_moves[(vx,vy)] in ('SE','SS','SW')))
-           and prey_pos_in_box((h_x, h_y))):
-
-           for i in range(len(wall_vertical.keys()+wall_horizontal.keys())):
-               if str(i) in wall_vertical.keys()+wall_horizontal.keys():
-                   continue
-               else:
-                   id = i
-                   break
+        if abs(y_prey - h_y)<=4 and abs(y_prey - h_y) > 0 and prey_pos_in_box((h_x, h_y)):
+           id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
            wall_horizontal[str(id)] = h_y
            prey_boundary = prey_update_box()
-           pdb.set_trace()
            hunter_boundary = hunter_update_box()
            (x_i, x_j) = hunter_boundary[0]
            wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
-           #pdb.set_trace()
            canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
            canvas.update()
            can_set = 0
@@ -379,7 +341,6 @@ while(1):
         print "Hinter wina witha " + str(tick) + " stepsaaa"
         quit()
 
-#f.close()
 
 # I don't know what this does but the script won't run without it.
 window.mainloop()
