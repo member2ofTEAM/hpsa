@@ -55,7 +55,7 @@ hunter_moves = (prey_moves.values() + [move+'h' for move in prey_moves.values()]
                + ['r'+value for value in wall_horizontal.keys()+wall_vertical.keys() if int(value)>=0])
 
 prey_queue = [(0,0)]
-prey_move = (0,0)
+reey_move = (0,0)
 
 h_x = x0
 h_y = y0
@@ -100,14 +100,15 @@ def prey_update_box():
 prey_boundary = prey_update_box()
 
 def hunter_update_box():
+    pdb.set_trace()
     h_walls = wall_horizontal.values()
     h_walls.sort()
     for (y_i, y_j) in zip(h_walls, h_walls[1:]):
-        if y_i < y_prey and y_prey < y_j:
+        if y_i < h_y and h_y < y_j:
             v_walls = wall_vertical.values()
             v_walls.sort()
             for (x_i, x_j) in zip(v_walls, v_walls[1:]):
-                if x_i < x_prey and x_prey < x_j:
+                if x_i < h_x and h_x < x_j:
                     return ((x_i, x_j), (y_i, y_j))
 
 hunter_boundary = hunter_update_box()
@@ -171,28 +172,12 @@ def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):
         canvas.delete('predict'+str(i))
     for i in range(steps): 
         print i
-        minx = 500
-        miny = 500
-        maxx = 0
-        maxy = 0       
-        for k in range(10):
-            for l in range(10):
-                offset_x = pot_x+k-4
-                offset_y = pot_y+l-4                
-                
-                if not(vertical_check(offset_x)):
-                    if not(vertical_check(offset_y)):
-                        heatmap[offset_x][offset_y] += 50 + steps-(int(i)/2)
-                        if offset_x > maxx:
-                            maxx = offset_x
-                        if offset_y > maxy:
-                            maxy = offset_y
-                        if offset_x < minx:
-                            minx = offset_x
-                        if offset_y < miny:
-                            miny = offset_y
+        for k in range(pot_x - 5, pot_x + 5):
+            for l in range(pot_y - 5, pot_y + 5):
+                if hunter_pos_in_box((k, l)):
+                    heatmap[k][l] += 50 + steps-(int(i)/2)
     
-        canvas.create_rectangle(minx, miny, maxx, maxy, fill = "yellow", tag = 'predict'+str(i))
+        canvas.create_rectangle(pot_x, pot_y, pot_x + 4, pot_y + 4, fill = "yellow", tag = 'predict'+str(i))
         canvas.update() 
         pot_x = pot_x + pot_vx
         pot_y = pot_y + pot_vy
@@ -213,32 +198,29 @@ def find_safest_path(pos, prey_queue):
     print "Pos is: " + str(pos)
     del  prey_queue[:]
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
-    checked = []
     
     if (x_prey,y_prey)==pos:
         prey_queue.append((0,0))
     else:
         while (x_prey,y_prey)!=pos:
-            temp_queue = []
+            best_next = [MAX_HEAT, (-1, -1)]
             for move in temp_moves:
                 mx = pos[0]+move[0]
                 my = pos[1]+move[1]
                 
-                if not (mx,my) in checked:
-                    if not(vertical_check(mx)):
-                        if not(horizontal_check(my)):
-                            temp_queue.append((heatmap[mx][my]+100*euclidean_distance((mx,my),
-                                              (x_prey,y_prey)),(move[0],move[1])))
-                            checked.append((mx,my))
-            temp_queue.sort()
+                if prey_pos_in_box((mx, my)):
+                   score = heatmap[mx][my] + 100*euclidean_distance((mx,my), (x_prey, y_prey))
+                   if score < best_next[0]:
+                       best_next[0] = score
+                       best_next[1] = (mx, my)
+
             #The prey may be cornered and can't move anymore
-            if not temp_queue:
+            if best_next[1] == (-1, -1):
                 break
-            print temp_queue[0]
-            print pos
-            pos = (pos[0]+temp_queue[0][1][0],pos[1]+temp_queue[0][1][1])
-            prey_queue.append((temp_queue[0][1][0],temp_queue[0][1][1]))
-        prey_queue.sort(reverse=True)
+            pos = best_next[1]
+            prey_queue.append(best_next[1])
+        #Reverse since we start at the target position
+        prey_queue = prey_queue[::-1]
 
 def handler(event):
     global pause
