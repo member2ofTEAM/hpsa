@@ -120,20 +120,6 @@ def prey_pos_in_box(pos):
             prey_boundary[1][0] < pos[1] and
             prey_boundary[1][1] > pos[1])
 
-def hunter_step((h_x, h_y), (vx, vy)):
-    # New coordinate equals old coordinate plus distance-per-timestep
-    h_x = h_x + vx
-    h_y = h_y + vy
-
-    # If a boundary has been crossed, reverse the direction
-    if vertical_check(h_x):
-        vx = vx*-1
-
-    if horizontal_check(h_y):
-        vy = vy*-1
-    return (h_x, h_y)
-
-    
 def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):   
     pot_x = hunter_x
     pot_y = hunter_y
@@ -371,7 +357,17 @@ while(1):
         canvas.create_rectangle(x_prey-2, y_prey-2, x_prey + 2, y_prey + 2, fill = "blue", tag = 'prey')
         canvas.update()
        
-    (h_x, h_y) = hunter_step((h_x, h_y), (vx, vy))
+    # New coordinate equals old coordinate plus distance-per-timestep
+    h_x = h_x + vx
+    h_y = h_y + vy
+
+    # If a boundary has been crossed, reverse the direction
+    if vertical_check(h_x):
+        vx = vx*-1
+
+    if horizontal_check(h_y):
+        vy = vy*-1
+
     hunter_update_box()
 
     canvas.update()
