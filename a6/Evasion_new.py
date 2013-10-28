@@ -172,7 +172,7 @@ def min_heatmap():
     best_e = (-1, -1)
     min_e = MAX_HEAT
     for row in range(len(heatmap)):
-        for e in range(len(row)):
+        for e in range(len(heatmap[row])):
             if min_e > heatmap[row][e]:
                 min_e = e
                 best_e = (row, e)
@@ -180,7 +180,6 @@ def min_heatmap():
 
 def find_safest_path(prey_queue):
     print "current_pos is" + str((x_prey,y_prey))
-    print "Pos is: " + str(pos)
     del  prey_queue[:]
     start = (x_prey, y_prey)
     goal = min_heatmap()
@@ -193,8 +192,10 @@ def find_safest_path(prey_queue):
         while start != goal:
             best_next = [MAX_HEAT, (-1, -1)]
             for move in temp_moves:
-                if prey_pos_in_box(start + move):
-                   score = heatmap[mx][my] + 10000*euclidean_distance((mx,my), (x_prey, y_prey))
+                maybe_next = (start[0] + move[0], start[1] + move[1])
+                if prey_pos_in_box(maybe_next):
+                   (mx, my) = maybe_next
+                   score = heatmap[mx][my] + 10000*euclidean_distance(goal, maybe_next)
                    if score < best_next[0]:
                        best_next[0] = score
                        best_next[1] = move
