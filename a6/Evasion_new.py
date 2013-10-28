@@ -69,6 +69,8 @@ heatmap = [[0 for value in range(500)] for value in range(500)]
 
 id = 0
 
+PREY_QSIZE = 30
+
 canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
 canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
     
@@ -173,26 +175,23 @@ def find_safest_path(prey_queue):
     start = (x_prey, y_prey)
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
     #pdb.set_trace()
-    if start == goal:
-        prey_queue.append((0,0))
-    else:
-        while start != goal:
-            best_next = [MAX_HEAT, (-1, -1)]
-            for move in temp_moves:
-                maybe_next = (start[0] + move[0], start[1] + move[1])
-                if prey_pos_in_box(maybe_next):
-                   (mx, my) = maybe_next
-                   score = heatmap[mx][my]
-                   if score < best_next[0]:
-                       best_next[0] = score
-                       best_next[1] = move
+    for trash in range(PREY_QSIZE):
+        best_next = [MAX_HEAT, (-1, -1)]
+        for move in temp_moves:
+            maybe_next = (start[0] + move[0], start[1] + move[1])
+            if prey_pos_in_box(maybe_next):
+               (mx, my) = maybe_next
+               score = heatmap[mx][my]
+               if score < best_next[0]:
+                   best_next[0] = score
+                   best_next[1] = move
 
-            #The prey may be cornered and can't move anymore
-            if best_next[1] == (-1, -1):
-                break
-            move = best_next[1]
-            start = (start[0] + move[0], start[1] + move[1])
-            prey_queue.append(best_next[1])
+        #The prey may be cornered and can't move anymore
+        if best_next[1] == (-1, -1):
+            break
+        move = best_next[1]
+        start = (start[0] + move[0], start[1] + move[1])
+        prey_queue.append(move)
 
 def handler(event):
     global pause
