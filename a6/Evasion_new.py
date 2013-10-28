@@ -114,6 +114,13 @@ def hunter_update_box():
 hunter_boundary = ((0, 0), (0, 0))
 hunter_update_box()
 
+def hunter_pos_in_box(pos):
+    return (hunter_boundary[0][0] < pos[0] and
+            hunter_boundary[0][1] > pos[0] and
+            hunter_boundary[1][0] < pos[1] and
+            hunter_boundary[1][1] > pos[1])
+
+
 def prey_pos_in_box(pos):
     return (prey_boundary[0][0] < pos[0] and
             prey_boundary[0][1] > pos[0] and
@@ -267,10 +274,10 @@ while(1):
                    id = i
                    break
            wall_vertical[str(id)] = h_x
-           (y_i, y_j) = hunter_boundary[1]
-           wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
            prey_update_box()
            hunter_update_box()
+           (y_i, y_j) = hunter_boundary[1]
+           wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
            canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
            canvas.update()
            can_set = 0
@@ -288,10 +295,10 @@ while(1):
                    id = i
                    break
            wall_horizontal[str(id)] = h_y
-           (x_i, x_j) = hunter_boundary[0]
-           wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
            prey_update_box()
            hunter_update_box()
+           (x_i, x_j) = hunter_boundary[0]
+           wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
            canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
            canvas.update()
            can_set = 0
