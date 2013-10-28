@@ -169,45 +169,41 @@ def euclidean_distance(pos1,pos2):
 #Return coordinates of minimum entry in heatmap
 def min_heatmap():
     #THIS IS WRONG!
-    best_e = 500
-    for row in heatmap:
-        min_e = min(row)
-        if min_e < best_e: 
-            best_e = row.index(min_e)
-    best_row_e = min(heatmap[best_e])
-    best_row_e = beatmap[best_e].index(best_row_e)
-    return (best_e, best_row_e)
+    best_e = (-1, -1)
+    min_e = MAX_HEAT
+    for row in range(len(heatmap)):
+        for e in range(len(row)):
+            if min_e > heatmap[row][e]:
+                min_e = e
+                best_e = (row, e)
+    return best_e
 
 def find_safest_path(prey_queue):
     print "current_pos is" + str((x_prey,y_prey))
     print "Pos is: " + str(pos)
     del  prey_queue[:]
-    goal = [-1, -1]
+    start = (x_prey, y_prey)
+    goal = min_heatmap()
 
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
     #pdb.set_trace()
-    if (x_prey,y_prey)==pos:
+    if start == goal:
         prey_queue.append((0,0))
     else:
-        while (x_prey,y_prey)!=pos:
+        while start != goal:
             best_next = [MAX_HEAT, (-1, -1)]
             for move in temp_moves:
-                mx = pos[0]+move[0]
-                my = pos[1]+move[1]
-                if prey_pos_in_box((mx, my)):
+                if prey_pos_in_box(start + move):
                    score = heatmap[mx][my] + 10000*euclidean_distance((mx,my), (x_prey, y_prey))
                    if score < best_next[0]:
                        best_next[0] = score
-                       best_next[1] = (mx, my)
-                       best_move = (-move[0],-move[1])
+                       best_next[1] = move
 
             #The prey may be cornered and can't move anymore
             if best_next[1] == (-1, -1):
                 break
-            pos = best_next[1]
-            prey_queue.append(best_move)
-        #Reverse since we start at the target position
-        prey_queue = prey_queue[::-1]
+            start = start + best_next[1]
+            prey_queue.append(best_next[1])
 
 def handler(event):
     global pause
