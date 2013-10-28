@@ -5,8 +5,6 @@ import time
 import random
 import math
 import pdb
-from sets import Set
-
 
 # Initial coordinates
 x0 = 0
@@ -20,15 +18,10 @@ window = Tk()
 canvas = Canvas(window, width=500, height=500, bg='white')
 canvas.pack()
 
-heatmap = [[100 for value in range(500)] for value in range(500)] 
-
 hunter_predict_x = 0
 hunter_predict_y = 0
 
 predict_steps = 200
-
-last_hunter_x = 0
-last_hunter_y = 0
 
 # The velocity, or distance moved per time step
 vx = 1    # x velocity
@@ -71,10 +64,13 @@ pause = -1
 
 ticks_to_set = 30
 max_walls = 15
+            
+heatmap = [[0 for value in range(500)] for value in range(500)] 
 
 id = 0
 
 canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
+canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
     
 def vertical_check(pos_x):
     return pos_x >= x_max or pos_x <= x_min or pos_x in wall_vertical.values()
@@ -132,11 +128,6 @@ def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):
     pot_vx = hunter_vx
     pot_vy = hunter_vy
         
-#    pdb.set_trace()
-    pos = ((x_prey,y_prey),0)
-    pos_set = [pos]
-    heatmap[pos[0][0]][pos[0][1]] = pos[1]
-
     # Distance in which Prey can move within 30 steps
     for i in range(-15 + x_prey, 16 + x_prey):
         for j in range(-15 + y_prey, 16 + y_prey):
@@ -174,12 +165,25 @@ def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):
     
 def euclidean_distance(pos1,pos2):
     return math.sqrt((pos1[0]-pos2[0])**2 + (pos1[1]-pos2[1])**2)   
-            
-            
-def find_safest_path(pos, prey_queue):
+    
+#Return coordinates of minimum entry in heatmap
+def min_heatmap():
+    #THIS IS WRONG!
+    best_e = 500
+    for row in heatmap:
+        min_e = min(row)
+        if min_e < best_e: 
+            best_e = row.index(min_e)
+    best_row_e = min(heatmap[best_e])
+    best_row_e = beatmap[best_e].index(best_row_e)
+    return (best_e, best_row_e)
+
+def find_safest_path(prey_queue):
     print "current_pos is" + str((x_prey,y_prey))
     print "Pos is: " + str(pos)
     del  prey_queue[:]
+    goal = [-1, -1]
+
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
     #pdb.set_trace()
     if (x_prey,y_prey)==pos:
@@ -217,15 +221,10 @@ window.bind('<Key>', handler)
 tick = 0
 # For each timestep
 while(1):
-    if(pause==1):
-        raw_input('pressa di pi')
-        pause = pause *-1
-        continue
-    canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
-    
+   
+    #Build wall 
     if can_set and len(wall_horizontal.keys()+wall_vertical.keys())<max_walls:
-    
-    #build vertical wall
+        #build vertical wall
         if abs(x_prey-h_x) <= 4 and abs(h_x-x_prey) > 0 and prey_pos_in_box((h_x, h_y)):
            id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
            wall_vertical[str(id)] = h_x
@@ -237,6 +236,8 @@ while(1):
            canvas.update()
            can_set = 0
            set_count = 0                           
+           calculate_heat(predict_steps,hunter_predict_x,hunter_predict_y,h_x,h_y,heatmap)
+           del prey_queue[:]
                             
         #build horizontal wall
         if abs(y_prey - h_y)<=4 and abs(y_prey - h_y) > 0 and prey_pos_in_box((h_x, h_y)):
@@ -250,97 +251,50 @@ while(1):
            canvas.update()
            can_set = 0
            set_count = 0
+           calculate_heat(predict_steps,hunter_predict_x,hunter_predict_y,h_x,h_y,heatmap)
+           del prey_queue[:]
              
-                  
+    #Update prey   
     if tick % 2 and tick > 1:
-        #pdb.set_trace()
-        if (len(prey_queue) == 1 
-            or hunter_predict_x != last_predict_x 
-            or hunter_predict_y != last_predict_y):
-        
-            last_predict_x = hunter_predict_x
-            last_predict_y = hunter_predict_y
-            hunter_predict_x = vx
-            hunter_predict_y = vy
-            heatmap = [[100 for value in range(500)] for value in range(500)] 
-            
-            calculate_heat(predict_steps,hunter_predict_x,hunter_predict_y,h_x,h_y,heatmap)
-                            
-            next_pos = [MAX_HEAT, (0, 0)]
-            for i in range(-15 + x_prey, 16 + x_prey):
-                for j in range(-15 + y_prey, 16 + y_prey):
-                    if prey_pos_in_box((i, j)):
-                        if heatmap[i][j] < next_pos[0]:
-                            next_pos[1] = (i, j)
-                        
-            last_hunter_x = h_x
-            last_hunter_y = h_y 
-            
-            pos = next_pos[1]
-            print pos
-            
-            canvas.delete('prey_pos')
-            canvas.create_rectangle(pos[0]-5, pos[1]-5, pos[0]+5, pos[1]+5, fill = "green", tag = 'prey_pos')
-            canvas.update() 
-            
-            find_safest_path(pos, prey_queue)
+        if not prey_queue: 
+            find_safest_path(prey_queue)
             print prey_queue
-                    
+        
+        #There may be nothing more to do
         if prey_queue:
             prey_move = prey_queue.pop(0)
             print prey_queue
+            x_prey = x_prey + prey_move[0]
+            y_prey = y_prey + prey_move[1]
         
-        x_hyp = x_prey + prey_move[0]
-        y_hyp = y_prey + prey_move[1]
-        
-        if vertical_check(x_hyp) or horizontal_check(y_hyp):
-            prey_queue = []
-            prey_move = []
-            for move in prey_moves.keys():
-                x_hyp = x_prey + move[0]
-                y_hyp = y_prey + move[1]
-                if vertical_check(x_hyp) or vertical_check(y_hyp):
-                    continue
-                else:
-                    prey_move.append((move[0],move[1]))
-
-                    
-            prey_move = random.choice(prey_move)
-                
-
-        x_prey = x_prey + prey_move[0]
-        y_prey = y_prey + prey_move[1]
         canvas.delete('prey')
-        canvas.create_rectangle(x_prey-2, y_prey-2, x_prey + 2, y_prey + 2, fill = "blue", tag = 'prey')
+        canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
         canvas.update()
        
-    # New coordinate equals old coordinate plus distance-per-timestep
+    #Update hunter
+    if vertical_check(h_x + vx):
+        vx = vx*-1
+    if horizontal_check(h_y + vy):
+        vy = vy*-1
     h_x = h_x + vx
     h_y = h_y + vy
-
-    # If a boundary has been crossed, reverse the direction
-    if vertical_check(h_x):
-        vx = vx*-1
-
-    if horizontal_check(h_y):
-        vy = vy*-1
-
     hunter_boundary = hunter_update_box()
 
-    canvas.update()
-    # Pause for 0.05 seconds, then delete the image
-    time.sleep(0.01)
+    #Redraw
     canvas.delete('blueball')
+    canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
+    canvas.update()
+    
+    #Increae ticks
+    time.sleep(0.01)
     tick += 1
     set_count += 1
-
     if set_count >= ticks_to_set:
         can_set = 1
-        
+    
+    #Check winning condition
     if x_prey in range(h_x - 4, h_x + 5) and y_prey in range(h_y - 4, h_y + 5):
         print "Hinter wina witha " + str(tick) + " stepsaaa"
         quit()
 
-
-# I don't know what this does but the script won't run without it.
 window.mainloop()
