@@ -95,10 +95,9 @@ def prey_update_box():
             v_walls.sort()
             for (x_i, x_j) in zip(v_walls, v_walls[1:]):
                 if x_i < x_prey and x_prey < x_j:
-                    prey_boundary = ((x_i, x_j), (y_i, y_j))
+                    return ((x_i, x_j), (y_i, y_j))
 
-prey_boundary = ((0, 0), (0, 0))
-prey_update_box()
+prey_boundary = prey_update_box()
 
 def hunter_update_box():
     h_walls = wall_horizontal.values()
@@ -109,10 +108,9 @@ def hunter_update_box():
             v_walls.sort()
             for (x_i, x_j) in zip(v_walls, v_walls[1:]):
                 if x_i < x_prey and x_prey < x_j:
-                    hunter_boundary = ((x_i, x_j), (y_i, y_j))
+                    return ((x_i, x_j), (y_i, y_j))
 
-hunter_boundary = ((0, 0), (0, 0))
-hunter_update_box()
+hunter_boundary = hunter_update_box()
 
 def hunter_pos_in_box(pos):
     return (hunter_boundary[0][0] < pos[0] and
@@ -274,8 +272,8 @@ while(1):
                    id = i
                    break
            wall_vertical[str(id)] = h_x
-           prey_update_box()
-           hunter_update_box()
+           prey_boundary = prey_update_box()
+           hunter_boundary = hunter_update_box()
            (y_i, y_j) = hunter_boundary[1]
            wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
            pdb.set_trace()
@@ -296,8 +294,8 @@ while(1):
                    id = i
                    break
            wall_horizontal[str(id)] = h_y
-           prey_update_box()
-           hunter_update_box()
+           prey_boundary = prey_update_box()
+           hunter_boundary = hunter_update_box()
            (x_i, x_j) = hunter_boundary[0]
            wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
            pdb.set_trace()
@@ -321,7 +319,7 @@ while(1):
             
             calculate_heat(predict_steps,hunter_predict_x,hunter_predict_y,h_x,h_y,heatmap)
                             
-            next_pos = (MAX_HEAT, (0, 0))
+            next_pos = [MAX_HEAT, (0, 0)]
             for i in range(-15 + x_prey, 16 + x_prey):
                 for j in range(-15 + y_prey, 16 + y_prey):
                     if prey_pos_in_box((i, j)):
@@ -379,7 +377,7 @@ while(1):
     if horizontal_check(h_y):
         vy = vy*-1
 
-    hunter_update_box()
+    hunter_boundary = hunter_update_box()
 
     canvas.update()
     # Pause for 0.05 seconds, then delete the image
