@@ -74,8 +74,6 @@ max_walls = 15
 
 id = 0
 
-prey_boundary = surrounding_box()
-
 canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
     
 def vertical_check(pos_x):
@@ -97,7 +95,24 @@ def prey_update_box():
             v_walls.sort()
             for (x_i, x_j) in zip(v_walls, v_walls[1:]):
                 if x_i < x_prey and x_prey < x_j:
-                    prey_boundary = surrounding_box()
+                    prey_boundary = ((x_i, x_j), (y_i, y_j))
+
+prey_boundary = ((0, 0), (0, 0))
+prey_update_box()
+
+def hunter_update_box():
+    h_walls = wall_horizontal.values()
+    h_walls.sort()
+    for (y_i, y_j) in zip(h_walls, h_walls[1:]):
+        if y_i < y_prey and y_prey < y_j:
+            v_walls = wall_vertical.values()
+            v_walls.sort()
+            for (x_i, x_j) in zip(v_walls, v_walls[1:]):
+                if x_i < x_prey and x_prey < x_j:
+                    hunter_boundary = ((x_i, x_j), (y_i, y_j))
+
+hunter_boundary = ((0, 0), (0, 0))
+hunter_update_box()
 
 def prey_pos_in_box(pos):
     return (prey_boundary[0][0] < pos[0] and
@@ -105,7 +120,7 @@ def prey_pos_in_box(pos):
             prey_boundary[1][0] < pos[1] and
             prey_boundary[1][1] > pos[1])
 
-def hunter_step((vx, vy)):
+def hunter_step((h_x, h_y), (vx, vy)):
     # New coordinate equals old coordinate plus distance-per-timestep
     h_x = h_x + vx
     h_y = h_y + vy
@@ -116,7 +131,7 @@ def hunter_step((vx, vy)):
 
     if horizontal_check(h_y):
         vy = vy*-1
-
+    return (h_x, h_y)
 
     
 def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):   
@@ -266,6 +281,7 @@ while(1):
                    id = i
                    break
            wall_vertical[str(id)] = h_x
+           (y_i, y_j) = hunter_boundary[1]
            wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
            prey_update_box()
            canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
@@ -285,6 +301,7 @@ while(1):
                    id = i
                    break
            wall_horizontal[str(id)] = h_y
+           (x_i, x_j) = hunter_boundary[0]
            wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
            prey_update_box()
            canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
@@ -354,7 +371,8 @@ while(1):
         canvas.create_rectangle(x_prey-2, y_prey-2, x_prey + 2, y_prey + 2, fill = "blue", tag = 'prey')
         canvas.update()
        
-    hunter_step((vx, vy))
+    (h_x, h_y) = hunter_step((h_x, h_y), (vx, vy))
+    hunter_update_box()
 
     canvas.update()
     # Pause for 0.05 seconds, then delete the image
