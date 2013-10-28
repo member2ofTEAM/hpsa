@@ -167,23 +167,10 @@ def euclidean_distance(pos1,pos2):
     return math.sqrt((pos1[0]-pos2[0])**2 + (pos1[1]-pos2[1])**2)   
     
 #Return coordinates of minimum entry in heatmap
-def min_heatmap():
-    #THIS IS WRONG!
-    best_e = (-1, -1)
-    min_e = MAX_HEAT
-    for row in range(len(heatmap)):
-        for e in range(len(heatmap[row])):
-            if min_e > heatmap[row][e]:
-                min_e = e
-                best_e = (row, e)
-    return best_e
-
 def find_safest_path(prey_queue):
     print "current_pos is" + str((x_prey,y_prey))
     del  prey_queue[:]
     start = (x_prey, y_prey)
-    goal = min_heatmap()
-
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
     #pdb.set_trace()
     if start == goal:
@@ -195,7 +182,7 @@ def find_safest_path(prey_queue):
                 maybe_next = (start[0] + move[0], start[1] + move[1])
                 if prey_pos_in_box(maybe_next):
                    (mx, my) = maybe_next
-                   score = heatmap[mx][my] + 10000*euclidean_distance(goal, maybe_next)
+                   score = heatmap[mx][my]
                    if score < best_next[0]:
                        best_next[0] = score
                        best_next[1] = move
@@ -203,7 +190,8 @@ def find_safest_path(prey_queue):
             #The prey may be cornered and can't move anymore
             if best_next[1] == (-1, -1):
                 break
-            start = start + best_next[1]
+            move = best_next[1]
+            start = (start[0] + move[0], start[1] + move[1])
             prey_queue.append(best_next[1])
 
 def handler(event):
