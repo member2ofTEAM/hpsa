@@ -90,25 +90,25 @@ def prey_update_box():
     h_walls = wall_horizontal.values()
     h_walls.sort()
     for (y_i, y_j) in zip(h_walls, h_walls[1:]):
-        if y_i < y_prey and y_prey < y_j:
+        if y_i <= y_prey and y_prey < y_j:
             v_walls = wall_vertical.values()
             v_walls.sort()
             for (x_i, x_j) in zip(v_walls, v_walls[1:]):
-                if x_i < x_prey and x_prey < x_j:
+                if x_i <= x_prey and x_prey < x_j:
                     return ((x_i, x_j), (y_i, y_j))
 
 prey_boundary = prey_update_box()
 
 def hunter_update_box():
-    pdb.set_trace()
+    #pdb.set_trace()
     h_walls = wall_horizontal.values()
     h_walls.sort()
     for (y_i, y_j) in zip(h_walls, h_walls[1:]):
-        if y_i < h_y and h_y < y_j:
+        if y_i <= h_y and h_y < y_j:
             v_walls = wall_vertical.values()
             v_walls.sort()
             for (x_i, x_j) in zip(v_walls, v_walls[1:]):
-                if x_i < h_x and h_x < x_j:
+                if x_i <= h_x and h_x < x_j:
                     return ((x_i, x_j), (y_i, y_j))
 
 hunter_boundary = hunter_update_box()
@@ -198,7 +198,7 @@ def find_safest_path(pos, prey_queue):
     print "Pos is: " + str(pos)
     del  prey_queue[:]
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
-    
+    #pdb.set_trace()
     if (x_prey,y_prey)==pos:
         prey_queue.append((0,0))
     else:
@@ -209,16 +209,17 @@ def find_safest_path(pos, prey_queue):
                 my = pos[1]+move[1]
                 
                 if prey_pos_in_box((mx, my)):
-                   score = heatmap[mx][my] + 100*euclidean_distance((mx,my), (x_prey, y_prey))
+                   score = heatmap[mx][my] + 10000*euclidean_distance((mx,my), (x_prey, y_prey))
                    if score < best_next[0]:
                        best_next[0] = score
                        best_next[1] = (mx, my)
+                       best_move = (-move[0],-move[1])
 
             #The prey may be cornered and can't move anymore
             if best_next[1] == (-1, -1):
                 break
             pos = best_next[1]
-            prey_queue.append(best_next[1])
+            prey_queue.append(best_move)
         #Reverse since we start at the target position
         prey_queue = prey_queue[::-1]
 
@@ -255,10 +256,11 @@ while(1):
                    break
            wall_vertical[str(id)] = h_x
            prey_boundary = prey_update_box()
+           pdb.set_trace()
            hunter_boundary = hunter_update_box()
            (y_i, y_j) = hunter_boundary[1]
            wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
-           pdb.set_trace()
+           #pdb.set_trace()
            canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
            canvas.update()
            can_set = 0
@@ -277,10 +279,11 @@ while(1):
                    break
            wall_horizontal[str(id)] = h_y
            prey_boundary = prey_update_box()
+           pdb.set_trace()
            hunter_boundary = hunter_update_box()
            (x_i, x_j) = hunter_boundary[0]
            wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
-           pdb.set_trace()
+           #pdb.set_trace()
            canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
            canvas.update()
            can_set = 0
@@ -288,7 +291,7 @@ while(1):
              
                   
     if tick % 2 and tick > 1:
-        
+        #pdb.set_trace()
         if (len(prey_queue) == 1 
             or hunter_predict_x != last_predict_x 
             or hunter_predict_y != last_predict_y):
@@ -323,6 +326,7 @@ while(1):
                     
         if prey_queue:
             prey_move = prey_queue.pop(0)
+            print prey_queue
         
         x_hyp = x_prey + prey_move[0]
         y_hyp = y_prey + prey_move[1]
