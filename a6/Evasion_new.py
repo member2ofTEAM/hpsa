@@ -270,6 +270,7 @@ while(1):
            (y_i, y_j) = hunter_boundary[1]
            wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
            prey_update_box()
+           hunter_update_box()
            canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
            canvas.update()
            can_set = 0
@@ -290,6 +291,7 @@ while(1):
            (x_i, x_j) = hunter_boundary[0]
            wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
            prey_update_box()
+           hunter_update_box()
            canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
            canvas.update()
            can_set = 0
