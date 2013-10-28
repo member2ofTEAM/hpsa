@@ -278,6 +278,7 @@ while(1):
            hunter_update_box()
            (y_i, y_j) = hunter_boundary[1]
            wall_vertical_out.append((id, (h_x, y_i),( h_x, y_j)))
+           pdb.set_trace()
            canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
            canvas.update()
            can_set = 0
@@ -299,6 +300,7 @@ while(1):
            hunter_update_box()
            (x_i, x_j) = hunter_boundary[0]
            wall_horizontal_out.append((id, (x_i, h_y),( x_j, h_y))) 
+           pdb.set_trace()
            canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
            canvas.update()
            can_set = 0
