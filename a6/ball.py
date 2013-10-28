@@ -25,9 +25,16 @@ y_min = 0
 x_max = 500
 y_max = 500
 
+# Moves
+prey_moves = ['NN','NE','EE','SE','SS','SW','WW','NW']
+hunter_moves = prey_moves + [x+'h' for x in prey_moves] + [x+'v' for x in_prey_moves] + ['r'+x for x in wall_horizontal_our.keys()+wall_vertical_our.keys() if int(x)>=0]
+
  
-wall_vertical = [x_min, x_max]
-wall_horizontal = [y_min, y_max]
+wall_vertical = [(-4,(x_min,y_min),(x_min,y_max)),(-3,(x_may,y_min),(x_max,y_may))]
+wall_horizontal = [(-2,(x_min,y_min),(x_max,y_min)),(-1,(x_min,y_max),(x_m
+
+wall_vertical_our = {'-4': x_min, '-3':x_max}
+wall_horizontal:our = {'-2':y_min, '-1':y_max}
 
 x = x0
 y = y0
@@ -52,24 +59,31 @@ def handler(event):
 
     if can_set:
         if event.char in ('v'):
-            wall_vertical.append(x)
+            wall_vertical_our[v_id] = x
             wall_vertical.sort()
             for (y_i, y_j) in zip(wall_horizontal, wall_horizontal[1:]):
                 if y_i < y and y < y_j:
+		    wall_vertical.append(v_id, (x, y_i),( x, y_j)) 
+		    v_id = v_id + 1
                     canvas.create_line(x, y_i, x, y_j, fill="black")
                     canvas.update()
                     can_set = 0
             print wall_vertical
 
         if event.char in ('h'):
-            wall_horizontal.append(y)
+            wall_horizontal_our[h_id] = y
             wall_horizontal.sort()
             for (x_i, x_j) in zip(wall_vertical, wall_vertical[1:]):
                 if x_i < x and x < x_j:
+		     wall_horizontal.append(h_id, (x, y_i),( x, y_j)) 
+		     h_id = h_id + 1
                     canvas.create_line(x_i, y, x_j, y, fill="black")
                     canvas.update()
                     can_set = 0
             print wall_horizontal
+            
+         if event.char in (wall_horizontal.keys()) or event.char in (wall_vertical.keys()):
+	   
 
     if tick % 2:
         if event.char in ('w'):
