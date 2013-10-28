@@ -3,7 +3,6 @@ Endlessly bouncing ball - demonstrates animation using Python and TKinter
 """
 import time
 import random
-import msvcrt as m
 import math
 import pdb
 from sets import Set
@@ -49,7 +48,9 @@ wall_horizontal = {'-2':y_min, '-1':y_max}
 
 # Moves
 prey_moves = {(0,1):'NN',(1,1):'NE',(1,0):'EE',(1,-1):'SE',(0,-1):'SS',(-1,-1):'SW',(-1,0):'WW',(-1,1):'NW',(0,0):'XX'}
-hunter_moves = prey_moves.values() + [move+'h' for move in prey_moves.values()] + [move+'v' for move in prey_moves.values()] + ['r'+value for value in wall_horizontal.keys()+wall_vertical.keys() if int(value)>=0]
+hunter_moves = (prey_moves.values() + [move+'h' for move in prey_moves.values()]
+               + [move+'v' for move in prey_moves.values()] 
+               + ['r'+value for value in wall_horizontal.keys()+wall_vertical.keys() if int(value)>=0])
 
 prey_queue = [(0,0)]
 prey_move = (0,0)
@@ -71,20 +72,13 @@ max_walls = 15
 
 id = 0
 
-max_tick = 0
-best_prey = []
-all_prey_moves = []
-
 canvas.create_rectangle(x_prey-2, y_prey-2, x_prey + 2, y_prey + 2, fill = "blue", tag = 'prey')
-
     
 def vertical_check(pos_x):
-    if pos_x >= x_max or pos_x <= x_min or pos_x in wall_vertical.values():
-        return True
+    return pos_x >= x_max or pos_x <= x_min or pos_x in wall_vertical.values()
     
 def horizontal_check(pos_y):
-    if pos_y >= y_max or pos_y <= y_min or pos_y in wall_horizontal.values():
-        return True
+    return pos_y >= y_max or pos_y <= y_min or pos_y in wall_horizontal.values()
         
 def l1d((x, y), mid_x, mid_y):
     return max(abs(mid_x - x), abs(mid_y - y))    
@@ -96,7 +90,7 @@ def calculate_heat(steps,hunter_vx,hunter_vy,hunter_x,hunter_y,heatmap):
     pot_vx = hunter_vx
     pot_vy = hunter_vy
         
-    
+#    pdb.set_trace()
     pos = ((x_prey,y_prey),0)
     pos_set = [pos]
     visited = []
@@ -188,39 +182,37 @@ def euclidean_distance(pos1,pos2):
     return math.sqrt((pos1[0]-pos2[0])**2 + (pos1[1]-pos2[1])**2)   
             
             
-def find_safest_path(pos):
+def find_safest_path(pos, prey_queue):
     print "current_pos is" + str((x_prey,y_prey))
     print "Pos is: " + str(pos)
-    queue = []
-    temp_queue = []
+    del  prey_queue[:]
     temp_moves = [move for move in prey_moves.keys() if not move == (0,0)]
     checked = []
     
     if (x_prey,y_prey)==pos:
-        queue.append((0,0))
-        return queue
-    
-    while (x_prey,y_prey)!=pos:
-        temp_queue = []
-        for move in temp_moves:
-            mx = pos[0]+move[0]
-            my = pos[1]+move[1]
-            
-            if not (mx,my) in checked:
-                if not(vertical_check(mx)):
-                    if not(horizontal_check(my)):
-                        temp_queue.append((heatmap[mx][my]+100*euclidean_distance((mx,my),(x_prey,y_prey)),(move[0],move[1])))
-                        checked.append((mx,my))
-        temp_queue.sort()
-        print temp_queue[0]
-        print pos
-        pos = (pos[0]+temp_queue[0][1][0],pos[1]+temp_queue[0][1][1])
-        queue.append((temp_queue[0][1][0],temp_queue[0][1][1]))
-        
-    
-    queue.sort(reverse=True)
-    return queue
-        
+        prey_queue.append((0,0))
+    else:
+        while (x_prey,y_prey)!=pos:
+            temp_queue = []
+            for move in temp_moves:
+                mx = pos[0]+move[0]
+                my = pos[1]+move[1]
+                
+                if not (mx,my) in checked:
+                    if not(vertical_check(mx)):
+                        if not(horizontal_check(my)):
+                            temp_queue.append((heatmap[mx][my]+100*euclidean_distance((mx,my),
+                                              (x_prey,y_prey)),(move[0],move[1])))
+                            checked.append((mx,my))
+            temp_queue.sort()
+            #The prey may be cornered and can't move anymore
+            if not temp_queue:
+                break
+            print temp_queue[0]
+            print pos
+            pos = (pos[0]+temp_queue[0][1][0],pos[1]+temp_queue[0][1][1])
+            prey_queue.append((temp_queue[0][1][0],temp_queue[0][1][1]))
+        prey_queue.sort(reverse=True)
 
 def handler(event):
     global pause
@@ -245,7 +237,9 @@ while(1):
     if can_set and len(wall_horizontal.keys()+wall_vertical.keys())<max_walls:
     
     #build vertical wall
-        if(((x_prey-h_x)<=6 and (x_prey-h_x)>=2 and prey_moves[(vx,vy)] in ('NE','EE','SE'))) or (((h_x-x_prey)<=6 and (h_x-x_prey)>=2 and prey_moves[(vx,vy)] in ('NW','WW','SW'))):
+        if ((((x_prey-h_x)<=6 and (x_prey-h_x)>=2 and prey_moves[(vx,vy)] in ('NE','EE','SE'))) 
+           or (((h_x-x_prey)<=6 and (h_x-x_prey)>=2 and prey_moves[(vx,vy)] in ('NW','WW','SW')))):
+
             h_walls = wall_horizontal.values()
             h_walls.sort()
             for (y_i, y_j) in zip(h_walls, h_walls[1:]):
@@ -268,7 +262,9 @@ while(1):
                             set_count = 0                           
                             
         #build horizontal wall
-        if(((y_prey-h_y)<=6 and (y_prey-h_y)>=2 and prey_moves[(vx,vy)] in ('NE','NN','NW'))) or (((y_prey-h_y)>=-6 and (y_prey-h_y)<=-2 and prey_moves[(vx,vy)] in ('SE','SS','SW'))):
+        if ((((y_prey-h_y)<=6 and (y_prey-h_y)>=2 and prey_moves[(vx,vy)] in ('NE','NN','NW'))) 
+            or (((y_prey-h_y)>=-6 and (y_prey-h_y)<=-2 and prey_moves[(vx,vy)] in ('SE','SS','SW')))):
+
             h_walls = wall_horizontal.values()
             h_walls.sort()
             for (y_i, y_j) in zip(h_walls, h_walls[1:]):
@@ -293,52 +289,53 @@ while(1):
                   
     if tick % 2 and tick > 1:
         
-        if len(prey_queue)==1:
+        if (len(prey_queue) == 1 
+            or hunter_predict_x != last_predict_x 
+            or hunter_predict_y != last_predict_y):
         
             last_predict_x = hunter_predict_x
             last_predict_y = hunter_predict_y
             hunter_predict_x = vx
             hunter_predict_y = vy
-            if(hunter_predict_x != last_predict_x) or (hunter_predict_y != last_predict_y):
-                                                
-                heatmap = [[100 for value in range(500)] for value in range(500)] 
-                
-                calculate_heat(predict_steps,hunter_predict_x,hunter_predict_y,h_x,h_y,heatmap)
-                                
-                thresh = []
-                for i in range(30):
-                    for j in range(30):
-                        x_offset = x_prey-15+i
-                        y_offset = y_prey-15+j 
-                        if not(vertical_check(x_offset)):
-                            if not(horizontal_check(y_offset)):
-                                h_walls = wall_horizontal.values()
-                                h_walls.sort()
-                                for (y_i, y_j) in zip(h_walls, h_walls[1:]):
-                                    if y_i < y_offset and y_offset < y_j:
-                                        v_walls = wall_vertical.values()
-                                        v_walls.sort()
-                                        for (x_i, x_j) in zip(v_walls, v_walls[1:]):
-                                            if x_i < x_offset and x_offset < x_j:
-                                                value = (heatmap[x_offset][y_offset],(x_offset,y_offset))
-                                                thresh.append(value)
+            heatmap = [[100 for value in range(500)] for value in range(500)] 
+            
+            calculate_heat(predict_steps,hunter_predict_x,hunter_predict_y,h_x,h_y,heatmap)
                             
-                thresh.sort()  
-                #pdb.set_trace()
-                last_hunter_x = h_x
-                last_hunter_y = h_y 
-                
-                pos = thresh[0][1]
-                print pos
-                
-                canvas.delete('prey_pos')
-                canvas.create_rectangle(pos[0]-5, pos[1]-5, pos[0]+5, pos[1]+5, fill = "green", tag = 'prey_pos')
-                canvas.update() 
-                
-                prey_queue = find_safest_path(pos)
-                print prey_queue
+            thresh = []
+            for i in range(30):
+                for j in range(30):
+                    x_offset = x_prey-15+i
+                    y_offset = y_prey-15+j 
+                    if not(vertical_check(x_offset)):
+                        if not(horizontal_check(y_offset)):
+                            h_walls = wall_horizontal.values()
+                            h_walls.sort()
+                            for (y_i, y_j) in zip(h_walls, h_walls[1:]):
+                                if y_i < y_offset and y_offset < y_j:
+                                    v_walls = wall_vertical.values()
+                                    v_walls.sort()
+                                    for (x_i, x_j) in zip(v_walls, v_walls[1:]):
+                                        if x_i < x_offset and x_offset < x_j:
+                                            value = (heatmap[x_offset][y_offset],(x_offset,y_offset))
+                                            thresh.append(value)
+                        
+            thresh.sort()  
+            #pdb.set_trace()
+            last_hunter_x = h_x
+            last_hunter_y = h_y 
+            
+            pos = thresh[0][1]
+            print pos
+            
+            canvas.delete('prey_pos')
+            canvas.create_rectangle(pos[0]-5, pos[1]-5, pos[0]+5, pos[1]+5, fill = "green", tag = 'prey_pos')
+            canvas.update() 
+            
+            find_safest_path(pos, prey_queue)
+            print prey_queue
                     
-        prey_move = prey_queue.pop(0)
+        if prey_queue:
+            prey_move = prey_queue.pop(0)
         
         x_hyp = x_prey + prey_move[0]
         y_hyp = y_prey + prey_move[1]
@@ -358,7 +355,6 @@ while(1):
             prey_move = random.choice(prey_move)
                 
 
-        all_prey_moves.append((prey_move[0], prey_move[1]))
         x_prey = x_prey + prey_move[0]
         y_prey = y_prey + prey_move[1]
         canvas.delete('prey')
