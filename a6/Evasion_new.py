@@ -108,7 +108,7 @@ hunter_moves = (prey_moves.values() + [move+'h' for move in prey_moves.values()]
                + [move+'v' for move in prey_moves.values()] 
                + ['r'+value for value in wall_horizontal.keys()+wall_vertical.keys() if int(value)>=0])
 
-prey_queue = 30*[(-1,0)]
+prey_queue = 100*[(-1,0)]
 reey_move = (0,0)
 
 h_x = x0
@@ -210,25 +210,12 @@ PREY_QSIZE = 30
 HUNTER_PSIZE = 120
 MAX_HEAT = 708
 
+def linfdistance(pos1,pos2):
+    return max(abs(pos1[0]-pos2[0]), abs(pos1[1]-pos2[1]))
+
 def distance(pos1,pos2):
     return math.sqrt(abs(pos1[0]-pos2[0])**2 + abs(pos1[1]-pos2[1])**2)
-
-def draw_heat_line(s_x, s_y, e_x, e_y, heatmap):
-    if s_x == e_x:
-        if s_y <= e_y:
-            for i in range(e_y, s_y + 1):
-                heatmap[s_x][i] = MAX_HEAT
-        if e_y < s_y:
-            for i in range(s_y, e_y - 1, -1):
-                heatmap[s_x][i] = MAX_HEAT
-    if s_y == e_y:
-        if s_x <= e_x:
-            for i in range(e_x, s_x + 1):
-                heatmap[i][s_x] = MAX_HEAT
-        if e_x < s_x:
-            for i in range(s_x, e_x - 1, -1):
-                heatmap[i][s_x] = MAX_HEAT
-
+ 
 def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
     # Prediction of Hunter Moves            
     (oh_x, oh_y) = (pot_x, pot_y)
@@ -266,13 +253,6 @@ def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
                         heatmap[i][j] = max((142 - 0.5*distance(hunter_steps[0], (i, j)))/
                                              142 * (MAX_HEAT - distance((x, y), 
                                         (i, j))), heatmap[i][j])
-    for (id, (s_x, s_y), (e_x, e_y)) in wall_vertical_out:
-        if id > 0:
-            draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
-
-    for (id, (s_x, s_y), (e_x, e_y)) in wall_horizontal_out:
-        if id > 0:
-            draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
 
 #    for i in range(500):#x_prey - 100, x_prey + 100):
 #        for j in range(500):#y_prey - 200, y_prey + 100):
@@ -314,14 +294,14 @@ def parse_wall(entries):
     if(wall[1]==wall[3]):
       hw = (entry[0],(wall[0],wall[1]),(wall[2],wall[3]))
       wall_horizontal_out.append(hw)
-      #wall_horizontal[entry[0]]=wall[1]
+      wall_horizontal[entry[0]]=wall[1]
       canvas.create_line(wall[0], wall[1], wall[2], wall[3], fill="black")
       canvas.update()
       print wall_horizontal
     if(wall[0]==wall[2]):
       vw = (entry[0],(wall[0],wall[1]),(wall[2],wall[3]))
       wall_vertical_out.append(vw)
-      #wall_vertical[entry[0]]=wall[0]
+      wall_vertical[entry[0]]=wall[0]
       canvas.create_line(wall[0], wall[1], wall[2], wall[3], fill="black")
       canvas.update()
       print wall_vertical
@@ -409,7 +389,7 @@ while(1):
 	    set_count = 0                           
 	    del prey_queue[:]
 	    built = True
-			      
+	    			      
 	  #build horizontal wall
 	  elif (prey_pos_in_box((h_x, h_y)) and abs(h_y + vy - y_prey)<=2 and (math.copysign(1,vy)!=math.copysign(1,(h_y - y_prey))) and h_y != y_prey):
 	    id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
@@ -425,23 +405,55 @@ while(1):
 	    set_count = 0
 	    del prey_queue[:]
 	    built = True
-	  '''  
+	    
 	  elif len(wall_horizontal.keys()+wall_vertical.keys()) > 4:
 	    removable_walls = [wall for wall in (wall_vertical_out+wall_horizontal_out) if wall[0]>=0]
 	    if prey_boundary == hunter_boundary:
 	      wall_to_remove = (-2,-2)
 	      for wall in removable_walls:
-		if (not(wall[1][0] == hunter_boundary[0][0] and wall[1][1] == hunter_boundary[0][1])
-		and(not(wall[1][0] == hunter_boundary[1][0] and wall[1][1] == hunter_boundary[1][1])):
-		  wall_to_remove = wall[0]
-		  sendsocket(s,(hunter_direction+"w"+str(wall_to_remove)+'\n'))
-		  wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
-		  wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
-		  removed = True
-	 '''	  
+		#pdb.set_trace()
+		if(wall[1][0]==wall[2][0]):
+		  if not(wall[1][0]==hunter_boundary[0][0] or wall[1][0]==hunter_boundary[0][1]):
+		    wall_to_remove = wall[0]
+		    sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+		    wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
+		    wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
+		    removed = True
+		    break
+		elif(wall[1][1]==wall[2][1]):
+		  if not(wall[1][1]==hunter_boundary[1][0] or wall[1][1]==hunter_boundary[1][1]):
+		    wall_to_remove = wall[0]
+		    sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+		    wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
+		    wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
+		    removed = True
+		    break
+
+	  	  
 	  if not(built) and not(removed):
 	    sendsocket(s,hunter_direction+'\n')
-      else:
+      elif can_set and len(wall_horizontal.keys()+wall_vertical.keys())==max_walls+4 and max_walls == 4:
+	  #remove vertical wall
+	  if (prey_pos_in_box((h_x, h_y)) and abs(h_x + vx - x_prey) <= 4 and (math.copysign(1,vx)!=math.copysign(1,(h_x - x_prey))) and h_x != x_prey):
+	    removable_walls = [wall for wall in (wall_vertical_out) if wall[0]>=0]
+	    for wall in removable_walls:
+	      if (math.copysign(1,vx)==math.copysign(1,(h_x - wall[1][0]))):
+		wall_to_remove = wall[0]
+		sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+		wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
+		removed = True
+		break
+	  elif (prey_pos_in_box((h_x, h_y)) and abs(h_y + vy - y_prey)<=4 and (math.copysign(1,vy)!=math.copysign(1,(h_y - y_prey))) and h_y != y_prey):
+	    removable_walls = [wall for wall in (wall_horizontal_out) if wall[0]>=0]
+	    for wall in removable_walls:
+	      if (math.copysign(1,vy)==math.copysign(1,(h_y - wall[1][1]))):
+		wall_to_remove = wall[0]
+		sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+		wall_vertical = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
+		removed = True
+		break
+	
+      elif not(built) and not(removed):
 	sendsocket(s,hunter_direction+'\n')
     else:
       #Update prey   
@@ -486,9 +498,5 @@ while(1):
     if set_count >= ticks_to_set:
         can_set = 1
     
-    #Check winning condition
-    if x_prey in range(h_x - 4, h_x + 5) and y_prey in range(h_y - 4, h_y + 5):
-        print "Hinter wina witha " + str(tick) + " stepsaaa"
-        quit()
 
 window.mainloop()
