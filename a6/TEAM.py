@@ -70,14 +70,6 @@ max_walls = int(in_msg[1])
 x0 = 0
 y0 = 0
 
-ball_diameter = 30
-
-# Get TKinter ready to go
-from Tkinter import *
-window = Tk()
-canvas = Canvas(window, width=500, height=500, bg='white')
-canvas.pack()
-
 hunter_predict_x = 0
 hunter_predict_y = 0
 
@@ -122,9 +114,6 @@ set_count = 30
 
             
 id = 0
-
-canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
-canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
     
 def vertical_check(pos_x):
     result = False
@@ -198,9 +187,6 @@ def prey_pos_in_box(pos):
             prey_boundary[1][0] < pos[1] and
             prey_boundary[1][1] > pos[1])
 
-img = PhotoImage(width=500, height=500)
-canvas.create_image((250, 250), image=img, state="normal")
-
 PREY_QSIZE = 10
 HUNTER_PSIZE = 120
 MAX_HEAT = 708
@@ -251,8 +237,7 @@ def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
 
 #    for i in range(500):#x_prey - 100, x_prey + 100):
 #        for j in range(500):#y_prey - 200, y_prey + 100):
-#            img.put(str('#%02x%02x%02x' % ((255 * int(heatmap[i][j]))/MAX_HEAT, 0, 0)), (i,j))
-    canvas.update()  
+#            img.put(str('#%02x%02x%02x' % ((255 * int(heatmap[i][j]))/MAX_HEAT, 0, 0)), (i,j)) 
 
 heatmap = [[0 for value in range(500)] for value in range(500)] 
 calculate_heat(predict_steps,vx,vy,h_x,h_y,heatmap)
@@ -276,32 +261,21 @@ def find_safest_path(prey_queue):
         start = (start[0] + move[0], start[1] + move[1])
         prey_queue.append(move)
 
-def handler(event):
-    global pause
-    
-    if event.char in('p'):
-        pause = pause * -1
 
 def parse_wall(entries):
-  canvas.delete("all")
   for entry in entries:
     wall = [int(v) for v in re.findall("[0-9]+", entry[1])]
     if(wall[1]==wall[3]):
       hw = (entry[0],(wall[0],wall[1]),(wall[2],wall[3]))
       wall_horizontal_out.append(hw)
       wall_horizontal[entry[0]]=wall[1]
-      canvas.create_line(wall[0], wall[1], wall[2], wall[3], fill="black")
-      canvas.update()
       #print wall_horizontal
     if(wall[0]==wall[2]):
       vw = (entry[0],(wall[0],wall[1]),(wall[2],wall[3]))
       wall_vertical_out.append(vw)
       wall_vertical[entry[0]]=wall[0]
-      canvas.create_line(wall[0], wall[1], wall[2], wall[3], fill="black")
-      canvas.update()
       #print wall_vertical
 
-window.bind('<Key>', handler)
 
 tick = 0
 # For each timestep
@@ -376,8 +350,6 @@ while(1):
 	    (y_i, y_j) = hunter_boundary[1]
 	    wall_vertical_out.append((id, (h_x, y_i+1),( h_x, y_j-1)))
 	    sendsocket(s,(hunter_direction+"w"+"("+str(h_x)+","+str(y_i+1)+")"+","+"("+str(h_x)+","+str(y_j-1)+")"+'\n'))
-	    canvas.create_line(h_x, y_i, h_x, y_j, fill="black")
-	    canvas.update()
 	    can_set = 0
 	    set_count = 0                           
 	    del prey_queue[:]
@@ -392,8 +364,6 @@ while(1):
 	    (x_i, x_j) = hunter_boundary[0]
 	    wall_horizontal_out.append((id, (x_i+1, h_y),(x_j-1, h_y)))
 	    sendsocket(s,(hunter_direction+"w"+"("+str(x_i+1)+","+str(h_y)+")"+","+"("+str(x_j-1)+","+str(h_y)+")"+'\n'))
-	    canvas.create_line(x_i, h_y, x_j, h_y, fill="black")
-	    canvas.update()
 	    can_set = 0
 	    set_count = 0
 	    del prey_queue[:]
@@ -474,11 +444,7 @@ while(1):
 	    y_prey = y_prey + prey_move[1]
 	
 	sendsocket(s,(prey_moves[prey_move[0],prey_move[1]])+'\n')
-	  
-    canvas.delete('prey')
-    canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", tag = 'prey')
-    canvas.update()
-       
+	         
     #Update hunter
     if vertical_check(h_x + vx):
         vx = vx*-1
@@ -491,18 +457,11 @@ while(1):
     h_x = h_x + vx
     h_y = h_y + vy
     hunter_boundary = hunter_update_box()
-
-    #Redraw
-    canvas.delete('blueball')
-    canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
-    canvas.update()
     
     #Increae ticks
-    time.sleep(0.01)
     tick += 1
     set_count += 1
     if set_count >= ticks_to_set:
         can_set = 1
     
 
-window.mainloop()
