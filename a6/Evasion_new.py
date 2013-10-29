@@ -132,9 +132,25 @@ canvas.create_rectangle(x_prey, y_prey, x_prey + 4, y_prey + 4, fill = "blue", t
 canvas.create_rectangle(h_x, h_y, h_x+4, h_y+4, fill="red", tag='blueball')
     
 def vertical_check(pos_x):
+    result = False
+    for wall in wall_vertical_out:
+        if wall[1][0] <= wall[2][0]:
+            if pos_x in range(wall[1][0], wall[2][0] + 1):
+                result = True
+        if wall[1][0] > wall[2][0]:
+            if pos_x in range(wall[1][0], wall[2][0] - 1, -1):
+                result = True
     return pos_x in wall_vertical.values()
     
 def horizontal_check(pos_y):
+    result = False
+    for wall in wall_horizontal_out:
+        if wall[1][1] <= wall[2][1]:
+            if pos_y in range(wall[1][1], wall[2][1] + 1):
+                result = True
+        if wall[1][1] > wall[2][1]:
+            if pos_y in range(wall[1][1], wall[2][1] - 1, -1):
+                result = True
     return pos_y in wall_horizontal.values()
     
 #Returns bounds on x and y
