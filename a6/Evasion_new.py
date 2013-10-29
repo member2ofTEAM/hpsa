@@ -194,12 +194,25 @@ PREY_QSIZE = 30
 HUNTER_PSIZE = 120
 MAX_HEAT = 708
 
-def linfdistance(pos1,pos2):
-    return max(abs(pos1[0]-pos2[0]), abs(pos1[1]-pos2[1]))
-
 def distance(pos1,pos2):
     return math.sqrt(abs(pos1[0]-pos2[0])**2 + abs(pos1[1]-pos2[1])**2)
- 
+
+def draw_heat_line(s_x, s_y, e_x, e_y, heatmap):
+    if s_x == e_x:
+        if s_y <= e_y:
+            for i in range(e_y, s_y + 1):
+                heatmap[s_x][i] = MAX_HEAT
+        if e_y < s_y:
+            for i in range(s_y, e_y - 1, -1):
+                heatmap[s_x][i] = MAX_HEAT
+    if s_y == e_y:
+        if s_x <= e_x:
+            for i in range(e_x, s_x + 1):
+                heatmap[i][s_x] = MAX_HEAT
+        if e_x < s_x:
+            for i in range(s_x, e_x - 1, -1):
+                heatmap[i][s_x] = MAX_HEAT
+
 def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
     # Prediction of Hunter Moves            
     (oh_x, oh_y) = (pot_x, pot_y)
@@ -237,6 +250,11 @@ def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
                         heatmap[i][j] = max((142 - 0.5*distance(hunter_steps[0], (i, j)))/
                                              142 * (MAX_HEAT - distance((x, y), 
                                         (i, j))), heatmap[i][j])
+    for (id, (s_x, s_y), (e_x, e_y)) in wall_vertical_out:
+         draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
+
+    for (id, (s_x, s_y), (e_x, e_y)) in wall_horizontal_out:
+         draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
 
 #    for i in range(500):#x_prey - 100, x_prey + 100):
 #        for j in range(500):#y_prey - 200, y_prey + 100):
