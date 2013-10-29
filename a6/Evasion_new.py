@@ -251,10 +251,12 @@ def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
                                              142 * (MAX_HEAT - distance((x, y), 
                                         (i, j))), heatmap[i][j])
     for (id, (s_x, s_y), (e_x, e_y)) in wall_vertical_out:
-         draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
+        if id > 0:
+            draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
 
     for (id, (s_x, s_y), (e_x, e_y)) in wall_horizontal_out:
-         draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
+        if id > 0:
+            draw_heat_line(s_x, s_y, e_x, e_y, heatmap)
 
 #    for i in range(500):#x_prey - 100, x_prey + 100):
 #        for j in range(500):#y_prey - 200, y_prey + 100):
@@ -296,14 +298,14 @@ def parse_wall(entries):
     if(wall[1]==wall[3]):
       hw = (entry[0],(wall[0],wall[1]),(wall[2],wall[3]))
       wall_horizontal_out.append(hw)
-      wall_horizontal[entry[0]]=wall[1]
+      #wall_horizontal[entry[0]]=wall[1]
       canvas.create_line(wall[0], wall[1], wall[2], wall[3], fill="black")
       canvas.update()
       print wall_horizontal
     if(wall[0]==wall[2]):
       vw = (entry[0],(wall[0],wall[1]),(wall[2],wall[3]))
       wall_vertical_out.append(vw)
-      wall_vertical[entry[0]]=wall[0]
+      #wall_vertical[entry[0]]=wall[0]
       canvas.create_line(wall[0], wall[1], wall[2], wall[3], fill="black")
       canvas.update()
       print wall_vertical
