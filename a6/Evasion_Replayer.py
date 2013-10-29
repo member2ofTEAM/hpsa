@@ -3,7 +3,6 @@ Endlessly bouncing ball - demonstrates animation using Python and TKinter
 """
 import time
 import random
-import msvcrt as m
 
 # Initial coordinates
 x0 = 0
@@ -235,12 +234,12 @@ def handler(event):
 
 window.bind('<Key>', handler)
 
-f = open("prey_moves_diag_backup", "rb")
+f = open("prey_moves_diag", "rb")
 input_text = f.read().split('\n')
 #input_text = 0
 #offset = input_text[-3]
 rep_no = 0
-prey_queue = eval(input_text[rep_no])
+prey_queue = eval(input_text[-2])
 
 tick = 0
 # For each timestep
