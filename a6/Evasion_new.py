@@ -108,7 +108,7 @@ hunter_moves = (prey_moves.values() + [move+'h' for move in prey_moves.values()]
                + [move+'v' for move in prey_moves.values()] 
                + ['r'+value for value in wall_horizontal.keys()+wall_vertical.keys() if int(value)>=0])
 
-prey_queue = [(0,0)]
+prey_queue = 30*[(-1,0)]
 reey_move = (0,0)
 
 h_x = x0
@@ -151,6 +151,15 @@ def prey_update_box():
 
 prey_boundary = prey_update_box()
 
+def prey_area_box():
+    return (abs(prey_boundary[0][0] - prey_boundary[0][1]) * 
+            abs(prey_boundary[1][0] - prey_boundary[1][1]))
+
+def prey_area_longated():
+    return (abs(prey_boundary[0][0] - prey_boundary[0][1])/abs(prey_boundary[1][0] - prey_boundary[1][1]) > 5
+         or abs(prey_boundary[1][0] - prey_boundary[1][1])/abs(prey_boundary[0][0] - prey_boundary[0][1]) > 5)
+
+
 def hunter_update_box():
     #pdb.set_trace()
     h_walls = wall_horizontal.values()
@@ -180,17 +189,27 @@ def prey_pos_in_box(pos):
 
 img = PhotoImage(width=500, height=500)
 canvas.create_image((250, 250), image=img, state="normal")
-PREY_QSIZE = 100
-HUNTER_PSIZE = 2 * PREY_QSIZE
+
+PREY_QSIZE = 30
+HUNTER_PSIZE = 120
 MAX_HEAT = 708
+
+def linfdistance(pos1,pos2):
+    return max(abs(pos1[0]-pos2[0]), abs(pos1[1]-pos2[1]))
 
 def distance(pos1,pos2):
     return math.sqrt(abs(pos1[0]-pos2[0])**2 + abs(pos1[1]-pos2[1])**2)
  
 def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
     # Prediction of Hunter Moves            
+    (oh_x, oh_y) = (pot_x, pot_y)
     hunter_steps = []
-    for i in range(HUNTER_PSIZE):
+    lhp = 120
+    if prey_area_box() < 15000:
+        lhp = 85 
+    if prey_area_box() < 4000:
+        lhp = 40
+    for i in range(min(HUNTER_PSIZE, lhp)):
         hunter_steps.append((pot_x, pot_y))
         if vertical_check(pot_x + pot_vx):
             pot_vx = pot_vx*-1
@@ -202,23 +221,26 @@ def calculate_heat(steps, pot_vx, pot_vy, pot_x, pot_y, heatmap):
             pot_vy = 0
         (pot_x, pot_y) = (pot_x + pot_vx, pot_y + pot_vy)
 
-    # Gravity
-    ((x_i, x_j), (y_i, y_j)) = prey_boundary 
-    mid_x = x_i+(x_j-x_i)/2
-    mid_y = y_i+(y_j-y_i)/2
-    for i in range(x_prey - 100, x_prey + 100):
-        for j in range(y_prey - 100, y_prey + 100):
-            heatmap[i][j] = distance((i, j), (mid_x, mid_y))
+    if prey_area_longated():
+        for i in range(x_prey - PREY_QSIZE - 1, x_prey + PREY_QSIZE + 1):
+            for j in range(y_prey - PREY_QSIZE - 1, y_prey + PREY_QSIZE + 1):
+                heatmap[i][j] = MAX_HEAT - distance(hunter_steps[0], (i, j))
+    else:
+        for i in range(x_prey - PREY_QSIZE - 1, x_prey + PREY_QSIZE + 1):
+            for j in range(y_prey - PREY_QSIZE - 1, y_prey + PREY_QSIZE + 1):
+                heatmap[i][j] = distance((i, j), (oh_x, oh_y))
+    
+        for (x, y) in hunter_steps[::-1]:
+            for i in range(x - 10, x + 10):
+                for j in range(y - 10, y + 10):
+                    if distance((i, j), (x, y)) < 10 and hunter_pos_in_box((i, j)):
+                        heatmap[i][j] = max((142 - 0.5*distance(hunter_steps[0], (i, j)))/
+                                             142 * (MAX_HEAT - distance((x, y), 
+                                        (i, j))), heatmap[i][j])
 
-    for (x, y) in hunter_steps:
-        for i in range(x - 10, x + 10):
-            for j in range(y - 10, y + 10):
-                if distance((i, j), (x, y)) < 10 and hunter_pos_in_box((i, j)):
-                    heatmap[i][j] = max(MAX_HEAT - distance((x, y), (i, j)), heatmap[i][j])
-
-    for i in range(x_prey - 100, x_prey + 100):
-        for j in range(y_prey - 100, y_prey + 100):
-            img.put(str('#%02x%02x%02x' % ((255 * int(heatmap[i][j]))/MAX_HEAT, 0, 0)), (i,j))
+#    for i in range(500):#x_prey - 100, x_prey + 100):
+#        for j in range(500):#y_prey - 200, y_prey + 100):
+#            img.put(str('#%02x%02x%02x' % ((255 * int(heatmap[i][j]))/MAX_HEAT, 0, 0)), (i,j))
     canvas.update()  
 
 heatmap = [[0 for value in range(500)] for value in range(500)] 
