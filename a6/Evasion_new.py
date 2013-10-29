@@ -1,5 +1,5 @@
 """
-Endlessly bouncing ball - demonstrates animation using Python and TKinter
+Endlessly bouncing ball - demonstrates animation using Python and TKintedsr
 """
 import time
 import random
