@@ -76,7 +76,7 @@ def next_move():
         our_nodes.append(1)
         our_nodes.append(2)
     else:
-        send('') 
+        send('0') 
 
 #TODO: Implement the who came first rules etc
 def next_round():
@@ -112,3 +112,5 @@ round = 0
 nodes_owner = NO_NODES * [0]
 our_nodes = []
 
+while(1):
+    next_round()
