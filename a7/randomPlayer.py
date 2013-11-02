@@ -10,36 +10,6 @@ import pdb
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import Tkinter as Tk
 
-class Muncher():
-
-    def __init__(self, start, program, player):
-        self.node = start
-        nodes_owner[self.node] = player
-        self.program = program
-        self.next_move = 0
-        self.player = player
-
-    #Return next node (may be same position), -1 if muncher disintegrated
-    def next(self):
-        if self.node == -1:
-            return -1
-        next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x]), range(4))
-        if len(frozenset(next_nodes)) != 1:
-            for i in range(4):
-                maybe_next = next_nodes[self.next_move]
-                if (maybe_next != -1 and not nodes_owner[maybe_next]):
-                    self.node = next_nodes[self.next_move]
-                    self.next_move = (self.next_move + 1) % 4
-                    return self.node
-                self.next_move = (self.next_move + 1) % 4
-        return -1
-
-    def get_pos(self):
-        return self.node
-
-    def __str__(self):
-        return str(self.node) + "/" + str(self.program)
-
 def send(msg):
     print "sending"
     print msg
@@ -104,36 +74,6 @@ def parseStatus(status):
     remainingStuff = map(int, lines[4].split(','))
     return (munched, liveMunchers, otherLiveMunchers, scores, remainingStuff)
 
-def randomMove(munched):
-    rand = random.randint(0, remainingStuff[0])
-    nextMove = str(rand)
-    if rand == 0:
-        return nextMove
-    nextMove += ':'
-    for i in xrange(rand):
-        randNode = random.randint(1, len(nodes)) - 1
-        while randNode in munched:
-            randNode = random.randint(1, len(nodes)) - 1
-        munched.add(randNode)
-        nextMove += '{0}/{1},'.format(randNode, programs[random.randint(1, 24) - 1])
-    nextMove = nextMove[:-1]
-    print "nextMove"
-    print nextMove
-    return nextMove
-
-def spatial_neighbor_to(node, direction):
-    node_pos = nodes_data[node]
-    moves = {"l":(-1, 0), "r":(1, 0), "u":(0,1), "d":(0,-1)}
-    offset = moves[direction]
-    maybe_nb = [node_pos[0] + offset[0], node_pos[1] + offset[1]]
-    try:
-        maybe_nb = nodes_data.index(maybe_nb)
-        if ([node, maybe_nb] in edges_data or [maybe_nb, node] in edges_data): 
-            return maybe_nb
-        return -1
-    except ValueError:
-        return -1
-
 def redraw():
     a.cla()
     colors = [nodes_owner[node] for node in G.nodes()]
@@ -160,8 +100,6 @@ def next_round():
         nodes_owner[opp_node] = 2
     munched.update(newlyMunched)
     print len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
-    nodes_owner[1] = 1
-    nodes_owner[2] = 1
     if round == 0:
         send('1:1/urld,2/urld')
     round += 1
