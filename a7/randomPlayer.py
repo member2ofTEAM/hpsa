@@ -1,10 +1,10 @@
 import socket
 import random
 import sys
-import pdb
-import networkx as nx
-import numpy
-import pdb
+
+programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
+firstNames = ["Jaded", "Jaunty", "Jealous", "Jerky", "Jolly", "Joyful", "Juicy", "Jumpy", "Justifiable", "Juvenile"]
+lastNames = ["Jam", "Janitor", "Jelly", "Jerk", "Jet", "Jitterbug", "Journalist", "Judge", "Juice", "Juxtaposition"]
 
 def send(msg):
     print "sending"
@@ -39,12 +39,28 @@ def parseData(data):
             isNode = True
         elif 'nodeid1' in line:
             isEdge = True
+            edges = [dict() for i in xrange(len(nodes))]
         elif isEdge:
-            edges.append(map(int, line.split(',')))
+            [node1, node2] = map(int, line.split(','))
+            if nodes[node1][0] == nodes[node2][0]:
+                if nodes[node1][1] > nodes[node2][1]:
+                    edges[node1]['u'] = node2
+                    edges[node2]['d'] = node1
+                else:
+                    edges[node1]['d'] = node2
+                    edges[node2]['u'] = node1
+            else:
+                if nodes[node1][0] > nodes[node2][0]:
+                    edges[node1]['l'] = node2
+                    edges[node2]['r'] = node1
+                else:
+                    edges[node1]['r'] = node2
+                    edges[node2]['l'] = node1
         elif isNode:
-            nodes.append(map(int, line.split(','))[1:])
+            temp = map(int, line.split(','))
+            nodes.append((temp[1], temp[2]))
     return (nodes, edges)
-
+        
 def parseStatus(status):
     munched = set()
     liveMunchers = []
@@ -70,45 +86,34 @@ def parseStatus(status):
     remainingStuff = map(int, lines[4].split(','))
     return (munched, liveMunchers, otherLiveMunchers, scores, remainingStuff)
 
-def next_move():
-    if len(our_nodes) == 0:
-        send('2:1/urld,2/urld')
-        our_nodes.append(1)
-        our_nodes.append(2)
-    else:
-        send('') 
-
-#TODO: Implement the who came first rules etc
-def next_round():
-    status = receive()
-    print status
-    if status == '0' or status == '':
-        sys.exit(0)
-    (newlyMunched, liveMunchers, otherLiveMunchers, scores, remainingStuff) = parseStatus(status)
-    for m in liveMunchers:
-        our_nodes.append(m[0])
-    for node in newlyMunched:
-        nodes_owner[node] = 2
-    for node in our_nodes:
-        nodes_owner[node] = 1
-    print len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
-    next_move()
+def randomMove(munched):
+    rand = random.randint(0, remainingStuff[0])
+    nextMove = str(rand)
+    if rand == 0:
+        return nextMove
+    nextMove += ':'
+    for i in xrange(rand):
+        randNode = random.randint(1, len(nodes)) - 1
+        while randNode in munched:
+            randNode = random.randint(1, len(nodes)) - 1
+        munched.add(randNode)
+        nextMove += '{0}/{1},'.format(randNode, programs[random.randint(1, 24) - 1])
+    nextMove = nextMove[:-1]
+    print "nextMove"
+    print nextMove
+    return nextMove
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', int(sys.argv[1])))
-send("TEAM")
-
-munchers = [(1, 'urld'), (2, 'urld')]
-
-G = nx.Graph()
-(nodes_data, edges_data) = parseData(receive())
-G.add_edges_from(edges_data)
-NO_MUNCH = 10
-NO_NODES = len(nodes_data)
-NO_EDGES = len(edges_data)
-round = 0
-
-#0 means neutral, 1 means player 1, 2 means player 2
-nodes_owner = NO_NODES * [0]
-our_nodes = []
-
+send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
+(nodes, edges) = parseData(receive())
+munched = set()
+while(True):
+    status = receive()
+    print status
+    if status == '0' or status == '':
+        break
+    (newlyMunched, liveMunchers, otherLiveMunchers, scores, remainingStuff) = parseStatus(status)
+    munched.update(newlyMunched)
+    print len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
+    send(randomMove(munched))
