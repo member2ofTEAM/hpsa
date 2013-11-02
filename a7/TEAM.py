@@ -1,27 +1,133 @@
+import socket
+import random
+import sys
+import pdb
 import csv
 import networkx as nx
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import pdb
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import Tkinter as Tk
 
-NO_NODES = 127
-NO_EDGES = 131
-NO_MUNCH = 10
-FILENAME = "nanodata.csv"
-input_data = [map(int, i) for i in csv.reader(open(FILENAME)) if i != [] and i[0].isdigit()]
-nodes_data = input_data[:NO_NODES]
-nodes_data = dict((i[0], (i[1], i[2])) for i in nodes_data)
-edges_data = input_data[NO_NODES:NO_NODES + NO_EDGES]
-#0 means neutral, 1 means player 1, 2 means player 2
-nodes_owner = {}
-for node in nodes_data.keys():
-    nodes_owner[node] = 0
+def send(msg):
+    print "sending"
+    print msg
+    msg += "\n<EOM>\n"
+    totalsent = 0
+    while totalsent < len(msg):
+        sent = s.send(msg[totalsent:])
+        if sent == 0:
+            raise RuntimeError("socket connection broken")
+        totalsent = totalsent + sent
+
+def receive():
+    msg = ''
+    while '<EOM>\n' not in msg:
+        chunk = s.recv(1024)
+        if not chunk: break
+        if chunk == '':
+            raise RuntimeError("socket connection broken")
+        msg += chunk
+    msg = msg[:-7]
+    return msg
+
+def parseData(data):
+    isNode = False
+    isEdge = False
+    nodes = []
+    edges = []
+    for line in data.split():
+        line = line.strip().lower()
+        if 'nodeid,xloc,yloc' in line:
+            isNode = True
+        elif 'nodeid1' in line:
+            isEdge = True
+        elif isEdge:
+            edges.append(map(int, line.split(',')))
+        elif isNode:
+            nodes.append(map(int, line.split(','))[1:])
+    return (nodes, edges)
+
+def parseStatus(status):
+    munched = set()
+    liveMunchers = []
+    otherLiveMunchers = []
+    lines = status.split()
+    if lines[0] != '0':
+        [num, munchedNodes] = lines[0].split(':')
+        munchedNodes = map(int, munchedNodes.split(','))
+        for i in xrange(int(num)):
+            munched.add(munchedNodes[i])
+    if lines[1] != '0':
+        [num, myMunchers] = lines[1].split(':')
+        myMunchers = myMunchers.split(',')
+        for i in xrange(int(num)):
+            temp = myMunchers[i].split('/')
+            liveMunchers.append((int(temp[0]), temp[1], int(temp[2])))
+    if lines[2] != '0':
+        [num, otherMunchers] = lines[2].split(':')
+        otherMunchers = map(int, otherMunchers.split(','))
+        for i in xrange(int(num)):
+            otherLiveMunchers.append(otherMunchers[i])
+    scores = map(int, lines[3].split(','))
+    remainingStuff = map(int, lines[4].split(','))
+    return (munched, liveMunchers, otherLiveMunchers, scores, remainingStuff)
+
+def redraw():
+    a.cla()
+    colors = [nodes_owner[node] for node in G.nodes()]
+    plt.xlim(-1, 20)
+    plt.ylim(-1, 10)
+    a.set_xticks(numpy.arange(-1, 20, 1))
+    a.set_yticks(numpy.arange(-1, 10, 1))
+    plt.grid(which='both')
+    nx.draw_networkx(G, nodes_data, cmap = plt.get_cmap('jet'), 
+                        node_color = colors, font_color='white')
+    canvas.draw()
+
+def next_move():
+    if len(our_nodes) == 0:
+        send('2:1/urld,2/urld')
+        our_nodes.append(1)
+        our_nodes.append(2)
+    else:
+        send('') 
+
+#TODO: Implement the who came first rules etc
+def next_round():
+    status = receive()
+    print status
+    if status == '0' or status == '':
+        sys.exit(0)
+    (newlyMunched, liveMunchers, otherLiveMunchers, scores, remainingStuff) = parseStatus(status)
+    for m in liveMunchers:
+        our_nodes.append(m[0])
+    for node in newlyMunched:
+        nodes_owner[node] = 2
+    for node in our_nodes:
+        nodes_owner[node] = 1
+    print len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
+    next_move()
+    redraw()
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('127.0.0.1', int(sys.argv[1])))
+send("TEAM")
+
+munchers = [(1, 'urld'), (2, 'urld')]
 
 G = nx.Graph()
+(nodes_data, edges_data) = parseData(receive())
 G.add_edges_from(edges_data)
+NO_MUNCH = 10
+NO_NODES = len(nodes_data)
+NO_EDGES = len(edges_data)
+round = 0
+
+#0 means neutral, 1 means player 1, 2 means player 2
+nodes_owner = NO_NODES * [0]
+our_nodes = []
 
 root = Tk.Tk()
 fig = plt.figure()
@@ -30,78 +136,9 @@ canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.show()
 canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
 
-#Return -1 if there is no node in that spatial direction
-def spatial_neighbor_to(node, direction):
-    node_pos = nodes_data[node]
-    moves = {"l":(-1, 0), "r":(1, 0), "u":(0,1), "d":(0,-1)}
-    offset = moves[direction]
-    maybe_nb = (node_pos[0] + offset[0], node_pos[1] + offset[1])
-    inverse_nodes = dict((v, k) for k, v in nodes_data.iteritems())
-    maybe_nb = inverse_nodes.get(maybe_nb, -1)
-    if maybe_nb == -1:
-        return -1
-    else:
-        if [node, maybe_nb] in edges_data or [maybe_nb, node] in edges_data:
-            return maybe_nb
-        else:
-            return -1
-
-class Muncher():
-    
-    def __init__(self, start, program, player):
-        self.node = start
-        nodes_owner[self.node] = player
-        self.program = program
-        self.next_move = 0
-        self.player = player
-
-    #Return next node (may be same position), -1 if muncher disintegrated
-    def next(self):
-        if self.node == -1:
-            return -1
-        next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x]), range(4))
-        if len(frozenset(next_nodes)) == 1:
-            return -1
-        else:
-            for i in range(4):
-                maybe_next = next_nodes[self.next_move]
-                if (maybe_next != -1 and not nodes_owner[maybe_next]):
-                    self.node = next_nodes[self.next_move]
-                    self.next_move = (self.next_move + 1) % 4
-                    return self.node
-                self.next_move = (self.next_move + 1) % 4
-            return -1
-
-    def get_pos(self):
-        return self.node
-
-muncher = []
-muncher.append(Muncher(6, "ruld", 1))
-muncher.append(Muncher(10, "ruld", 1))
-muncher.append(Muncher(11, "ruld", 2))
-muncher.append(Muncher(12, "ruld", 2))
-
-def redraw():
-    a.cla()
-    colors = [nodes_owner.get(node) for node in G.nodes()]
-    plt.xlim(-1, 20)
-    plt.ylim(-1, 10)
-    a.set_xticks(numpy.arange(-1, 20, 1))
-    a.set_yticks(numpy.arange(-1, 10, 1))
-    plt.grid(which='both')
-    nx.draw_networkx(G, nodes_data, cmap = plt.get_cmap('jet'), node_color = colors, font_color='white')
-    canvas.draw()
-
-#TODO: Implement the who came first rules etc
-def next_round():
-    for m in muncher:
-        node = m.next()
-        print node
-        if node != -1:
-            nodes_owner[node] = m.player
-    redraw()
-
-b = Tk.Button(root, text="next move", command=next_round)
+b = Tk.Button(root, text="next round", command=next_round)
 b.pack()
 
 Tk.mainloop()
+
+
