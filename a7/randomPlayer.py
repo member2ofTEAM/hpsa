@@ -1,10 +1,43 @@
 import socket
 import random
 import sys
+import pdb
+import networkx as nx
+import numpy
+import pdb
 
 programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
 firstNames = ["Jaded", "Jaunty", "Jealous", "Jerky", "Jolly", "Joyful", "Juicy", "Jumpy", "Justifiable", "Juvenile"]
 lastNames = ["Jam", "Janitor", "Jelly", "Jerk", "Jet", "Jitterbug", "Journalist", "Judge", "Juice", "Juxtaposition"]
+
+class Muncher():
+
+    def __init__(self, start, program, player):
+        self.node = start
+        nodes_owner[self.node] = player
+        self.program = program
+        self.next_move = 0
+        self.player = player
+
+    #Return next node (may be same position), -1 if muncher disintegrated
+    def next(self):
+        if self.node == -1:
+            return -1
+        next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x]), range(4))
+        if len(frozenset(next_nodes)) == 1:
+            return -1
+        else:
+            for i in range(4):
+                maybe_next = next_nodes[self.next_move]
+                if (maybe_next != -1 and not nodes_owner[maybe_next]):
+                    self.node = next_nodes[self.next_move]
+                    self.next_move = (self.next_move + 1) % 4
+                    return self.node
+                self.next_move = (self.next_move + 1) % 4
+            return -1
+
+    def get_pos(self):
+        return self.node
 
 def send(msg):
     print "sending"
@@ -33,6 +66,7 @@ def parseData(data):
     isEdge = False
     nodes = []
     edges = []
+    edges_data = []
     for line in data.split():
         line = line.strip().lower()
         if 'nodeid,xloc,yloc' in line:
@@ -42,6 +76,7 @@ def parseData(data):
             edges = [dict() for i in xrange(len(nodes))]
         elif isEdge:
             [node1, node2] = map(int, line.split(','))
+            edges_data.append([node1, node2])
             if nodes[node1][0] == nodes[node2][0]:
                 if nodes[node1][1] > nodes[node2][1]:
                     edges[node1]['u'] = node2
@@ -59,7 +94,7 @@ def parseData(data):
         elif isNode:
             temp = map(int, line.split(','))
             nodes.append((temp[1], temp[2]))
-    return (nodes, edges)
+    return (nodes, edges, edges_data)
         
 def parseStatus(status):
     munched = set()
@@ -106,7 +141,13 @@ def randomMove(munched):
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', int(sys.argv[1])))
 send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
-(nodes, edges) = parseData(receive())
+(nodes, edges, edges_data) = parseData(receive())
+pdb.set_trace()
+G = nx.Graph()
+G.add_edges_from(edges_data)
+NO_NODES = len(nodes)
+NO_EDGES = len(edges_data)
+round = 0
 munched = set()
 while(True):
     status = receive()
@@ -117,3 +158,5 @@ while(True):
     munched.update(newlyMunched)
     print len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
     send(randomMove(munched))
+    round += 1
+

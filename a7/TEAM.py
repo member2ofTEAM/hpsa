@@ -98,8 +98,6 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', int(sys.argv[1])))
 send("TEAM")
 
-munchers = [(1, 'urld'), (2, 'urld')]
-
 G = nx.Graph()
 (nodes_data, edges_data) = parseData(receive())
 G.add_edges_from(edges_data)
