@@ -4,23 +4,47 @@ import sys
 import pdb
 import networkx as nx
 import numpy
-import pdb
+import copy
+import time
 
 programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
 firstNames = ["Jaded", "Jaunty", "Jealous", "Jerky", "Jolly", "Joyful", "Juicy", "Jumpy", "Justifiable", "Juvenile"]
 lastNames = ["Jam", "Janitor", "Jelly", "Jerk", "Jet", "Jitterbug", "Journalist", "Judge", "Juice", "Juxtaposition"]
 
+#Return -1 if there is no node in that spatial direction
+def spatial_neighbor_to(node, direction):
+    node_pos = nodes[node]
+    moves = {"l":(-1, 0), "r":(1, 0), "u":(0,-1), "d":(0,1)}
+    offset = moves[direction]
+    maybe_nb = (node_pos[0] + offset[0], node_pos[1] + offset[1])
+    
+    tmp = -1
+    for i in range(len(nodes)):
+      if nodes[i] == maybe_nb:
+	tmp = i	
+	break
+
+    maybe_nb = tmp
+    
+    if maybe_nb == -1:
+        return -1
+    else:
+        if [node, maybe_nb] in edges_data or [maybe_nb, node] in edges_data:
+            return maybe_nb
+        else:
+            return -1
+
 class Muncher():
 
     def __init__(self, start, program, player):
         self.node = start
-        nodes_owner[self.node] = player
+        #nodes_owner[self.node] = player
         self.program = program
         self.next_move = 0
         self.player = player
 
     #Return next node (may be same position), -1 if muncher disintegrated
-    def next(self):
+    def next(self,munched):
         if self.node == -1:
             return -1
         next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x]), range(4))
@@ -29,7 +53,8 @@ class Muncher():
         else:
             for i in range(4):
                 maybe_next = next_nodes[self.next_move]
-                if (maybe_next != -1 and not nodes_owner[maybe_next]):
+                
+                if (maybe_next != -1 and maybe_next not in munched):
                     self.node = next_nodes[self.next_move]
                     self.next_move = (self.next_move + 1) % 4
                     return self.node
@@ -39,9 +64,13 @@ class Muncher():
     def get_pos(self):
         return self.node
 
+
+nodes = []
+edges = []
+
 def send(msg):
     print "sending"
-    print msg
+    print "Send: " + msg
     msg += "\n<EOM>\n"
     totalsent = 0
     while totalsent < len(msg):
@@ -121,56 +150,76 @@ def parseStatus(status):
     remainingStuff = map(int, lines[4].split(','))
     return (munched, liveMunchers, otherLiveMunchers, scores, remainingStuff)
 
-def lookahead(munched)
+def lookahead(munched,nodes,edges):
     #backing up the game board
-    nodes_copy = nodes
-    edges_copy = edges
-    munched_copy = munched
+    nodes_copy = nodes[:]
+    edges_copy = edges[:]
+    munched_copy = set([item for item in munched])
 
-    not_munched = [node for node in nodes_copy if node not in munched]
+    not_munched = [i for i in range(len(nodes_copy)) if i not in munched]
+    print "not munched ", not_munched
+       
     max_score = -1
     best_program = ''
-    best_node = -1
+    best_node = 0
     max_tmp = -1
-    minthreshold = 4
+    minthreshold = -1
     #loop through all possible nodes remaining   
     for node in not_munched:
-        max_tmp = max_score
-        best_program_tmp = best_program
+	#print "Node: " + str(node)
+        max_tmp = -1
+        best_program_tmp = ''
 	#Loop through all possible programs
         for program in programs:
+	    #print "Program: " + program
+
             #PLAY GAME
 	    score = 0
-            tmp_muncher = Muncher(node,program,player)
-	    munched.add(node)
-	    while tmp_muncher.next()!=-1:
+	    next_tmp = 0
+            tmp_muncher = Muncher(node,program,1)
+	    next_tmp = node
+	    
+	    while next_tmp !=-1 and next_tmp not in munched:
+		#print "Next id :",next_tmp
 		score += 1
-		munched.add(tmp_muncher.get_pos())
-
-	    #assign best program
-            if score > max_tmp:
-                max_tmp = score
-                best_program_tmp = program
-            
+		munched.add(next_tmp)
+		next_tmp = tmp_muncher.next(munched)
+		
             #restore old board state
-	    nodes = nodes_copy
-            edges = edges_copy
-            munched = munched_copy
+	    nodes = nodes_copy[:]
+            edges = edges_copy[:]
+            munched = set([item for item in munched_copy])
 
 	    #if any path for node is very bad
 	    #don't choose node
             if score <= minthreshold:
                 max_tmp = -1
                 break
-        if max_score < max_tmp
+                
+            #assign best program
+            if score > max_tmp:
+                max_tmp = score
+                best_program_tmp = program
+            
+        if max_score < max_tmp:
+	   print "MAXSCORE: ", max_score
+	   print best_program_tmp
+	   print node
+	   print nodes[node]
            best_program = best_program_tmp
            best_node = node
-    return (node, program)
+           max_score = max_tmp
+           
+    print "Best node is : " + str(best_node) + best_program       
+    return (best_node, best_program)
 
-def greedyMove(munched):
+def greedyMove(munched,nodes,edges):
    nextMove = str(0)
+   node = 0
+   program = ''
    if remainingStuff[0]>0:
-	(node,program) = lookahead(munched)
+	print "STILL GOT STUFF TO DO"
+	(node,program) = lookahead(munched,nodes,edges)
 	nextMove = '1:'
 	nextMove += '{0}/{1},'.format(node,program) 
 	return nextMove
@@ -198,7 +247,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', int(sys.argv[1])))
 send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
 (nodes, edges, edges_data) = parseData(receive())
-pdb.set_trace()
+#pdb.set_trace()
 G = nx.Graph()
 G.add_edges_from(edges_data)
 NO_NODES = len(nodes)
@@ -207,12 +256,12 @@ round = 0
 munched = set()
 while(True):
     status = receive()
-    print status
+    print "Status: " + status
     if status == '0' or status == '':
         break
     (newlyMunched, liveMunchers, otherLiveMunchers, scores, remainingStuff) = parseStatus(status)
     munched.update(newlyMunched)
-    print len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
-    send(greedyMove(munched))
+    print "Additional Information: ",len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
+    send(greedyMove(munched,nodes,edges))
     round += 1
 

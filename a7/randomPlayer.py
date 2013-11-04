@@ -123,6 +123,7 @@ def parseStatus(status):
 
 def randomMove(munched):
     rand = random.randint(0, remainingStuff[0])
+    rand = 0
     nextMove = str(rand)
     if rand == 0:
         return nextMove
@@ -142,7 +143,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('127.0.0.1', int(sys.argv[1])))
 send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
 (nodes, edges, edges_data) = parseData(receive())
-pdb.set_trace()
+#pdb.set_trace()
 G = nx.Graph()
 G.add_edges_from(edges_data)
 NO_NODES = len(nodes)
