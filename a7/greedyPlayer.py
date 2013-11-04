@@ -162,7 +162,8 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
         for neighbor in edges[node].values():
             if not (neighbor in munched):
                 m = Muncher(neighbor, nodes, edges, edges_data, munched, "best")
-                ranking.append((neighbor, m.program, m.score))
+                if m.score > 4:
+                    ranking.append((neighbor, m.program, m.score))
         if not ranking:
             continue
         ranking.sort(key=lambda x: x[2], reverse=True)
@@ -181,7 +182,7 @@ def greedy_global(munched, nodes, edges, edges_data):
 
     return ranking
 
-def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers):
+def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round):
     move_string = str(0)
     node = 0
     program = ''
@@ -193,10 +194,14 @@ def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers):
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         move_string = move_string[:-1]
     if (remainingStuff[0]>0 and otherNewMunchers) or remainingStuff[2] < 1000:
+        granking = greedy_global(munched, nodes, edges, edges_data)
         ranking = greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers)
         num_next = len(ranking)
-        move_string = str(num_next) + ':'
+        num_g = len(otherNewMunchers) - len(ranking)
+        move_string = str(num_next + num_g) + ':'
         for next_move in ranking[:num_next]:
+            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
+        for next_move in granking[:num_g]:
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         move_string = move_string[:-1]
     return move_string
@@ -224,7 +229,7 @@ if __name__ == "__main__":
             otherNewMunchers, scores, remainingStuff) = parseStatus(status)
 #        update_owner(newlyMunched, liveMunchers, otherLiveMunchers, nodes_owner)
         munched.update(newlyMunched)
-        send(greedyMove(munched,nodes,edges, edges_data, otherNewMunchers))
+        send(greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round))
         round += 1
     print remainingStuff[2]
 
