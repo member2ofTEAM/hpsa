@@ -2,71 +2,91 @@ import socket
 import random
 import sys
 import pdb
-import networkx as nx
-import numpy
-import copy
+#import networkx as nx
 import time
+import re
 
 programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
 firstNames = ["Jaded", "Jaunty", "Jealous", "Jerky", "Jolly", "Joyful", "Juicy", "Jumpy", "Justifiable", "Juvenile"]
 lastNames = ["Jam", "Janitor", "Jelly", "Jerk", "Jet", "Jitterbug", "Journalist", "Judge", "Juice", "Juxtaposition"]
 
-#Return -1 if there is no node in that spatial direction
-def spatial_neighbor_to(node, direction):
-    node_pos = nodes[node]
-    moves = {"l":(-1, 0), "r":(1, 0), "u":(0,-1), "d":(0,1)}
-    offset = moves[direction]
-    maybe_nb = (node_pos[0] + offset[0], node_pos[1] + offset[1])
-    
-    tmp = -1
-    for i in range(len(nodes)):
-      if nodes[i] == maybe_nb:
-	tmp = i	
-	break
-
-    maybe_nb = tmp
-    
-    if maybe_nb == -1:
-        return -1
-    else:
-        if [node, maybe_nb] in edges_data or [maybe_nb, node] in edges_data:
-            return maybe_nb
-        else:
-            return -1
-
 class Muncher():
 
-    def __init__(self, start, program, player):
+    def __init__(self, start, nodes, edges_data, munched, program=None, player=1):
         self.node = start
-        #nodes_owner[self.node] = player
-        self.program = program
-        self.next_move = 0
+        self.score = 1
         self.player = player
+        self.eaten = [self.node]
+        self.program = ""
+        if program == None:
+            self.program = self._infer_program(nodes, edges_data)
+        elif program == "best":
+            (self.score, self.program) = self._best_program_by_score(nodes, edges_data, munched)
+        else:
+            self.program = program
+
+    def _infer_program(self):
+        return "urld"
 
     #Return next node (may be same position), -1 if muncher disintegrated
-    def next(self,munched):
+    def next(self, munched, nodes, edges_data):
         if self.node == -1:
             return -1
-        next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x]), range(4))
-        if len(frozenset(next_nodes)) == 1:
-            return -1
-        else:
-            for i in range(4):
-                maybe_next = next_nodes[self.next_move]
-                
-                if (maybe_next != -1 and maybe_next not in munched):
-                    self.node = next_nodes[self.next_move]
-                    self.next_move = (self.next_move + 1) % 4
-                    return self.node
-                self.next_move = (self.next_move + 1) % 4
-            return -1
+        next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x], nodes, edges_data), range(4))
+        for i in range(len(next_nodes)):
+            maybe_next = next_nodes[i]
+            if (maybe_next != -1 and maybe_next not in munched and maybe_next not in self.eaten):
+                self.node = maybe_next
+                self.score += 1
+                self.eaten.append(self.node)
+                return self.node
+        return -1
 
     def get_pos(self):
         return self.node
 
+    #Return program with maximum score and score
+    def _best_program_by_score(self, nodes, edges_data, munched):
+        best_score = -1
+        best_program = ''
+        for program in programs:
+            #The proper way of doing this is to create a copy of self
+            score_copy = self.score
+            node_copy = self.node
+            eaten_copy = self.eaten[:]
+            program_copy = self.program
 
-nodes = []
-edges = []
+            self.program = program
+            #PLAY GAME
+            while (self.next(munched, nodes, edges_data) != -1):
+                pass
+
+            if self.score > best_score:
+                best_score = self.score
+                best_program = program
+            #Restore changed variables
+            self.score = score_copy
+            self.node = node_copy
+            self.eaten = eaten_copy[:]
+            self.program = program_copy
+
+        return (best_score, best_program)
+
+#Return -1 if there is no node in that spatial direction
+def spatial_neighbor_to(node, direction, nodes, edges_data):
+    node_pos = nodes[node]
+    moves = {"l":(-1, 0), "r":(1, 0), "u":(0,-1), "d":(0,1)}
+    offset = moves[direction]
+    maybe_nb = (node_pos[0] + offset[0], node_pos[1] + offset[1])
+    tmp = -1
+    for i in range(len(nodes)):
+        if nodes[i] == maybe_nb:
+            tmp = i	
+            break
+    maybe_nb = tmp
+    if maybe_nb != -1 and ([node, maybe_nb] in edges_data or [maybe_nb, node] in edges_data):
+            return maybe_nb
+    return -1
 
 def send(msg):
     print "sending"
@@ -124,17 +144,21 @@ def parseData(data):
             temp = map(int, line.split(','))
             nodes.append((temp[1], temp[2]))
     return (nodes, edges, edges_data)
-        
+
 def parseStatus(status):
     munched = set()
     liveMunchers = []
     otherLiveMunchers = []
+    otherNewMunchers = []
     lines = status.split()
     if lines[0] != '0':
         [num, munchedNodes] = lines[0].split(':')
-        munchedNodes = map(int, munchedNodes.split(','))
+        munchedNodes = map(int, re.split("[/,]", munchedNodes))
         for i in xrange(int(num)):
             munched.add(munchedNodes[i])
+        for m in lines[0].split(':')[1].split(","):
+            if "/" in m:
+                otherNewMunchers.append(map(int, m.split("/")))
     if lines[1] != '0':
         [num, myMunchers] = lines[1].split(':')
         myMunchers = myMunchers.split(',')
@@ -148,120 +172,66 @@ def parseStatus(status):
             otherLiveMunchers.append(otherMunchers[i])
     scores = map(int, lines[3].split(','))
     remainingStuff = map(int, lines[4].split(','))
-    return (munched, liveMunchers, otherLiveMunchers, scores, remainingStuff)
+    return (munched, liveMunchers, otherLiveMunchers, otherNewMunchers, scores, remainingStuff)
 
-def lookahead(munched,nodes,edges):
-    #backing up the game board
-    nodes_copy = nodes[:]
-    edges_copy = edges[:]
-    munched_copy = set([item for item in munched])
+#Return best (node, program, score) for nodes of interest sorted and maximized by score
+def greedy_next(munched, nodes, edges_data, otherNewMunchers):
+    nodes_of_interest = []
 
-    not_munched = [i for i in range(len(nodes_copy)) if i not in munched]
-    print "not munched ", not_munched
-       
-    max_score = -1
-    best_program = ''
-    best_node = 0
-    max_tmp = -1
-    minthreshold = -1
-    #loop through all possible nodes remaining   
-    for node in not_munched:
-	#print "Node: " + str(node)
-        max_tmp = -1
-        best_program_tmp = ''
-	#Loop through all possible programs
-        for program in programs:
-	    #print "Program: " + program
+    for node in otherNewMunchers:
+        node = node[1]
+        program = "urld"
+        neighborhood = map(lambda x: spatial_neighbor_to(node, program[x], nodes, edges_data), range(4))
+        for neighbor in neighborhood:
+            if not (neighbor in munched) and neighbor != 1:
+                nodes_of_interest.append(neighbor)
 
-            #PLAY GAME
-	    score = 0
-	    next_tmp = 0
-            tmp_muncher = Muncher(node,program,1)
-	    next_tmp = node
-	    
-	    while next_tmp !=-1 and next_tmp not in munched:
-		#print "Next id :",next_tmp
-		score += 1
-		munched.add(next_tmp)
-		next_tmp = tmp_muncher.next(munched)
-		
-            #restore old board state
-	    nodes = nodes_copy[:]
-            edges = edges_copy[:]
-            munched = set([item for item in munched_copy])
+    ranking = []
+    for node in nodes_of_interest:
+        m = Muncher(node, nodes, edges_data, munched, "best")
+        ranking.append((node, m.program, m.score))
 
-	    #if any path for node is very bad
-	    #don't choose node
-            if score <= minthreshold:
-                max_tmp = -1
-                break
-                
-            #assign best program
-            if score > max_tmp:
-                max_tmp = score
-                best_program_tmp = program
-            
-        if max_score < max_tmp:
-	   print "MAXSCORE: ", max_score
-	   print best_program_tmp
-	   print node
-	   print nodes[node]
-           best_program = best_program_tmp
-           best_node = node
-           max_score = max_tmp
-           
-    print "Best node is : " + str(best_node) + best_program       
-    return (best_node, best_program)
+    ranking.sort(key=lambda x: x[2], reverse=True)
+    return ranking
 
-def greedyMove(munched,nodes,edges):
-   nextMove = str(0)
-   node = 0
-   program = ''
-   if remainingStuff[0]>0:
-	print "STILL GOT STUFF TO DO"
-	(node,program) = lookahead(munched,nodes,edges)
-	nextMove = '1:'
-	nextMove += '{0}/{1},'.format(node,program) 
-	return nextMove
-   else:
-	return nextMove
+def greedyMove(munched,nodes,edges,otherNewMunchers):
+    move_string = str(0)
+    node = 0
+    program = ''
+    if remainingStuff[0]>0:
+        ranking = greedy_next(munched, nodes, edges_data, otherNewMunchers)
+        next_move = ranking[0]
+        move_string = '1:'
+        move_string += str(next_move[0]) + "/" + str(next_move[1])
+    return move_string
 
-def randomMove(munched):
-    rand = random.randint(0, remainingStuff[0])
-    nextMove = str(rand)
-    if rand == 0:
-        return nextMove
-    nextMove += ':'
-    for i in xrange(rand):
-        randNode = random.randint(1, len(nodes)) - 1
-        while randNode in munched:
-            randNode = random.randint(1, len(nodes)) - 1
-        munched.add(randNode)
-        nextMove += '{0}/{1},'.format(randNode, programs[random.randint(1, 24) - 1])
-    nextMove = nextMove[:-1]
-    print "nextMove"
-    print nextMove
-    return nextMove
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('127.0.0.1', int(sys.argv[1])))
-send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
-(nodes, edges, edges_data) = parseData(receive())
-#pdb.set_trace()
-G = nx.Graph()
-G.add_edges_from(edges_data)
-NO_NODES = len(nodes)
-NO_EDGES = len(edges_data)
-round = 0
-munched = set()
-while(True):
-    status = receive()
-    print "Status: " + status
-    if status == '0' or status == '':
-        break
-    (newlyMunched, liveMunchers, otherLiveMunchers, scores, remainingStuff) = parseStatus(status)
-    munched.update(newlyMunched)
-    print "Additional Information: ",len(newlyMunched), len(liveMunchers), len(otherLiveMunchers), scores, remainingStuff
-    send(greedyMove(munched,nodes,edges))
-    round += 1
+#def update_owner(newly_munched, live_munchers, other_live_munchers, nodes_owner):
+#    pass
+    
+if __name__ == "__main__":
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', int(sys.argv[1])))
+    send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
+    (nodes, edges, edges_data) = parseData(receive())
+#    nodes_owner = [0] * len(nodes)
+#    G = nx.Graph()
+#    G.add_edges_from(edges_data)
+    round = 0
+    munched = set()
+    while(True):
+        status = receive()
+        print "Status: " + status
+        #TODO If the server sends a status that corresponds to nothing, the while loop will break here
+        if status == "0" or status == '':
+            break
+        (newlyMunched, liveMunchers, otherLiveMunchers, 
+            otherNewMunchers, scores, remainingStuff) = parseStatus(status)
+#        pdb.set_trace()
+#        update_owner(newlyMunched, liveMunchers, otherLiveMunchers, nodes_owner)
+        munched.update(newlyMunched)
+        if otherNewMunchers:
+            send(greedyMove(munched,nodes,edges, otherNewMunchers))
+        else:
+            send("0")
+        round += 1
 
