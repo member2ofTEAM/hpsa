@@ -154,22 +154,24 @@ def parseStatus(status):
 
 #Return best (node, program, score) for nodes of interest sorted and maximized by score
 def greedy_next(munched, nodes, edges, edges_data, otherNewMunchers):
-    nodes_of_interest = []
-
+    result = []
     for node in otherNewMunchers:
         node = node[1]
         #Look around current position of newly placed munchers
+        nodes_of_interest = []
         for neighbor in edges[node].values():
             if not (neighbor in munched):
                 nodes_of_interest.append(neighbor)
+        ranking = []
+        for node in nodes_of_interest:
+            m = Muncher(node, nodes, edges, edges_data, munched, "best")
+            ranking.append((node, m.program, m.score))
+        if not ranking:
+            continue
+        ranking.sort(key=lambda x: x[2], reverse=True)
+        result.append(ranking[0])
 
-    ranking = []
-    for node in nodes_of_interest:
-        m = Muncher(node, nodes, edges, edges_data, munched, "best")
-        ranking.append((node, m.program, m.score))
-
-    ranking.sort(key=lambda x: x[2], reverse=True)
-    return ranking
+    return result
 
 def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers):
     move_string = str(0)
