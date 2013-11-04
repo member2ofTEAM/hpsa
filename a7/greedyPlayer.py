@@ -5,6 +5,7 @@ import pdb
 #import networkx as nx
 import time
 import re
+from copy import deepcopy
 
 programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
 
@@ -16,6 +17,7 @@ class Muncher():
         self.player = player
         self.eaten = [self.node]
         self.program = ""
+        self.counter = 0
         if program == None:
             self.program = self._infer_program(nodes, edges_data)
         elif program == "best":
@@ -30,10 +32,12 @@ class Muncher():
     def next(self, munched, nodes, edges):
         if self.node == -1:
             return -1
-        for maybe_next in edges[self.node].values():
-            if not(maybe_next in munched or maybe_next in self.eaten):
+        for i in range(4):
+            maybe_next = edges[self.node].get(self.program[i], -1)
+            self.counter = (self.counter + 1) % 4
+            if maybe_next != -1 and not(maybe_next in munched or maybe_next in self.eaten):
                 self.node = maybe_next
-                self.score += 1
+                self.score = self.score + 1
                 self.eaten.append(self.node)
                 return self.node
         return -1
@@ -47,25 +51,18 @@ class Muncher():
         best_program = ''
         for program in programs:
             #The proper way of doing this is to create a copy of self
-            score_copy = self.score
-            node_copy = self.node
-            eaten_copy = self.eaten[:]
-            program_copy = self.program
+            clone = deepcopy(self)
+            clone.program = program
 
-            self.program = program
+#            pdb.set_trace()
             #PLAY GAME
-            while (self.next(munched, nodes, edges) != -1):
+            while (clone.next(munched, nodes, edges) != -1):
                 pass
 
             #TODO: all programs give the same score
-            if self.score >= best_score:
-                best_score = self.score
+            if clone.score >= best_score:
+                best_score = clone.score
                 best_program = program
-            #Restore changed variables
-            self.score = score_copy
-            self.node = node_copy
-            self.eaten = eaten_copy[:]
-            self.program = program_copy
 
         return (best_score, best_program)
 
@@ -161,7 +158,6 @@ def greedy_next(munched, nodes, edges, edges_data, otherNewMunchers):
 
     for node in otherNewMunchers:
         node = node[1]
-        program = "urld"
         #Look around current position of newly placed munchers
         for neighbor in edges[node].values():
             if not (neighbor in munched):
@@ -180,7 +176,10 @@ def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers):
     node = 0
     program = ''
     if (remainingStuff[0]>0 and otherNewMunchers) or remainingStuff[2] < 1000:
-        num_next = min(len(otherNewMunchers), remainingStuff[0])
+        if remainingStuff[2] < 1000:
+            num_next = len(remainingStuff[0])
+        else:
+            num_next = len(otherNewMunchers)
         move_string = str(num_next) + ':'
         ranking = greedy_next(munched, nodes, edges, edges_data, otherNewMunchers)
         for next_move in ranking[:num_next]:
