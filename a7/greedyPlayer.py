@@ -7,12 +7,10 @@ import time
 import re
 
 programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
-firstNames = ["Jaded", "Jaunty", "Jealous", "Jerky", "Jolly", "Joyful", "Juicy", "Jumpy", "Justifiable", "Juvenile"]
-lastNames = ["Jam", "Janitor", "Jelly", "Jerk", "Jet", "Jitterbug", "Journalist", "Judge", "Juice", "Juxtaposition"]
 
 class Muncher():
 
-    def __init__(self, start, nodes, edges_data, munched, program=None, player=1):
+    def __init__(self, start, nodes, edges, edges_data, munched, program=None, player=1):
         self.node = start
         self.score = 1
         self.player = player
@@ -21,7 +19,7 @@ class Muncher():
         if program == None:
             self.program = self._infer_program(nodes, edges_data)
         elif program == "best":
-            (self.score, self.program) = self._best_program_by_score(nodes, edges_data, munched)
+            (self.score, self.program) = self._best_program_by_score(nodes, edges, edges_data, munched)
         else:
             self.program = program
 
@@ -29,13 +27,11 @@ class Muncher():
         return "urld"
 
     #Return next node (may be same position), -1 if muncher disintegrated
-    def next(self, munched, nodes, edges_data):
+    def next(self, munched, nodes, edges):
         if self.node == -1:
             return -1
-        next_nodes = map(lambda x: spatial_neighbor_to(self.node, self.program[x], nodes, edges_data), range(4))
-        for i in range(len(next_nodes)):
-            maybe_next = next_nodes[i]
-            if (maybe_next != -1 and maybe_next not in munched and maybe_next not in self.eaten):
+        for maybe_next in edges[self.node].values():
+            if not(maybe_next in munched or maybe_next in self.eaten):
                 self.node = maybe_next
                 self.score += 1
                 self.eaten.append(self.node)
@@ -46,7 +42,7 @@ class Muncher():
         return self.node
 
     #Return program with maximum score and score
-    def _best_program_by_score(self, nodes, edges_data, munched):
+    def _best_program_by_score(self, nodes, edges, edges_data, munched):
         best_score = -1
         best_program = ''
         for program in programs:
@@ -58,10 +54,11 @@ class Muncher():
 
             self.program = program
             #PLAY GAME
-            while (self.next(munched, nodes, edges_data) != -1):
+            while (self.next(munched, nodes, edges) != -1):
                 pass
 
-            if self.score > best_score:
+            #TODO: all programs give the same score
+            if self.score >= best_score:
                 best_score = self.score
                 best_program = program
             #Restore changed variables
@@ -71,22 +68,6 @@ class Muncher():
             self.program = program_copy
 
         return (best_score, best_program)
-
-#Return -1 if there is no node in that spatial direction
-def spatial_neighbor_to(node, direction, nodes, edges_data):
-    node_pos = nodes[node]
-    moves = {"l":(-1, 0), "r":(1, 0), "u":(0,-1), "d":(0,1)}
-    offset = moves[direction]
-    maybe_nb = (node_pos[0] + offset[0], node_pos[1] + offset[1])
-    tmp = -1
-    for i in range(len(nodes)):
-        if nodes[i] == maybe_nb:
-            tmp = i	
-            break
-    maybe_nb = tmp
-    if maybe_nb != -1 and ([node, maybe_nb] in edges_data or [maybe_nb, node] in edges_data):
-            return maybe_nb
-    return -1
 
 def send(msg):
     print "sending"
@@ -175,34 +156,36 @@ def parseStatus(status):
     return (munched, liveMunchers, otherLiveMunchers, otherNewMunchers, scores, remainingStuff)
 
 #Return best (node, program, score) for nodes of interest sorted and maximized by score
-def greedy_next(munched, nodes, edges_data, otherNewMunchers):
+def greedy_next(munched, nodes, edges, edges_data, otherNewMunchers):
     nodes_of_interest = []
 
     for node in otherNewMunchers:
         node = node[1]
         program = "urld"
-        neighborhood = map(lambda x: spatial_neighbor_to(node, program[x], nodes, edges_data), range(4))
-        for neighbor in neighborhood:
-            if not (neighbor in munched) and neighbor != 1:
+        #Look around current position of newly placed munchers
+        for neighbor in edges[node].values():
+            if not (neighbor in munched):
                 nodes_of_interest.append(neighbor)
 
     ranking = []
     for node in nodes_of_interest:
-        m = Muncher(node, nodes, edges_data, munched, "best")
+        m = Muncher(node, nodes, edges, edges_data, munched, "best")
         ranking.append((node, m.program, m.score))
 
     ranking.sort(key=lambda x: x[2], reverse=True)
     return ranking
 
-def greedyMove(munched,nodes,edges,otherNewMunchers):
+def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers):
     move_string = str(0)
     node = 0
     program = ''
-    if remainingStuff[0]>0:
-        ranking = greedy_next(munched, nodes, edges_data, otherNewMunchers)
-        next_move = ranking[0]
-        move_string = '1:'
-        move_string += str(next_move[0]) + "/" + str(next_move[1])
+    if (remainingStuff[0]>0 and otherNewMunchers) or remainingStuff[2] < 1000:
+        num_next = min(len(otherNewMunchers), remainingStuff[0])
+        move_string = str(num_next) + ':'
+        ranking = greedy_next(munched, nodes, edges, edges_data, otherNewMunchers)
+        for next_move in ranking[:num_next]:
+            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
+        move_string = move_string[:-1]
     return move_string
 
 #def update_owner(newly_munched, live_munchers, other_live_munchers, nodes_owner):
@@ -211,7 +194,7 @@ def greedyMove(munched,nodes,edges,otherNewMunchers):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    send(firstNames[random.randint(1, len(firstNames)) - 1] + lastNames[random.randint(1, len(lastNames)) - 1])
+    send("TEAM")
     (nodes, edges, edges_data) = parseData(receive())
 #    nodes_owner = [0] * len(nodes)
 #    G = nx.Graph()
@@ -226,12 +209,9 @@ if __name__ == "__main__":
             break
         (newlyMunched, liveMunchers, otherLiveMunchers, 
             otherNewMunchers, scores, remainingStuff) = parseStatus(status)
-#        pdb.set_trace()
 #        update_owner(newlyMunched, liveMunchers, otherLiveMunchers, nodes_owner)
         munched.update(newlyMunched)
-        if otherNewMunchers:
-            send(greedyMove(munched,nodes,edges, otherNewMunchers))
-        else:
-            send("0")
+        send(greedyMove(munched,nodes,edges, edges_data, otherNewMunchers))
         round += 1
+    print remainingStuff[2]
 
