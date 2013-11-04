@@ -153,19 +153,16 @@ def parseStatus(status):
     return (munched, liveMunchers, otherLiveMunchers, otherNewMunchers, scores, remainingStuff)
 
 #Return best (node, program, score) for nodes of interest sorted and maximized by score
-def greedy_next(munched, nodes, edges, edges_data, otherNewMunchers):
+def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
     result = []
     for node in otherNewMunchers:
         node = node[1]
         #Look around current position of newly placed munchers
-        nodes_of_interest = []
+        ranking = []
         for neighbor in edges[node].values():
             if not (neighbor in munched):
-                nodes_of_interest.append(neighbor)
-        ranking = []
-        for node in nodes_of_interest:
-            m = Muncher(node, nodes, edges, edges_data, munched, "best")
-            ranking.append((node, m.program, m.score))
+                m = Muncher(neighbor, nodes, edges, edges_data, munched, "best")
+                ranking.append((neighbor, m.program, m.score))
         if not ranking:
             continue
         ranking.sort(key=lambda x: x[2], reverse=True)
@@ -173,17 +170,32 @@ def greedy_next(munched, nodes, edges, edges_data, otherNewMunchers):
 
     return result
 
+#Return best (node, program, score) for nodes of interest sorted and maximized by score
+def greedy_global(munched, nodes, edges, edges_data):
+    ranking = []
+    for node in range(len(nodes)):
+        if not (node in munched):
+            m = Muncher(node, nodes, edges, edges_data, munched, "best")
+            ranking.append((node, m.program, m.score))
+    ranking.sort(key=lambda x: x[2], reverse=True)
+
+    return ranking
+
 def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers):
     move_string = str(0)
     node = 0
     program = ''
-    if (remainingStuff[0]>0 and otherNewMunchers) or remainingStuff[2] < 1000:
-        if remainingStuff[2] < 1000:
-            num_next = len(remainingStuff[0])
-        else:
-            num_next = len(otherNewMunchers)
+    if (remainingStuff[1] == 0 and remainingStuff[0] > 0):
+        ranking = greedy_global(munched, nodes, edges, edges_data)
+        num_next = remainingStuff[0]
         move_string = str(num_next) + ':'
-        ranking = greedy_next(munched, nodes, edges, edges_data, otherNewMunchers)
+        for next_move in ranking[:num_next]:
+            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
+        move_string = move_string[:-1]
+    if (remainingStuff[0]>0 and otherNewMunchers) or remainingStuff[2] < 1000:
+        ranking = greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers)
+        num_next = len(ranking)
+        move_string = str(num_next) + ':'
         for next_move in ranking[:num_next]:
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         move_string = move_string[:-1]
