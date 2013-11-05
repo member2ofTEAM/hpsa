@@ -246,7 +246,7 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
     best_munchers = []
     best_munchers_ind = dict((enemy, 0) for enemy in consider.keys())
     best_score = -1 
-    for trash in range(50000):
+    for trash in range(min(len(otherNewMunchers) * 10000, 100000)):
         #Randomly pick new replys per enemy
         munchers_ind = deepcopy(best_munchers_ind)
         for enemy in munchers_ind.keys():
@@ -272,6 +272,7 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
     result = []
     for m in best_munchers:
         result.append((m.start, m.program))
+        munched.add(m.start)
 
     return result
 
@@ -279,9 +280,13 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
 def greedy_global(munched, nodes, edges, edges_data):
     ranking = []
     for node in range(len(nodes)):
+        if node == 90:
+            pdb.set_trace()
+        if node == 92:
+            pdb.set_trace()
         if not (node in munched):
             m = Muncher(node, nodes, edges, edges_data, munched)
-            ranking.append((node, m.program, m.score))
+            ranking.append((node, m.program, m.get_best_local_greedy_score()))
     ranking.sort(key=lambda x: x[2], reverse=True)
 
     return ranking
@@ -290,24 +295,28 @@ def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round_no):
     move_string = str(0)
     node = 0
     program = ''
-    if (remainingStuff[1] == 0 and remainingStuff[0] > 0):
+
+    if (remainingStuff[0] > 0 and otherNewMunchers):
+        scorchers = greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers)
+        greedys = greedy_global(munched, nodes, edges, edges_data)
+        num_next = len(scorchers)
+        pdb.set_trace()
+        num_g = len(otherNewMunchers) - len(scorchers)
+        move_string = str(num_next + num_g) + ':'
+        for next_move in scorchers[:num_next]:
+            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
+        for next_move in greedys[:num_g]:
+            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
+        move_string = move_string[:-1]
+
+    elif (remainingStuff[1] == 0 and remainingStuff[0] > 0):
         ranking = greedy_global(munched, nodes, edges, edges_data)
         num_next = remainingStuff[0]
         move_string = str(num_next) + ':'
         for next_move in ranking[:num_next]:
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         move_string = move_string[:-1]
-    if (remainingStuff[0]>0 and otherNewMunchers) or remainingStuff[2] < 1000:
-        granking = greedy_global(munched, nodes, edges, edges_data)
-        ranking = greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers)
-        num_next = len(ranking)
-        num_g = len(otherNewMunchers) - len(ranking)
-        move_string = str(num_next + num_g) + ':'
-        for next_move in ranking[:num_next]:
-            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
-        for next_move in granking[:num_g]:
-            move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
-        move_string = move_string[:-1]
+
     return move_string
 
 #def update_owner(newly_munched, live_munchers, other_live_munchers, nodes_owner):
