@@ -281,9 +281,9 @@ def greedy_global(munched, nodes, edges, edges_data):
     ranking = []
     for node in range(len(nodes)):
         if node == 90:
-            pdb.set_trace()
+#            pdb.set_trace()
         if node == 92:
-            pdb.set_trace()
+#            pdb.set_trace()
         if not (node in munched):
             m = Muncher(node, nodes, edges, edges_data, munched)
             ranking.append((node, m.program, m.get_best_local_greedy_score()))
@@ -300,7 +300,7 @@ def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round_no):
         scorchers = greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers)
         greedys = greedy_global(munched, nodes, edges, edges_data)
         num_next = len(scorchers)
-        pdb.set_trace()
+#        pdb.set_trace()
         num_g = len(otherNewMunchers) - len(scorchers)
         move_string = str(num_next + num_g) + ':'
         for next_move in scorchers[:num_next]:
