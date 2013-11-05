@@ -88,7 +88,10 @@ def parseStatus(status):
     return (munched, liveMunchers, otherLiveMunchers, scores, remainingStuff)
 
 def randomMove(munched):
-    rand = random.randint(0, remainingStuff[0])
+    if remainingStuff[0]>0:
+      rand = random.randint(1, remainingStuff[0])
+    else:
+      rand = 0
     nextMove = str(rand)
     if rand == 0:
         return nextMove

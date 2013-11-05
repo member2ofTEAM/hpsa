@@ -33,7 +33,7 @@ class Muncher():
         if self.node == -1:
             return -1
         for i in range(4):
-            maybe_next = edges[self.node].get(self.program[i], -1)
+            maybe_next = edges[self.node].get(self.program[self.counter], -1)
             self.counter = (self.counter + 1) % 4
             if maybe_next != -1 and not(maybe_next in munched or maybe_next in self.eaten):
                 self.node = maybe_next
@@ -54,7 +54,6 @@ class Muncher():
             clone = deepcopy(self)
             clone.program = program
 
-#            pdb.set_trace()
             #PLAY GAME
             while (clone.next(munched, nodes, edges) != -1):
                 pass
@@ -63,7 +62,7 @@ class Muncher():
             if clone.score >= best_score:
                 best_score = clone.score
                 best_program = program
-
+                
         return (best_score, best_program)
 
 def send(msg):
@@ -200,8 +199,10 @@ def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round):
         num_g = len(otherNewMunchers) - len(ranking)
         move_string = str(num_next + num_g) + ':'
         for next_move in ranking[:num_next]:
+	    print "Best score: ",next_move[2]
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         for next_move in granking[:num_g]:
+	    print "Best score: ",next_move[2]
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         move_string = move_string[:-1]
     return move_string
