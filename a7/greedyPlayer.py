@@ -5,23 +5,30 @@ import pdb
 #import networkx as nx
 import time
 import re
+from itertools import combinations
 from copy import deepcopy
 
 programs = ["dlru", "dlur", "drlu", "drul", "dulr", "durl", "ldru", "ldur", "lrdu", "lrud", "ludr", "lurd", "rdlu", "rdul", "rldu", "rlud", "rudl", "ruld", "udlr", "udrl", "uldr", "ulrd", "urdl", "urld"];
+
+small_programs = ["dlru", "drul", "lrdu", "rldu", "ulrd", "urdl", "rlud", "lrud", "dulr", "udlr"]
 
 class Muncher():
 
     def __init__(self, start, nodes, edges, edges_data, munched, program=None, player=1):
         self.node = start
+        self.start = start
         self.score = 1
         self.player = player
         self.eaten = [self.node]
         self.program = ""
+        self.best_programs = []
         self.counter = 0
         if program == None:
             self.program = self._infer_program(nodes, edges_data)
         elif program == "best":
-            (self.score, self.program) = self._best_program_by_score(nodes, edges, edges_data, munched)
+            self._best_program_by_score(nodes, edges, edges_data, munched)
+            #Choose program of best
+            self.program = self.best_programs[0][0]
         else:
             self.program = program
 
@@ -40,30 +47,28 @@ class Muncher():
                 self.score = self.score + 1
                 self.eaten.append(self.node)
                 return self.node
+        self.node = -1
         return -1
 
     def get_pos(self):
         return self.node
 
-    #Return program with maximum score and score
+    def get_best_score(self):
+        return self.best_programs[0][1]
+
+    def set_program_by_best(self, program_no):
+        self.program = self.best_programs[program_no][0]
+
     def _best_program_by_score(self, nodes, edges, edges_data, munched):
-        best_score = -1
-        best_program = ''
+        self.best_programs = []
         for program in programs:
-            #The proper way of doing this is to create a copy of self
             clone = deepcopy(self)
             clone.program = program
-
             #PLAY GAME
             while (clone.next(munched, nodes, edges) != -1):
                 pass
-
-            #TODO: all programs give the same score
-            if clone.score >= best_score:
-                best_score = clone.score
-                best_program = program
-                
-        return (best_score, best_program)
+            self.best_programs.append((clone.program, clone.score))
+        self.best_programs.sort(key = lambda x : x[1], reverse = True)
 
 def send(msg):
     print "sending"
@@ -153,20 +158,44 @@ def parseStatus(status):
 
 #Return best (node, program, score) for nodes of interest sorted and maximized by score
 def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
+    nodes_of_interest = []
     result = []
     for node in otherNewMunchers:
         node = node[1]
-        #Look around current position of newly placed munchers
-        ranking = []
+        nbh = []
         for neighbor in edges[node].values():
             if not (neighbor in munched):
-                m = Muncher(neighbor, nodes, edges, edges_data, munched, "best")
-                if m.score > 4:
-                    ranking.append((neighbor, m.program, m.score))
-        if not ranking:
-            continue
-        ranking.sort(key=lambda x: x[2], reverse=True)
-        result.append(ranking[0])
+                m = Muncher(neighbor, nodes, edges, edges_data, munched, program="best")
+                if m.get_best_score() > 4:
+                    nbh.append((neighbor, m))
+        nodes_of_interest.append(nbh)
+
+    run = []
+    for nbh in nodes_of_interest:
+        if nbh:
+            run.append(deepcopy(nbh[0][1]))
+        else:
+            run.append(0)
+    ended = False
+    munched_copy = deepcopy(munched)
+    while(not ended):
+        visited = []
+        ended = True
+        for m in run:
+            if m:
+                visited.append(m.next(munched_copy, node, edges))
+                ended = ended and (m.node == -1)
+        munched_copy.update(visited)
+    i = 0
+    for m in run:
+        if m and m.score < 4:
+            nodes_of_interest[i][0][1].set_program_by_best(1) 
+        i = i + 1
+
+    for nbh in nodes_of_interest:
+        if nbh:
+            m = nbh[0][1]
+            result.append((m.start, m.program, m.score))
 
     return result
 
@@ -199,10 +228,8 @@ def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round):
         num_g = len(otherNewMunchers) - len(ranking)
         move_string = str(num_next + num_g) + ':'
         for next_move in ranking[:num_next]:
-	    print "Best score: ",next_move[2]
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         for next_move in granking[:num_g]:
-	    print "Best score: ",next_move[2]
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
         move_string = move_string[:-1]
     return move_string
@@ -223,7 +250,6 @@ if __name__ == "__main__":
     while(True):
         status = receive()
         print "Status: " + status
-        #TODO If the server sends a status that corresponds to nothing, the while loop will break here
         if status == "0" or status == '':
             break
         (newlyMunched, liveMunchers, otherLiveMunchers, 
