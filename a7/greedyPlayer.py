@@ -222,11 +222,7 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
     for enemy in consider:
         replys = consider[enemy]
         #Look at immediate enemy nbh
-        nbh = edges[enemy].values()
-        for neighbor in nbh:
-            #Figure out enemy direction
-            inverse = dict((value, key) for (key, value) in edges[enemy].iteritems())
-            enemy_direction = inverse[neighbor]
+        for (enemy_direction, neighbor) in edges[enemy].iteritems():
             #Consider nodes around next node of enemy
             for (direction, node) in edges[neighbor].iteritems():
                 #If we could move to win that move, do it
@@ -249,7 +245,7 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
         best_munchers.append(ms[0])
     best_score = test_run(munched, best_munchers, nodes, edges)
 #    for programs in [small_programs]:#combinations(small_programs, len(nodes_of_interest)):
-    for trash in range(1000):
+    for trash in range(10000):
         #Randomly pick new replys per enemy
         munchers_ind = deepcopy(best_munchers_ind)
         for enemy in munchers_ind.keys():
