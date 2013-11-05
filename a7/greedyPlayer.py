@@ -280,9 +280,9 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
 def greedy_global(munched, nodes, edges, edges_data):
     ranking = []
     for node in range(len(nodes)):
-        if node == 90:
+#        if node == 90:
 #            pdb.set_trace()
-        if node == 92:
+#        if node == 92:
 #            pdb.set_trace()
         if not (node in munched):
             m = Muncher(node, nodes, edges, edges_data, munched)
