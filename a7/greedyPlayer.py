@@ -225,7 +225,6 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
         nbh = edges[enemy].values()
         for neighbor in nbh:
             #Figure out enemy direction
-            neighbor = nbh[0]
             inverse = dict((value, key) for (key, value) in edges[enemy].iteritems())
             enemy_direction = inverse[neighbor]
             #Consider nodes around next node of enemy
