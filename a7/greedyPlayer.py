@@ -22,6 +22,7 @@ class Muncher():
         self.eaten = [self.node]
         self.program = ""
         self.best_programs = []
+        self.program_no = 0
         self.counter = 0
         if program == None:
             self.program = self._infer_program(nodes, edges_data)
@@ -67,6 +68,10 @@ class Muncher():
             self.program = best_by_score[program_no][0]
         else:
             self.program = best_by_score[-1][0]
+
+    def set_program_no_offset(self, offset):
+        self.program_no = min(self.program_no + offset, 23)
+        self.program = self.best_programs[self.program_no]
 
     def _best_program_by_score(self, nodes, edges, edges_data, munched):
         self.best_programs = []
@@ -165,46 +170,59 @@ def parseStatus(status):
     remainingStuff = map(int, lines[4].split(','))
     return (munched, liveMunchers, otherLiveMunchers, otherNewMunchers, scores, remainingStuff)
 
-#Return best (node, program, score) for nodes of interest sorted and maximized by score
-def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
-    nodes_of_interest = []
-    result = []
-    for node in otherNewMunchers:
-        node = node[1]
-        nbh = []
-        for neighbor in edges[node].values():
-            if not (neighbor in munched):
-                m = Muncher(neighbor, nodes, edges, edges_data, munched, program="best")
-                if m.get_best_score() > 4:
-                    nbh.append((neighbor, m))
-        nodes_of_interest.append(nbh)
-
-    run = []
-    for nbh in nodes_of_interest:
-        if nbh:
-            run.append(deepcopy(nbh[0][1]))
-        else:
-            run.append(0)
-    ended = False
+def test_run(munched, munchers, nodes, edges):
     munched_copy = deepcopy(munched)
+    munchers_copy = deepcopy(munchers)
+    #Play
+    ended = False
     while(not ended):
         visited = []
         ended = True
-        for m in run:
-            if m:
-                visited.append(m.next(munched_copy, node, edges))
-                ended = ended and (m.node == -1)
+        for m in munchers_copy:
+            visited.append(m.next(munched_copy, nodes, edges))
+            ended = ended and (m.node == -1)
         munched_copy.update(visited)
-    i = 0
-    for m in run:
-        if m and m.score < 4:
-            nodes_of_interest[i][0][1].set_program_by_best(1) 
-        i = i + 1
+        #Store subset of good munchers, if did well overall
+    return sum(map(lambda x: x.score, munchers_copy))
 
-    for nbh in nodes_of_interest:
-        if nbh:
-            m = nbh[0][1]
-            result.append((m.start, m.program, m.score))
+#Return best (node, program, score) for nodes of interest sorted and maximized by score
+def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
+    best_munchers = []
+    result = []
+    for node in otherNewMunchers:
+        node = node[1]
+        best_m_score = -1
+        best_m = 0
+        nbh = []
+        for neighbor in edges[node].values():
+            if not (neighbor in munched):
+                nbh.append(Muncher(neighbor, nodes, edges, edges_data, munched, program="best"))
+            for m in nbh:
+                if m.get_best_score() > best_m_score:
+                    best_m_score = m.get_best_score()
+                    best_m = m
+        if best_m:
+            best_munchers.append(best_m)
+
+    best_score = test_run(munched, best_munchers, nodes, edges)
+#    for programs in [small_programs]:#combinations(small_programs, len(nodes_of_interest)):
+    for trash in range(1000):
+        run = []
+        for m in best_munchers:
+            #TODO: FIX THIS
+            #TODO: MAKE IT CONSIDER OTHER NEIGHBORS AS WELL
+            #GET IT TO WORK
+            x = random.randint(0, round(23 * (1000 - trash)))
+            if random.randint(0, 100) < 50:
+                x = -1 * x
+            run.append(deepcopy(m).set_program_no_offset(x))
+        score = test_run(munched, run, nodes, edges)
+        if score > best_score:
+            best_score = score
+            best_munchers = run
+            
+    for m in best_munchers:
+        result.append((m.start, m.program))
 
     return result
 
