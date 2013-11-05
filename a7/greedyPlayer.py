@@ -231,7 +231,7 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
                 if node not in munched and len(edges[neighbor].keys()) == 1:
                     m = Muncher(node, nodes, edges, edges_data, munched)
                     #Don't do it if we run into a small area immediately after
-                    if m.get_best_local_greedy_score() > 4:
+                    if m.get_best_local_greedy_score() > 3:
                         replys.append(m)
                 #If we could move to win that move, do it
                 #We have to invert the direction, becasue edges stores it in direction away from the key
@@ -239,7 +239,7 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
                     m = Muncher(node, nodes, edges, edges_data, 
                                       munched, programs=PROGRAMS[direction_inverse(direction)])
                     #Don't do it if we run into a small area immediately after
-                    if m.get_best_local_greedy_score() > 4:
+                    if m.get_best_local_greedy_score() > 3:
                         replys.append(m)
 
     #Ignore nodes that we cannot respond to 
