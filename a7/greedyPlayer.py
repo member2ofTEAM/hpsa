@@ -57,7 +57,16 @@ class Muncher():
         return self.best_programs[0][1]
 
     def set_program_by_best(self, program_no):
-        self.program = self.best_programs[program_no][0]
+        best_by_score = []
+        seen = []
+        for program in self.best_programs:
+            if not (program[1] in seen):
+                seen.append(program[1])
+                best_by_score.append(program)
+        if program_no < len(best_by_score):
+            self.program = best_by_score[program_no][0]
+        else:
+            self.program = best_by_score[-1][0]
 
     def _best_program_by_score(self, nodes, edges, edges_data, munched):
         self.best_programs = []
