@@ -225,26 +225,27 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
         for (enemy_direction, neighbor) in edges[enemy].iteritems():
             #Consider nodes around next node of enemy
             for (direction, node) in edges[neighbor].iteritems():
+                if node not in munched and len(edges[neighbor].keys()) == 1:
+                    m = Muncher(node, nodes, edges, edges_data, munched)
+                    #Don't do it if we run into a small area immediately after
+                    if m.get_best_local_greedy_score() > 4:
+                        replys.append(m)
                 #If we could move to win that move, do it
                 #We have to invert the direction, becasue edges stores it in direction away from the key
-                if node not in munched and direction_win(enemy_direction, direction_inverse(direction)):
+                elif node not in munched and direction_win(enemy_direction, direction_inverse(direction)):
                     m = Muncher(node, nodes, edges, edges_data, 
                                       munched, programs=PROGRAMS[direction_inverse(direction)])
                     #Don't do it if we run into a small area immediately after
-                    if m.get_best_local_greedy_score() > 3:
+                    if m.get_best_local_greedy_score() > 4:
                         replys.append(m)
 
     #Ignore nodes that we cannot respond to 
     consider = dict((enemy, reply) for (enemy, reply) in consider.iteritems() if reply) 
 
-    # REMEMBER THE INDICES THEN CHANGE THEM!
-    best_munchers = []
     #The response in consider corresponding to the enemy muncher
+    best_munchers = []
     best_munchers_ind = dict((enemy, 0) for enemy in consider.keys())
-    for ms in consider.values():
-        best_munchers.append(ms[0])
-    best_score = test_run(munched, best_munchers, nodes, edges)
-#    for programs in [small_programs]:#combinations(small_programs, len(nodes_of_interest)):
+    best_score = -1 
     for trash in range(10000):
         #Randomly pick new replys per enemy
         munchers_ind = deepcopy(best_munchers_ind)
