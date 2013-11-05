@@ -2,7 +2,7 @@ import socket
 import random
 import sys
 import pdb
-#import networkx as nx
+import networkx as nx
 import time
 import re
 from itertools import combinations
@@ -222,9 +222,12 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
     for enemy in consider:
         replys = consider[enemy]
         #Look at immediate enemy nbh
+        nbh = edges[enemy].values()
         for (enemy_direction, neighbor) in edges[enemy].iteritems():
             #Consider nodes around next node of enemy
             for (direction, node) in edges[neighbor].iteritems():
+                if node in nbh or node == enemy:
+                    continue
                 if node not in munched and len(edges[neighbor].keys()) == 1:
                     m = Muncher(node, nodes, edges, edges_data, munched)
                     #Don't do it if we run into a small area immediately after
@@ -291,17 +294,31 @@ def greedy_global(munched, nodes, edges, edges_data):
 
     return ranking
 
-def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round_no):
+def greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round_no, subGs):
     move_string = str(0)
     node = 0
     program = ''
 
     if (remainingStuff[0] > 0 and otherNewMunchers):
         scorchers = greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers)
-        greedys = greedy_global(munched, nodes, edges, edges_data)
         num_next = len(scorchers)
 #        pdb.set_trace()
         num_g = len(otherNewMunchers) - len(scorchers)
+        greedys = []
+        for g in subGs:
+            g.remove_nodes_from(munched)
+        subGs.sort(key = lambda x: len(x), reverse=True)
+        for g in subGs:
+            sub_grs = greedy_global(munched, g.nodes(), edges, edges_data)
+            no_sub_grs = int(min(num_g, round(float(len(g))/(len(nodes) - len(munched)) * num_g)))
+            no_sub_grs = min(num_g, no_sub_grs)
+            for n in sub_grs[:(no_sub_grs + 1)]:
+                greedys.append(n)
+            num_g = num_g - no_sub_grs
+            if num_g <= 0:
+                break
+
+        num_g = min(len(otherNewMunchers) - len(scorchers), len(greedys))
         move_string = str(num_next + num_g) + ':'
         for next_move in scorchers[:num_next]:
             move_string += str(next_move[0]) + "/" + str(next_move[1]) + ","
@@ -327,9 +344,10 @@ if __name__ == "__main__":
     s.connect(('127.0.0.1', int(sys.argv[1])))
     send("TEAM")
     (nodes, edges, edges_data) = parseData(receive())
-#    nodes_owner = [0] * len(nodes)
-#    G = nx.Graph()
-#    G.add_edges_from(edges_data)
+    nodes_owner = [0] * len(nodes)
+    G = nx.Graph()
+    G.add_edges_from(edges_data)
+    subGs = nx.connected_component_subgraphs(G)
     round_no = 0
     munched = set()
     while(True):
@@ -341,7 +359,7 @@ if __name__ == "__main__":
             otherNewMunchers, scores, remainingStuff) = parseStatus(status)
 #        update_owner(newlyMunched, liveMunchers, otherLiveMunchers, nodes_owner)
         munched.update(newlyMunched)
-        send(greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round_no))
+        send(greedyMove(munched,nodes,edges, edges_data, otherNewMunchers, round_no, subGs))
         round_no += 1
     print remainingStuff[2]
 
