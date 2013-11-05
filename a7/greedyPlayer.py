@@ -226,8 +226,8 @@ def greedy_neighbor(munched, nodes, edges, edges_data, otherNewMunchers):
         for (enemy_direction, neighbor) in edges[enemy].iteritems():
             #Consider nodes around next node of enemy
             for (direction, node) in edges[neighbor].iteritems():
-                if node in nbh or node == enemy:
-                    continue
+#                if node in nbh or node == enemy:
+#                    continue
                 if node not in munched and len(edges[neighbor].keys()) == 1:
                     m = Muncher(node, nodes, edges, edges_data, munched)
                     #Don't do it if we run into a small area immediately after
