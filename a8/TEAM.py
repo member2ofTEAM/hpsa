@@ -78,6 +78,7 @@ if __name__ == "__main__":
             zeros += str(zero) + " "
         zeros = zeros[:-1]
         send(zeros)
+        pdb.set_trace()
         update = parse_update(receive())
         init_data.append(update, axis=1)
 
