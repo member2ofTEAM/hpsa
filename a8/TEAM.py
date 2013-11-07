@@ -5,12 +5,13 @@ import pdb
 import time
 import numpy as np
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Perceptron
 
 
 def send(msg):
     print "sending"
     print "Send: " + msg
-    msg += '<EOM>'
+    msg += '<EOM>\n'
     totalsent = 0
     while totalsent < len(msg):
         sent = s.send(msg[totalsent:])
@@ -42,7 +43,7 @@ def parse_data(data):
 def parse_update(data):
     data = data.split("\n")
     update = data[-1]
-    update = map(int, update.split(update, " "))
+    update = map(float, update.split(" ")[:-1])
     return update
 
 #Create list of length n with i sublists alternating between 0 and 1
@@ -65,12 +66,13 @@ if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
     receive()
-    pdb.set_trace()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-    clf = LinearRegression()
+#    clf = LinearRegression()
+    clf = Perceptron()
 
     for i in range(19):
+#        pdb.set_trace()
         clf.fit(init_data[:, :-1], init_data[:,-1])
         w = clf.coef_
         zeros = ""
@@ -78,12 +80,17 @@ if __name__ == "__main__":
             zeros += str(zero) + " "
         zeros = zeros[:-1]
         send(zeros)
-        pdb.set_trace()
         update = parse_update(receive())
-        init_data.append(update, axis=1)
-
-    candidate = n * [0]
+        init_data = np.vstack((init_data, update))
+    
+    candidate = ""
     for i in range(len(w)):
         if w[i] > 0:
-            candidate[i] = 1
+            candidate += "1 "
+        else:
+            candidate += "0 "
+    send(candidate[:-1])
+
+   
+
 
