@@ -4,7 +4,6 @@ import sys
 import pdb
 import time
 import numpy as np
-from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import SGDRegressor
 
 
@@ -65,16 +64,14 @@ def i_zeros(n, i):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    pdb.set_trace()
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-    clf = LinearRegression()
+#    clf = LinearRegression()
 #    clf = Perceptron()
-#    clf = SGDRegressor()
+    clf = SGDRegressor(verbose=1, n_iter=10)
 
     for i in range(19):
-        pdb.set_trace()
         clf.fit(init_data[:, :-1], init_data[:,-1])
         w = clf.coef_
         zeros = ""
