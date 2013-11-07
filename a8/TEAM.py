@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 def send(msg):
     print "sending"
     print "Send: " + msg
-    msg += "<EOM>\n"
+    msg += '<EOM>'
     totalsent = 0
     while totalsent < len(msg):
         sent = s.send(msg[totalsent:])
@@ -20,7 +20,7 @@ def send(msg):
 
 def receive():
     msg = ''
-    while '<EOM>\n' not in msg:
+    while '<EOM>' not in msg:
         chunk = s.recv(1024)
         if not chunk: break
         if chunk == '':
