@@ -47,18 +47,27 @@ def parse_update(data):
 
 #Create list of length n with i sublists alternating between 0 and 1
 def i_zeros(n, i):
+    app = 1
+    if i % 2:
+        app = 0
+    i = i / 2
     last = n % i
     rest = n / i
     result = []
     for j in range(i):
         if j % 2:
-            result.append([1] * rest)
+            result.append([int(app)] * rest)
         else:
-            result.append([0] * rest)
+            result.append([int(not app)] * rest)
     if last:
-        result.append(last * [1])
+        if i % 2:
+            result.append(last * [int(app)])
+        else:
+            result.append(last * [int(not app)])
     #flatten the result
-    return [item for sublist in result for item in sublist]
+    result = [item for sublist in result for item in sublist]
+    assert len(result) == n
+    return result
 
    
 if __name__ == "__main__":
@@ -69,13 +78,13 @@ if __name__ == "__main__":
     (n, init_data) = parse_data(receive())
 #    clf = LinearRegression()
 #    clf = Perceptron()
-    clf = SGDRegressor(verbose=1, n_iter=10)
+    clf = SGDRegressor(verbose=1, n_iter=50, eta0=0.002, penalty='elasticnet')
 
     for i in range(19):
         clf.fit(init_data[:, :-1], init_data[:,-1])
         w = clf.coef_
         zeros = ""
-        for zero in i_zeros(n, i + 2):
+        for zero in i_zeros(n, i + 4):
             zeros += str(zero) + " "
         zeros = zeros[:-1]
         send(zeros)
