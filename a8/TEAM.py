@@ -27,7 +27,7 @@ def receive():
         if chunk == '':
             raise RuntimeError("socket connection broken")
         msg += chunk
-    msg = msg[:-5]
+    msg = msg[:-7]
     return msg
 
 def parse_data(data):
@@ -104,6 +104,7 @@ if __name__ == "__main__":
 #        zeros = zeros[:-1]
 #        send(zeros)
         update = parse_update(receive())
+        pdb.set_trace()
         init_data = np.vstack((init_data, update))
    
     clf.fit(init_data[:, :-1], init_data[:, -1]) 
