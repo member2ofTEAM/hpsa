@@ -4,7 +4,8 @@ import sys
 import pdb
 import time
 import numpy as np
-from sklearn.linear_model import SGDRegressor
+from sklearn.linear_model import SGDRegressor, LinearRegression
+from sklearn.svm import SVR
 
 
 def send(msg):
@@ -26,7 +27,7 @@ def receive():
         if chunk == '':
             raise RuntimeError("socket connection broken")
         msg += chunk
-    msg = msg[:-7]
+    msg = msg[:-5]
     return msg
 
 def parse_data(data):
@@ -76,21 +77,37 @@ if __name__ == "__main__":
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-#    clf = LinearRegression()
+    clf = LinearRegression()
 #    clf = Perceptron()
-    clf = SGDRegressor(verbose=1, n_iter=50, eta0=0.002, penalty='elasticnet')
+#    clf = SGDRegressor(verbose=0, n_iter=50, alpha=0)
+#    clf = SVR(kernel='linear')
+    get_weight = lambda: clf.coef_
 
     for i in range(19):
-        clf.fit(init_data[:, :-1], init_data[:,-1])
-        w = clf.coef_
-        zeros = ""
-        for zero in i_zeros(n, i + 4):
-            zeros += str(zero) + " "
-        zeros = zeros[:-1]
-        send(zeros)
+        train_data = init_data
+        if i > 0:
+            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
+#        pdb.set_trace()
+        clf.fit(train_data[:, :-1], train_data[:,-1])
+        w = get_weight()
+#        pdb.set_trace()
+        candidate = ""
+        for j in range(len(w)):
+            if w[j] > 0:
+                candidate += "1 "
+            else:
+                candidate += "0 "
+        send(candidate[:-1])
+#        zeros = ""
+#        for zero in i_zeros(n, i + 4):
+#            zeros += str(zero) + " "
+#        zeros = zeros[:-1]
+#        send(zeros)
         update = parse_update(receive())
         init_data = np.vstack((init_data, update))
-    
+   
+    clf.fit(init_data[:, :-1], init_data[:, -1]) 
+    w = get_weight()
     candidate = ""
     for i in range(len(w)):
         if w[i] > 0:
