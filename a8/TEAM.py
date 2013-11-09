@@ -82,8 +82,8 @@ if __name__ == "__main__":
 #    clf = LinearRegression()
 #    clf = Perceptron()
 #Best so far
-    clf = SGDRegressor(verbose=0, n_iter=2000)
-#    clf = BayesianRidge()
+#    clf = SGDRegressor(verbose=0, n_iter=20000)
+    clf = BayesianRidge()
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
 
@@ -94,7 +94,9 @@ if __name__ == "__main__":
 #        pdb.set_trace()
         ws = []
         for trash in range(30):
-            train_index = np.random.randint(20 + i, size = 20 + i)
+            train_index = np.random.randint(20, size = 20)
+            if i > 0:
+                train_index = np.append(train_index, np.array(range(20, i + 20)))
             clf.fit(train_data[train_index, :-1], train_data[train_index,-1])
             ws.append(get_weight())
 #        clf.fit(update[:, :-1], update[:, -1])
