@@ -4,8 +4,10 @@ import sys
 import pdb
 import time
 import numpy as np
-from sklearn.linear_model import SGDRegressor, LinearRegression
+from sklearn.linear_model import SGDRegressor, LinearRegression, BayesianRidge
+from sklearn.linear_model import OrthogonalMatchingPursuit
 from sklearn.svm import SVR
+from sklearn.cross_validation import Bootstrap
 
 
 def send(msg):
@@ -79,7 +81,9 @@ if __name__ == "__main__":
     (n, init_data) = parse_data(receive())
 #    clf = LinearRegression()
 #    clf = Perceptron()
-    clf = SGDRegressor(verbose=0, n_iter=80000, alpha=0, warm_start = True)
+#Best so far
+    clf = SGDRegressor(verbose=0, n_iter=2000)
+#    clf = BayesianRidge()
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
 
@@ -88,17 +92,30 @@ if __name__ == "__main__":
 #        if i > 0:
 #            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
 #        pdb.set_trace()
-        clf.fit(train_data[:, :-1], train_data[:,-1])
+        ws = []
+        for trash in range(30):
+            train_index = np.random.randint(20 + i, size = 20 + i)
+            clf.fit(train_data[train_index, :-1], train_data[train_index,-1])
+            ws.append(get_weight())
 #        clf.fit(update[:, :-1], update[:, -1])
+#        pdb.set_trace()
+        clf.fit(train_data[:, :-1], train_data[:,-1])
+        w_std = np.std(ws, axis = 0)
         w = get_weight()
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
         for j in range(len(w)):
-            if w[j] > 0:
-                candidate += str(int(app)) + " "
+            if w_std[j] > np.percentile(w_std, 50):
+#            if abs(w[j]) < np.max(map(abs, w))/float((i + 1) * 0.3):
+                if w[j] > 0:
+                    candidate += str(int(app)) + " "
+                else:
+                    candidate += str(int(not app)) + " "
             else:
-                candidate += str(int(not app)) + " "
+                candidate += "0 "
+            if w[j] >= 1:
+                print w
         send(candidate[:-1])
 #        zeros = ""
 #        for zero in i_zeros(n, i + 4):
@@ -106,10 +123,10 @@ if __name__ == "__main__":
 #        zeros = zeros[:-1]
 #        send(zeros)
         update = parse_update(receive())
-        update = np.array(update)
         #pdb.set_trace()
         init_data = np.vstack((init_data, update))
    
+#    clf = SGDRegressor(verbose=0, n_iter=20000, power_t = 0.0001)
     clf.fit(init_data[:, :-1], init_data[:, -1]) 
     w = get_weight()
     candidate = ""
