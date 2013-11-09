@@ -80,7 +80,7 @@ for i in range(0,len(args.team_list),2):
   
 #Create item names
 diff_items = len(Set(args.itemlist))
-for i in range(int(diff_items)-2):
+for i in range(int(diff_items)-2): # -2 because almond and caramel are always in
   item_names.append(pot_item_names.pop())
   
 item_names.sort()
@@ -99,7 +99,8 @@ item_list = item_list.split(" ")
 i_list = []
 
 for item in item_list:
-  i_list.append(int(item))
+  if item != " ":
+    i_list.append(int(item))
 
 #Current item
 current_item = i_list.pop()

@@ -17,6 +17,7 @@ item_list = item_list.split(" ")
 list = []
 
 for item in item_list:
-  list.append(int(item))
+  if item != " ":
+    list.append(int(item))
 
 print list
