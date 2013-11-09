@@ -3,9 +3,9 @@ import argparse
 
 #Parse Arguments
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('nu_diff', metavar='N', type=int,
+parser.add_argument('nu_diff', metavar='k', type=int,
                    help='The number of different items')
-parser.add_argument('list_len', metavar='A', type=int,
+parser.add_argument('list_len', metavar='a', type=int,
                    help='The amount of items')
 
 args = parser.parse_args()
