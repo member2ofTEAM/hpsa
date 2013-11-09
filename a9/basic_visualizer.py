@@ -17,7 +17,7 @@ class Player():
     
     self.items = {}
     
-  def update(time_used, bid,item_won=-1):
+  def update(bid,time_used,item_won=-1):
     if item_won!=-1:
       self.money = max(self.money - self.current_bid,0)
       if item_won in self.items:
@@ -227,6 +227,7 @@ while(game):
   
   while received < messages:
     #Receive player_id bid time_used 
+    players[player_id].update(bid,time)
     draw_scoreboard()
     
   #pid = receive player_id
