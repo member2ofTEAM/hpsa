@@ -103,8 +103,8 @@ for item in item_list:
 
 #Current item
 current_item = i_list.pop()
-last_item = 0
-last_winner = 1
+last_item = -1
+last_winner = -1
 
 
 
@@ -134,16 +134,18 @@ def draw_scoreboard():
   text_in='Last item:'
   w.create_text((x_offset,y_offset),text=text_in,justify='left',anchor='nw')
   x_offset += len(text_in)*6+5
-  item = item_names[last_item]
-  w.create_oval((x_offset,y_offset+1,x_offset+12,y_offset+3+10),fill=item_colors[last_item])
-  w.create_text((x_offset+2,y_offset),text=item[0],justify='left',anchor='nw')
-  x_offset+=15
-  w.create_text((x_offset,y_offset),text=item,justify='left',anchor='nw',fill=item_colors[last_item])
-  x_offset+=len(item)*6+20  
+  if(last_item>-1):
+    item = item_names[last_item]
+    w.create_oval((x_offset,y_offset+1,x_offset+12,y_offset+3+10),fill=item_colors[last_item])
+    w.create_text((x_offset+2,y_offset),text=item[0],justify='left',anchor='nw')
+    x_offset+=15
+    w.create_text((x_offset,y_offset),text=item,justify='left',anchor='nw',fill=item_colors[last_item])
+    x_offset+=len(item)*6+20  
   text_in='Last Winner:'
   w.create_text((x_offset,y_offset),text=text_in,justify='left',anchor='nw')
-  x_offset+=len(item)*6+20 
-  w.create_text((x_offset,y_offset),text=players[last_winner].teamname,justify='left',anchor='nw')
+  x_offset+=len(text_in)*6+10
+  if(last_winner>-1):
+    w.create_text((x_offset,y_offset),text=players[last_winner].teamname,justify='left',anchor='nw')
   x_offset=10
   y_offset+=30
   text_in='Next '+str(min(int(args.goal),len(i_list)))+' items:'
@@ -215,6 +217,7 @@ draw_scoreboard()
 
 '''
 #TODO: COMMUNICATION WITH SERVER - MAIN SCRIPT IS HERE
+#TODO: DISPLAY WINNER OF THE GAME
 game = True
 #Communication with Server:
 while(game):
