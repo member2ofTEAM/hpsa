@@ -1,19 +1,14 @@
 import socket
-import random
 import sys
-import pdb
 import time
+import random
 
 def send(msg):
-    print "sending"
-    print "Send: " + msg
     msg += '<EOM>'
-    totalsent = 0
-    while totalsent < len(msg):
-        sent = s.send(msg[totalsent:])
-        if sent == 0:
-            raise RuntimeError("socket connection broken")
-        totalsent = totalsent + sent
+    sent = s.send(msg)
+    if sent == 0:
+        raise RuntimeError("socket connection broken")
+    print "Sent: " + msg
 
 def receive():
     msg = ''
@@ -25,15 +20,15 @@ def receive():
         msg += chunk
     msg = msg[:-5]
     return msg
-   
+  
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    pdb.set_trace()
     print receive()
-    send("TEAM")
+    send(str(sys.argv[2]))
     print receive()
-    s.close() 
-    s.connect(('127.0.0.1', int(sys.argv[1])))
-    send("0 10")
-    print receive()
+    while(1):
+        send(str(random.randint(0, 4)))
+        print receive()
+        time.sleep(1)
+
