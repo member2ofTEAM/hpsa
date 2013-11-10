@@ -79,11 +79,11 @@ if __name__ == "__main__":
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-#    clf = LinearRegression()
+    clf = LinearRegression()
 #    clf = Perceptron()
 #Best so far
 #    clf = SGDRegressor(verbose=0, n_iter=20000)
-    clf = BayesianRidge()
+#    clf = BayesianRidge()
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
 
@@ -93,22 +93,19 @@ if __name__ == "__main__":
 #            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
 #        pdb.set_trace()
         ws = []
-        for trash in range(30):
-            train_index = np.random.randint(20, size = 20)
-            if i > 0:
-                train_index = np.append(train_index, np.array(range(20, i + 20)))
+        for trash in range(300):
+            train_index = np.random.randint(20 + i, size = 20 + i)
             clf.fit(train_data[train_index, :-1], train_data[train_index,-1])
             ws.append(get_weight())
 #        clf.fit(update[:, :-1], update[:, -1])
 #        pdb.set_trace()
-        clf.fit(train_data[:, :-1], train_data[:,-1])
         w_std = np.std(ws, axis = 0)
-        w = get_weight()
+        w = np.mean(ws, axis = 0)
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
         for j in range(len(w)):
-            if w_std[j] > np.percentile(w_std, 50):
+            if w_std[j] > np.percentile(w_std, 40 + i):
 #            if abs(w[j]) < np.max(map(abs, w))/float((i + 1) * 0.3):
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
