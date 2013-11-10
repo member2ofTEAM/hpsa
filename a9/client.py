@@ -3,13 +3,6 @@ import sys
 import time
 import random
 
-def send(msg):
-    msg += '<EOM>'
-    sent = s.send(msg)
-    if sent == 0:
-        raise RuntimeError("socket connection broken")
-    print "Sent: " + msg
-
 def receive():
     msg = ''
     while '<EOM>' not in msg:
@@ -25,10 +18,13 @@ if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
     print receive()
-    send(str(sys.argv[2]))
+    s.send(str(sys.argv[2]))
     print receive()
     while(1):
-        send(str(random.randint(0, 4)))
-        print receive()
+        s.send(str(random.randint(0, 4)))
+        inc = receive()
+        if not inc:
+            break
+        print inc
  #       time.sleep(1)
 

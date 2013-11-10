@@ -9,6 +9,7 @@ S:<winner_id> <winner_bid> <player_budget>
 .
 .
 .
+S:sends nothing (don't know why, but for now considered feature)
 '''
 
 import select
@@ -26,8 +27,6 @@ def list_to_flat_string(l):
         result += str(item) + " "
     return result[:-1]
 
-#TODO Rewrite by taking item number into account to fix crazy bug.
-
 class Server:
     '''p is the number of players
     k is the number of types
@@ -40,7 +39,7 @@ class Server:
         self.eom = '<EOM>'
         self.server = None
         self.threads = []
-        self.no_items = 200
+        self.no_items = 1000
        
         #Game specific attributes
         self.p = p
@@ -69,28 +68,28 @@ class Server:
             client, address = self.server.accept()
             #Do handshake
             client.send("Name?" + self.eom)
-            name = client.recv(self.size)[:-5]
+            name = client.recv(self.size).strip()
             greeting = [player_id, self.p, self.k, self.n] + self.item_list 
             client.send(list_to_flat_string(greeting) + self.eom)
             c = Client((client, address), player_id, name)
-            #Prevent the client from trying to read in auction results
-            #c.waiting_lock.acquire()
             c.start()
             self.threads.append(c)
+
         for item in self.item_list:
-#            pdb.set_trace()
-            alive_threads = [thread for thread in self.threads if thread.is_alive()]
+            alive_clients = [client for client in self.threads if client.is_alive()]
             #Wait for the clients to receive their bids
-            highest_bid = max(alive_threads, key=lambda x: x.out_msg_queue.get(block=True))
-            highest_bidder = [client for client in alive_threads if client.bid == highest_bid.bid]
-            #If two player have the same timestamp, the one with the lower player id is chosen
-            winner = min(highest_bidder, key=lambda x: x.time)
+            highest_bid = max(alive_clients, key=lambda x: x.out_msg_queue.get(block=True))
+            highest_bidder = [client for client in alive_clients if client.bid == highest_bid.bid]
+            #If two player have the same bid and timestamp, the winner is chosen uniformly random
+            lowest_time = min(highest_bidder, key=lambda x: x.time)
+            fastest_winner = [client for client in highest_bidder if client.time == lowest_time.time]
+            winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
             self.item_owner[winner.player_id][item] += 1
             #if self.item_owner[winner.player_id][item] == self.n:
             #    print "Player " + str(winner.name) + " won the game."
             #    break
-            for client in alive_threads:
+            for client in alive_clients:
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
  
         #Close all threads
@@ -110,28 +109,28 @@ class Client(threading.Thread):
         self.budget = 100
         self.player_id = player_id
         self.name = name
-        #-1 means no bid has been received yet from this client
+        #The bidding system
         self.bid = 0
         self.bid_time = sys.float_info.max
         self.out_msg_queue = Queue.Queue(maxsize=1)
         self.inc_msg_queue = Queue.Queue(maxsize=1)
+        
         self.time = 120000
-        #Never wait for an answer longer than the player has time left
         self.client.settimeout(self.time)
+        self.running = 1
 
     def run(self):
-        running = 1
-        while (1):
+        while (self.running):
 #            pdb.set_trace()
             before = time.time()
             bid = str(self.client.recv(self.size))
-            bid = bid[0]
 #            print "Bid received: " + str(bid)
             after = time.time()
             self.time -= after - before
             if self.time <= 0:
                 print "Player {0} timed out and is disqualified.".format(self.name)
                 self.client.close()
+                self.running = 0
                 break
             if bid:
                 try:
@@ -140,6 +139,7 @@ class Client(threading.Thread):
                     print ("Player {0} sent invalid bid: {1}" 
                                         "and is disqualified.").format(self.name, self.bid)
                     self.client.close()
+                    self.running = 0
                     break
                 if bid > self.budget:
                     self.bid = 0
@@ -147,6 +147,7 @@ class Client(threading.Thread):
                     self.bid = bid
             else:
                 self.client.close()
+                self.running = 0
                 print "Player {0} disconnected and is disqualified.".format(self.name)
                 break
             #If I bid ealier than my competitor I'd win
@@ -158,11 +159,11 @@ class Client(threading.Thread):
             if self.player_id == winner_id:
                 self.budget -= self.bid
             self.client.send(list_to_flat_string([winner_id, winner_bid, self.budget]) + self.eom)
+        self.client.close()
 
     def join(self, timeout=None):
-        self.client.close()
+        self.running = 0
         super(Client, self).join(timeout)
-                        
 
 if __name__ == "__main__":
     if len(sys.argv) != 6:
