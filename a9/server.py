@@ -40,7 +40,7 @@ class Server:
         self.eom = '<EOM>'
         self.server = None
         self.threads = []
-        self.no_items = 20
+        self.no_items = 200
        
         #Game specific attributes
         self.p = p
@@ -91,7 +91,7 @@ class Server:
             #    print "Player " + str(winner.name) + " won the game."
             #    break
             for client in alive_threads:
-                client.inc_msg_queue.put([winner.player_id, winner.bid])
+                client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
  
         #Close all threads
         self.server.close()
@@ -113,8 +113,8 @@ class Client(threading.Thread):
         #-1 means no bid has been received yet from this client
         self.bid = 0
         self.bid_time = sys.float_info.max
-        self.out_msg_queue = Queue.Queue()
-        self.inc_msg_queue = Queue.Queue()
+        self.out_msg_queue = Queue.Queue(maxsize=1)
+        self.inc_msg_queue = Queue.Queue(maxsize=1)
         self.time = 120000
         #Never wait for an answer longer than the player has time left
         self.client.settimeout(self.time)
@@ -124,10 +124,9 @@ class Client(threading.Thread):
         while (1):
 #            pdb.set_trace()
             before = time.time()
-            #Sends a string!
-            bid = self.client.recv(self.size)
+            bid = str(self.client.recv(self.size))
             bid = bid[0]
-            print "Bid received: " + str(bid)
+#            print "Bid received: " + str(bid)
             after = time.time()
             self.time -= after - before
             if self.time <= 0:
@@ -148,12 +147,12 @@ class Client(threading.Thread):
                     self.bid = bid
             else:
                 self.client.close()
-                print "Player " + str(self.name) + "disconnected and is disqualified."
+                print "Player {0} disconnected and is disqualified.".format(self.name)
                 break
             #If I bid ealier than my competitor I'd win
             self.bid_time = time.time()
             #Now I want to communicate my bid and receive the result
-            self.out_msg_queue.put(bid)
+            self.out_msg_queue.put(bid, block=True)
             #The parent has entered the information and I can continue
             [winner_id, winner_bid] = self.inc_msg_queue.get(block=True)
             if self.player_id == winner_id:

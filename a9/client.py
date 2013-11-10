@@ -30,5 +30,5 @@ if __name__ == "__main__":
     while(1):
         send(str(random.randint(0, 4)))
         print receive()
-        time.sleep(1)
+ #       time.sleep(1)
 
