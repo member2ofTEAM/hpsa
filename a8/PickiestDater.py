@@ -1,4 +1,4 @@
-mport socket
+import socket
 import random
 import sys
 import numpy
@@ -7,7 +7,7 @@ import pdb
 def send(msg):
     print "sending"
     print msg
-    msg += "\n<EOM>\n"
+    msg += "<EOM>\n"
     totalsent = 0
     while totalsent < len(msg):
         sent = s.send(msg[totalsent:])
@@ -17,13 +17,13 @@ def send(msg):
 
 def receive():
     msg = ''
-    while '<EOM>\n' not in msg:
+    while '<EOM>' not in msg:
         chunk = s.recv(1024)
         if not chunk: break
         if chunk == '':
             raise RuntimeError("socket connection broken")
         msg += chunk
-    msg = msg[:-7]
+    msg = msg[:-6]
     return msg
 
 def randomInt(num):
@@ -316,20 +316,16 @@ def fix_sums_uniform(weights):
         neg_sum = a[1]
         r = (r + 1) % n		
 
-def main():
+if __name__ == "__main__":
     name = "TEAM"
-    current_mod = []
     possible_mod = []
     weights = []
     t_or_f = True
     to_send = ''
     
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #pdb.set_trace()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    
-    for i in range(0,n):
-        current_mod.append(0)
 		
     msg = receive()
 
@@ -337,9 +333,8 @@ def main():
         send(name)
 	
     msg = receive()
-    msg2 = msg
-    msg.split(' ')
-    n = msg[2]
+    msg = msg.split(' ')
+    n = int(msg[1])
 
     #decide which type of weights we will generate
     #high_skew_rand(5, 5, 14, weights)
@@ -351,9 +346,12 @@ def main():
     #fix_sums_uniform(weights)
     #fix_values(weights)
     #back_to_int(weights)
+    determine_mod(n, possible_mod, orig, weights)
     fix_sums_random(weights)
     fix_values(weights)
     
+    #pdb.set_trace()
+
     for i in range(0, len(weights)):
         to_send = to_send + " " + str(weights[i])
     to_send = to_send + "\n"
@@ -362,15 +360,20 @@ def main():
     while(1):
         to_send = ''
         msg = receive()
+       # pdb.set_trace()
         if(msg == "next weights?"):
-            t_or_f = modify_values_random(n, current_mod, orig, weights)
+            t_or_f = random_mod(n, possible_mod, orig, weights)
             if(t_or_f == True):
                 for i in range(0, len(weights)):
                     to_send = to_send + " " + str(weights[i])
                 to_send = to_send + "\n"
             elif(t_or_f == False):
+                for i in range(0, len(weights)):
+                    to_send = to_send + " " + str(weights[i])
                 #do some other sort of modification or something
                 print "False"
+            #pdb.set_trace()
+            
             send(to_send)
 		
         #a = sum_values(weights)
@@ -379,9 +382,6 @@ def main():
         #print current_mod
         #print "Pos sum =" + str(a[0])
         #print "Neg sum =" + str(a[1])
-	
-if __name__ == "__main__":
-    main()
 					
 #t_or_f = True
 #high_skew_rand(5, 5, 14, weights)
