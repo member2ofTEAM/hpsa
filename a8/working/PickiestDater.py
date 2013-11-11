@@ -67,15 +67,14 @@ def high_skew_rand(skew_num, zero_num, skew_amt, weights):
 			
 def uniform(n, num_zero, weights):
     min = 100 / (n - num_zero)
-	
     for x in range(0, num_zero):
         weights.append(0)
     for x in range(num_zero,n):
-        if (x < ((n - num_zero)/2)+num_zero and x >= num_zero):
+        if (x < (n /2)+num_zero and x >= num_zero):
             weights.append(min)
-        elif(x >= ((n - num_zero)/2) + num_zero):
+        elif(x >= (n /2) + num_zero):
             weights.append(-1 * min)
-
+    print sum_values(n, weights) 
     random.shuffle(weights)
 	
 def determine_sign(num):
@@ -267,7 +266,7 @@ def back_to_int(weights):
     for i in range(0, len(weights)):
         weights[i] = int(weights[i] * 100.0)
 
-def sum_values(weights):
+def sum_values(n, weights):
     pos_sum = 0
     neg_sum = 0
     for i in range(0,n):
@@ -278,26 +277,21 @@ def sum_values(weights):
 		
     return(pos_sum, neg_sum)
 
-def fix_sums_random(weights):
+def fix_sums_random(n, weights):
     pos_sum = 0.0
     neg_sum = 0.0
     r = 0
     min = 1
-    a = sum_values(weights)
+    a = sum_values(n, weights)
     pos_sum = a[0]
     neg_sum = a[1]
-    for i in range(0,n):
-        if(weights[i] > 0):
-            pos_sum = pos_sum + weights[i]
-        elif(weights[i] < 0):
-            neg_sum = neg_sum - weights[i]
     while(pos_sum != 100):
         r = randomInt(n)
         if(weights[r] > 0 and pos_sum > 100):
             weights[r] = weights[r] - min
         elif(weights[r] > 0 and pos_sum < 100):
             weights[r] = weights[r] + min
-        a = sum_values(weights)
+        a = sum_values(n, weights)
         pos_sum = a[0]
     while(neg_sum != -100):
         r = randomInt(n)
@@ -307,28 +301,23 @@ def fix_sums_random(weights):
             weights[r] = weights[r] + min
         pos_sum = 0
         neg_sum = 0
-        a = sum_values(weights)
+        a = sum_values(n, weights)
         neg_sum = a[1]
 
-def fix_sums_uniform(weights):
+def fix_sums_uniform(n, weights):
     pos_sum = 0.0
     neg_sum = 0.0
     r = 0
     min = 1
-    a = sum_values(weights)
+    a = sum_values(n, weights)
     pos_sum = a[0]
     neg_sum = a[1]
-    for i in range(0,n):
-        if(weights[i] > 0):
-            pos_sum = pos_sum + weights[i]
-        elif(weights[i] < 0):
-            neg_sum = neg_sum - weights[i]
     while(pos_sum != 100):
         if(weights[r] > 0 and pos_sum > 100):
             weights[r] = weights[r] - min
         elif(weights[r] > 0 and pos_sum < 100):
             weights[r] = weights[r] + min
-        a = sum_values(weights)
+        a = sum_values(n, weights)
         pos_sum = a[0]
         r = (r + 1) % n
 
@@ -340,7 +329,7 @@ def fix_sums_uniform(weights):
             weights[r] = weights[r] + min
         pos_sum = 0
         neg_sum = 0
-        a = sum_values(weights)
+        a = sum_values(n, weights)
         neg_sum = a[1]
         r = (r + 1) % n		
 
@@ -411,14 +400,12 @@ if __name__ == "__main__":
 
     #decide which type of weights we will generate
 
-    high_skew_rand(5, 3, 4, weights)
-    #uniform(n, 0, weights)
+    #high_skew_rand(5, 3, 4, weights)
+    uniform(n, 0, weights)
     
 
-    #fix_sums_uniform(weights)
-    fix_sums_random(weights)    
-
-    #fix_sums_uniform(weights)
+    #fix_sums_uniform(n, weights)
+    fix_sums_random(n, weights)    
 
     orig = weights[:]
     
@@ -436,6 +423,7 @@ if __name__ == "__main__":
     to_send = construct_string2(weights)
     to_send = to_send + "\n"
     print to_send
+    print sum_values(n, weights)
     send(to_send)
    
     while(1):
@@ -459,7 +447,7 @@ if __name__ == "__main__":
             print orig
             print weights
             print possible_mod
-            print sum_values(weights)
+            print sum_values(n, weights)
            # print "check" + to_send
             send(to_send)
 		
