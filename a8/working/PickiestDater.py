@@ -120,6 +120,9 @@ def random_choice_to_mod(n, possible_mod, orig, weights):
     if(len(possibles) == 0):
         return(-1, -1, [], False)
 
+
+    change = min(len(possibles),change)
+
     while(flag == True):
         rands = []
         sum = 0
@@ -127,7 +130,12 @@ def random_choice_to_mod(n, possible_mod, orig, weights):
         tmp = possibles[:]
         #pdb.set_trace()
         for i in range(0, change):
-            num = random.randint(0, len(tmp) - 1)
+            if(len(tmp) == 1):
+               num = 0
+            elif(len(tmp) == 0):
+               return(-1, -1, [], False)
+            else:
+               num = random.randint(0, len(tmp) - 1)
             r = tmp[num]
             tmp.pop(num)
             is_pos2 = determine_sign(orig[r])
@@ -375,7 +383,7 @@ def construct_string2(weights):
             if(weights[i] < 0):
                string = string + '-0.' + str(abs(weights[i])) + ' '
             elif(weights[i] > 0):
-               string = string + '-0.' + str(abs(weights[i])) + ' '
+               string = string + '0.' + str(abs(weights[i])) + ' '
     string = string + '\n'
     return string
 
@@ -402,15 +410,13 @@ if __name__ == "__main__":
 
     #decide which type of weights we will generate
 
-    #high_skew_rand(5, 0, 3, weights)
-    uniform(n, 0, weights)
+    high_skew_rand(5, 3, 4, weights)
+    #uniform(n, 0, weights)
     
 
     #fix_sums_uniform(weights)
     fix_sums_random(weights)    
 
-    #fix the sums
-    fix_sums_random(weights)
     #fix_sums_uniform(weights)
 
     orig = weights[:]
