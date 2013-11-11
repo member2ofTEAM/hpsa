@@ -81,11 +81,11 @@ if __name__ == "__main__":
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-    clf = LinearRegression()
+#    clf = LinearRegression(fit_intercept=False)
 #    clf = Perceptron()
 #Best so far
-#    clf = SGDRegressor(verbose=0, n_iter=120000, power_t=0.15)
-#    clf = BayesianRidge()
+#    clf = SGDRegressor(verbose=0, n_iter=2000, power_t=0.01, fit_intercept=False)
+    clf = BayesianRidge(fit_intercept=False)
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
 
@@ -98,7 +98,8 @@ if __name__ == "__main__":
             train_index = np.append(np.zeros(20, dtype=np.int8), np.array(range(20, 20 + i)))
         else:
             train_index = np.zeros(20, dtype=np.int8)
-        for trash in range(6000):
+        #This does better than 1, 150 and 2500. Why?
+        for trash in range(300):
             train_index[:20] = np.random.randint(20, size = 20)
             clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
             ws[trash] = get_weight()
@@ -111,10 +112,11 @@ if __name__ == "__main__":
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
-        npp = np.percentile(w_std, 70)
+        npph = np.percentile(w_std, 66 + i)
+        nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
 #            if True:
-            if w_std[j] > npp:
+            if w_std[j] > npph or w_std[j] < nppl:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:
