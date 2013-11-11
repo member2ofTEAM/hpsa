@@ -161,6 +161,10 @@ def random_mod(n, possible_mod, orig, weights):
     rands = a[2]
     possible = a[3]
 
+    #pdb.set_trace()
+    print "Possibles to mod: ", rands
+    #there's an error here somewhere
+
     print possible
     if(possible == False):
         return False
@@ -192,7 +196,7 @@ def random_mod(n, possible_mod, orig, weights):
             elif(weights[rands[r]] < 0):
                 weights[rands[r]] = weights[rands[r]] + 1
                 sum = sum + 1
-        determine_mod(n, possible_mod, orig, weights)
+        #determine_mod(n, possible_mod, orig, weights)
 
     # at end, change possible mod appropriately
     #print possible_mod
@@ -206,13 +210,12 @@ def determine_mod(n, possible_mod, orig, weight):
  
     del possible_mod[:]
    
-    print weight
+    #print weight
     #print orig
     for i in range(0, n):
         a = []
         current_change = weight[i] - orig[i]
-        #print "CURRENT CHANGE ", current_change
-        if(abs(weight[i]) < 5):
+        if(abs(weight[i]) <= 5):
             max_increase = 0
             max_decrease = 0
         elif(weight[i] > 0):
@@ -342,7 +345,12 @@ def construct_string(weights):
             string = string + '0.00' + ' '
         else:
             tmp = float(int(weights[i])) / 100.0
-            tmp = str(round(tmp, 2))
+            ceil = math.ceil(tmp)
+            if(abs(ceil - tmp) <= .005):
+                tmp = str(ceil)
+            elif(abs(ceil - tmp) > .005):
+                tmp = str(math.floor(tmp))
+            #tmp = str(round(tmp, 2))
             if(float(tmp) > 0):
                 pos_sum = pos_sum + float(tmp)
             elif(float(tmp) < 0):
@@ -352,6 +360,25 @@ def construct_string(weights):
     print pos_sum, neg_sum
     #print "Inside construct_string " + string
     return string
+
+def construct_string2(weights):
+    string = ''
+    for i in range(0, len(weights)):
+        if(weights[i] == 0):
+            string = string + '0.00' + ' '
+        elif(abs(weights[i]) > 0 and abs(weights[i]) < 10):
+            if(weights[i] < 0):
+                string = string + '-0.0' + str(abs(weights[i])) + ' '
+            elif(weights[i] > 0):
+                string = string + '0.0' + str(abs(weights[i])) + ' '
+        elif(abs(weights[i]) >= 10):
+            if(weights[i] < 0):
+               string = string + '-0.' + str(abs(weights[i])) + ' '
+            elif(weights[i] > 0):
+               string = string + '-0.' + str(abs(weights[i])) + ' '
+    string = string + '\n'
+    return string
+
 
 if __name__ == "__main__":
     name = "TEAM"
@@ -382,27 +409,26 @@ if __name__ == "__main__":
     #fix_sums_uniform(weights)
     fix_sums_random(weights)    
 
-    
-    #stores original weights and determines how much they can be modified by
-    orig = weights[:]
-    determine_mod(n, possible_mod, orig, weights)
-
-
-    #t_or_f = random_mod(n, possible_mod, orig, weights)
-
-
     #fix the sums
     fix_sums_random(weights)
     #fix_sums_uniform(weights)
+
+    orig = weights[:]
+    
+    #stores original weights and determines how much they can be modified by
+    determine_mod(n, possible_mod, orig, weights)
+
+    #t_or_f = random_mod(n, possible_mod, orig, weights)
 
 
     #fix the values by making them floats
     #fix_values(weights)
 
     #pdb.set_trace()
-
-    to_send = construct_string(weights)
+    print orig
+    to_send = construct_string2(weights)
     to_send = to_send + "\n"
+    print to_send
     send(to_send)
    
     while(1):
@@ -417,7 +443,7 @@ if __name__ == "__main__":
             #fix_values(weights)
                 #for i in range(0, len(weights)):
                 #    to_send = to_send + " " + str(weights[i])
-            to_send = construct_string(weights)
+            to_send = construct_string2(weights)
                 #for i in range(0, len(weights)):
                 #    to_send = to_send + " " + str(weights[i])
                 #do some other sort of modification or something
@@ -436,26 +462,4 @@ if __name__ == "__main__":
         #print current_mod
         #print "Pos sum =" + str(a[0])
         #print "Neg sum =" + str(a[1])
-					
-#t_or_f = True
-#high_skew_rand(5, 5, 14, weights)
-#uniform(n, 0, weights)
-#orig = weights[:]
-#determine_mod(n, possible_mod, orig, weights)
-#random_mod(n, possible_mod, orig, weights)
-#t_or_f = random_mod(n, possible_mod, orig, weights)
-#fix_sums_uniform(weights)
-#fix_values(weights)
-#back_to_int(weights)
-#fix_sums_random(weights)
-#fix_values(weights)
 
-#print "FIRST WEIGHTS ", weights
-#t_or_f = modify_values_random(n, current_mod, orig, weights)
-#print "SECOND WEIGHTS ", weights
-#a = sum_values(weights)
-#print "FINAL_WEIGHTS", weights
-#print "current_mod:"
-#print current_mod
-#print "Pos sum =" + str(a[0])
-#print "Neg sum =" + str(a[1])
