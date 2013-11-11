@@ -81,12 +81,14 @@ if __name__ == "__main__":
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-    clf = LinearRegression(fit_intercept=False)
+    if n <= 40:
+        clf = LinearRegression(fit_intercept=False)
+    else:
 #    clf = Perceptron()
 #Best so far
 #    clf = SGDRegressor(verbose=0, n_iter=2000, power_t=0.01, 
 #                       fit_intercept=False, eta0 = 0.01)
-#    clf = BayesianRidge(fit_intercept=False)
+        clf = BayesianRidge(fit_intercept=False)
 #    clf = ARDRegression(fit_intercept=False)
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
@@ -118,8 +120,8 @@ if __name__ == "__main__":
         npph = np.percentile(w_std, 75)
         nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
-            if True:
-#            if w_std[j] < npph:# or w_std[j] < nppl:
+#            if True:
+            if w_std[j] < npph:# or w_std[j] < nppl:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:
