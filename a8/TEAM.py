@@ -76,37 +76,45 @@ def i_zeros(n, i):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
+    random.seed(int(sys.argv[2]))
+    np.random.seed(int(sys.argv[2]))
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
     clf = LinearRegression()
 #    clf = Perceptron()
 #Best so far
-#    clf = SGDRegressor(verbose=0, n_iter=20000)
+#    clf = SGDRegressor(verbose=0, n_iter=120000, power_t=0.15)
 #    clf = BayesianRidge()
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
 
+    ws = 8000 * [0]
     for i in range(19):
-        train_data = init_data
 #        if i > 0:
 #            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
 #        pdb.set_trace()
-        ws = []
-        for trash in range(300):
-            train_index = np.random.randint(20 + i, size = 20 + i)
-            clf.fit(train_data[train_index, :-1], train_data[train_index,-1])
-            ws.append(get_weight())
+        if i > 0:
+            train_index = np.append(np.zeros(20, dtype=np.int8), np.array(range(20, 20 + i)))
+        else:
+            train_index = np.zeros(20, dtype=np.int8)
+        for trash in range(6000):
+            train_index[:20] = np.random.randint(20, size = 20)
+            clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
+            ws[trash] = get_weight()
+#        clf.fit(train_data[:, :-1], train_data[:,-1])
 #        clf.fit(update[:, :-1], update[:, -1])
 #        pdb.set_trace()
         w_std = np.std(ws, axis = 0)
         w = np.mean(ws, axis = 0)
+#        w = get_weight()
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
+        npp = np.percentile(w_std, 70)
         for j in range(len(w)):
-            if w_std[j] > np.percentile(w_std, 40 + i):
-#            if abs(w[j]) < np.max(map(abs, w))/float((i + 1) * 0.3):
+#            if True:
+            if w_std[j] > npp:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:
