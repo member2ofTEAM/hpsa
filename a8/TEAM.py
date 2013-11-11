@@ -4,7 +4,7 @@ import sys
 import pdb
 import time
 import numpy as np
-from sklearn.linear_model import SGDRegressor, LinearRegression, BayesianRidge
+from sklearn.linear_model import SGDRegressor, LinearRegression, BayesianRidge, ARDRegression
 from sklearn.linear_model import OrthogonalMatchingPursuit
 from sklearn.svm import SVR
 from sklearn.cross_validation import Bootstrap
@@ -81,15 +81,18 @@ if __name__ == "__main__":
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-#    clf = LinearRegression(fit_intercept=False)
+    clf = LinearRegression(fit_intercept=False)
 #    clf = Perceptron()
 #Best so far
-#    clf = SGDRegressor(verbose=0, n_iter=2000, power_t=0.01, fit_intercept=False)
-    clf = BayesianRidge(fit_intercept=False)
+#    clf = SGDRegressor(verbose=0, n_iter=2000, power_t=0.01, 
+#                       fit_intercept=False, eta0 = 0.01)
+#    clf = BayesianRidge(fit_intercept=False)
+#    clf = ARDRegression(fit_intercept=False)
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
-
-    ws = 8000 * [0]
+    
+    size_b = 3000
+    ws = size_b * [0]
     for i in range(19):
 #        if i > 0:
 #            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
@@ -99,11 +102,11 @@ if __name__ == "__main__":
         else:
             train_index = np.zeros(20, dtype=np.int8)
         #This does better than 1, 150 and 2500. Why?
-        for trash in range(300):
+        for trash in range(size_b):
             train_index[:20] = np.random.randint(20, size = 20)
             clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
             ws[trash] = get_weight()
-#        clf.fit(train_data[:, :-1], train_data[:,-1])
+#        clf.fit(init_data[:, :-1], init_data[:,-1])
 #        clf.fit(update[:, :-1], update[:, -1])
 #        pdb.set_trace()
         w_std = np.std(ws, axis = 0)
@@ -112,11 +115,11 @@ if __name__ == "__main__":
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
-        npph = np.percentile(w_std, 66 + i)
+        npph = np.percentile(w_std, 75)
         nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
-#            if True:
-            if w_std[j] > npph or w_std[j] < nppl:
+            if True:
+#            if w_std[j] < npph:# or w_std[j] < nppl:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:

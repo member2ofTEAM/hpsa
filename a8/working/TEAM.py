@@ -79,7 +79,7 @@ if __name__ == "__main__":
     (n, init_data) = parse_data(receive())
 #    clf = LinearRegression()
 #    clf = Perceptron()
-    clf = SGDRegressor(verbose=0, n_iter=80000, alpha=0, warm_start = True)
+    clf = SGDRegressor(verbose=0, n_iter=80000, alpha=0, warm_start = True, fit_intercept=False)
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
 
