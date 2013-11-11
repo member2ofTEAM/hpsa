@@ -4,8 +4,10 @@ import sys
 import pdb
 import time
 import numpy as np
-from sklearn.linear_model import SGDRegressor, LinearRegression
+from sklearn.linear_model import SGDRegressor, LinearRegression, BayesianRidge, ARDRegression
+from sklearn.linear_model import OrthogonalMatchingPursuit
 from sklearn.svm import SVR
+from sklearn.cross_validation import Bootstrap
 
 
 def send(msg):
@@ -74,31 +76,64 @@ def i_zeros(n, i):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
+    if (len(sys.argv)) == 2
+        random.seed(int(sys.argv[2]))
+        np.random.seed(int(sys.argv[2]))
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
-#    clf = LinearRegression()
+    if n <= 40:
+        clf = LinearRegression(fit_intercept=False)
+    else:
 #    clf = Perceptron()
-    clf = SGDRegressor(verbose=0, n_iter=80000, alpha=0, warm_start = True, fit_intercept=False)
+#Best so far
+#    clf = SGDRegressor(verbose=0, n_iter=20000, power_t=0.01, learning_rate='constant', 
+#                       fit_intercept=False, eta0 = 0.01, alpha=0)
+        clf = BayesianRidge(fit_intercept=False)
+#    clf = ARDRegression(fit_intercept=False)
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
-
+    
+    if n <= 40:
+        size_b = 3000
+    else:
+        size_b = 2000
+    ws = size_b * [0]
     for i in range(19):
-        train_data = init_data
 #        if i > 0:
 #            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
 #        pdb.set_trace()
-        clf.fit(train_data[:, :-1], train_data[:,-1])
+        if i > 0:
+            train_index = np.append(np.zeros(20, dtype=np.int8), np.array(range(20, 20 + i)))
+        else:
+            train_index = np.zeros(20, dtype=np.int8)
+        #This does better than 1, 150 and 2500. Why?
+        for trash in range(size_b):
+            train_index[:20] = np.random.randint(20, size = 20)
+            clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
+            ws[trash] = get_weight()
+#        clf.fit(init_data[:, :-1], init_data[:,-1])
 #        clf.fit(update[:, :-1], update[:, -1])
-        w = get_weight()
+#        pdb.set_trace()
+        w_std = np.std(ws, axis = 0)
+        w = np.mean(ws, axis = 0)
+#        w = get_weight()
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
+        npph = np.percentile(w_std, 70)
+        nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
-            if w[j] > 0:
-                candidate += str(int(app)) + " "
+#            if True:
+            if w_std[j] > npph or w_std[j] < nppl:
+                if w[j] > 0:
+                    candidate += str(int(app)) + " "
+                else:
+                    candidate += str(int(not app)) + " "
             else:
-                candidate += str(int(not app)) + " "
+                candidate += "0 "
+            if w[j] >= 1:
+                print w
         send(candidate[:-1])
 #        zeros = ""
 #        for zero in i_zeros(n, i + 4):
@@ -106,10 +141,10 @@ if __name__ == "__main__":
 #        zeros = zeros[:-1]
 #        send(zeros)
         update = parse_update(receive())
-        update = np.array(update)
         #pdb.set_trace()
         init_data = np.vstack((init_data, update))
    
+#    clf = SGDRegressor(verbose=0, n_iter=20000, power_t = 0.0001)
     clf.fit(init_data[:, :-1], init_data[:, -1]) 
     w = get_weight()
     candidate = ""

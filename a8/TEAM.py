@@ -76,8 +76,9 @@ def i_zeros(n, i):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    random.seed(int(sys.argv[2]))
-    np.random.seed(int(sys.argv[2]))
+    if (len(sys.argv)) == 2
+        random.seed(int(sys.argv[2]))
+        np.random.seed(int(sys.argv[2]))
     receive()
     send("TEAM")
     (n, init_data) = parse_data(receive())
@@ -86,14 +87,17 @@ if __name__ == "__main__":
     else:
 #    clf = Perceptron()
 #Best so far
-#    clf = SGDRegressor(verbose=0, n_iter=2000, power_t=0.01, 
-#                       fit_intercept=False, eta0 = 0.01)
+#    clf = SGDRegressor(verbose=0, n_iter=20000, power_t=0.01, learning_rate='constant', 
+#                       fit_intercept=False, eta0 = 0.01, alpha=0)
         clf = BayesianRidge(fit_intercept=False)
 #    clf = ARDRegression(fit_intercept=False)
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
     
-    size_b = 3000
+    if n <= 40:
+        size_b = 3000
+    else:
+        size_b = 2000
     ws = size_b * [0]
     for i in range(19):
 #        if i > 0:
@@ -117,11 +121,11 @@ if __name__ == "__main__":
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
-        npph = np.percentile(w_std, 75)
+        npph = np.percentile(w_std, 70)
         nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
 #            if True:
-            if w_std[j] < npph:# or w_std[j] < nppl:
+            if w_std[j] > npph or w_std[j] < nppl:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:
