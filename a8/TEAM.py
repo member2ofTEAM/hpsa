@@ -76,7 +76,7 @@ def i_zeros(n, i):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    if (len(sys.argv)) == 2
+    if (len(sys.argv)) == 2:
         random.seed(int(sys.argv[2]))
         np.random.seed(int(sys.argv[2]))
     receive()
@@ -87,19 +87,23 @@ if __name__ == "__main__":
     else:
 #    clf = Perceptron()
 #Best so far
-#    clf = SGDRegressor(verbose=0, n_iter=20000, power_t=0.01, learning_rate='constant', 
-#                       fit_intercept=False, eta0 = 0.01, alpha=0)
-        clf = BayesianRidge(fit_intercept=False)
+        clf2 = SGDRegressor(verbose=0, n_iter=200, learning_rate='constant', 
+                       fit_intercept=False, eta0 = 0.01, alpha=0)
+        clf1 = BayesianRidge(fit_intercept=False)
+#        clf2 = LinearRegression(fit_intercept=False)
 #    clf = ARDRegression(fit_intercept=False)
 #    clf = SVR(kernel='linear')
-    get_weight = lambda: clf.coef_
+    get_weight1 = lambda: clf1.coef_
+    get_weight2 = lambda: clf2.coef_
     
     if n <= 40:
         size_b = 3000
+    elif n<= 60:
+        size_b = 3000
     else:
-        size_b = 2000
+        size_b = 1300
     ws = size_b * [0]
-    for i in range(19):
+    for i in range(20):
 #        if i > 0:
 #            train_data = np.vstack((train_data[:-1, :], np.append(train_data[-1, :-1], [1]))) 
 #        pdb.set_trace()
@@ -110,8 +114,12 @@ if __name__ == "__main__":
         #This does better than 1, 150 and 2500. Why?
         for trash in range(size_b):
             train_index[:20] = np.random.randint(20, size = 20)
-            clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
-            ws[trash] = get_weight()
+            if trash % 2 == 1:
+                clf1.fit(init_data[train_index, :-1], init_data[train_index,-1])
+                ws[trash] = get_weight1()
+            else:
+                clf2.fit(init_data[train_index, :-1], init_data[train_index,-1])
+                ws[trash] = get_weight2()
 #        clf.fit(init_data[:, :-1], init_data[:,-1])
 #        clf.fit(update[:, :-1], update[:, -1])
 #        pdb.set_trace()
@@ -120,12 +128,15 @@ if __name__ == "__main__":
 #        w = get_weight()
 #        pdb.set_trace()
         app = i % 2
+        if i == 19:
+            app = 1
         candidate = ""
-        npph = np.percentile(w_std, 70)
+#TODO: Try taking out lower bound for large weights or in general
+        npph = np.percentile(w_std, 66)
         nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
 #            if True:
-            if w_std[j] > npph or w_std[j] < nppl:
+            if w_std[j] > npph or w_std[j] < nppl or i == 19:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:
@@ -145,15 +156,15 @@ if __name__ == "__main__":
         init_data = np.vstack((init_data, update))
    
 #    clf = SGDRegressor(verbose=0, n_iter=20000, power_t = 0.0001)
-    clf.fit(init_data[:, :-1], init_data[:, -1]) 
-    w = get_weight()
-    candidate = ""
-    for i in range(len(w)):
-        if w[i] > 0:
-            candidate += "1 "
-        else:
-            candidate += "0 "
-    send(candidate[:-1])
+#    clf.fit(init_data[:, :-1], init_data[:, -1]) 
+#    w = get_weight()
+#    candidate = ""
+#    for i in range(len(w)):
+#        if w[i] > 0:
+#            candidate += "1 "
+#        else:
+#            candidate += "0 "
+#    send(candidate[:-1])
 
    
 
