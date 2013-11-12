@@ -88,7 +88,7 @@ if __name__ == "__main__":
     if n <= 40:
         size_b = 3000
     else:
-        size_b = 3000
+        size_b = 2500
     ws = size_b * [0]
     for i in range(19):
         if i > 0:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         for trash in range(size_b):
             train_index[:20] = np.random.randint(20, size = 20)
             clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
-            ws[trash] = np.around(get_weight(), 3)
+            ws[trash] = np.around(get_weight(), 2)
         w_std = np.std(ws, axis = 0)
         w = np.mean(ws, axis = 0)
         app = i % 2
@@ -113,8 +113,6 @@ if __name__ == "__main__":
                     candidate += str(int(not app)) + " "
             else:
                 candidate += "0 "
-            if w[j] >= 1:
-                print w
         send(candidate[:-1])
         update = parse_update(receive())
         init_data = np.vstack((init_data, update))
