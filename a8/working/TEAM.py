@@ -76,7 +76,7 @@ def i_zeros(n, i):
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    if (len(sys.argv)) == 2
+    if (len(sys.argv)) == 3:
         random.seed(int(sys.argv[2]))
         np.random.seed(int(sys.argv[2]))
     receive()
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     if n <= 40:
         size_b = 3000
     else:
-        size_b = 2000
+        size_b = 3000
     ws = size_b * [0]
     for i in range(19):
 #        if i > 0:
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         for trash in range(size_b):
             train_index[:20] = np.random.randint(20, size = 20)
             clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
-            ws[trash] = get_weight()
+            ws[trash] = np.around(get_weight(), 2)
 #        clf.fit(init_data[:, :-1], init_data[:,-1])
 #        clf.fit(update[:, :-1], update[:, -1])
 #        pdb.set_trace()
@@ -140,9 +140,9 @@ if __name__ == "__main__":
 #            zeros += str(zero) + " "
 #        zeros = zeros[:-1]
 #        send(zeros)
-        update = parse_update(receive())
+        update = np.array(parse_update(receive()))
         #pdb.set_trace()
-        init_data = np.vstack((init_data, update))
+        init_data = np.vstack((init_data, update))#, np.append((1 - update[:-1]), -update[-1])))
    
 #    clf = SGDRegressor(verbose=0, n_iter=20000, power_t = 0.0001)
     clf.fit(init_data[:, :-1], init_data[:, -1]) 
