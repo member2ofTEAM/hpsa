@@ -86,9 +86,9 @@ class Server:
             winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
             self.item_owner[winner.player_id][item] += 1
-            #if self.item_owner[winner.player_id][item] == self.n:
-            #    print "Player " + str(winner.name) + " won the game."
-            #    break
+            if self.item_owner[winner.player_id][item] == self.n:
+            	print "Player " + str(winner.name) + " won the game."
+            	break
             for client in alive_clients:
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
  
