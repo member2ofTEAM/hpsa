@@ -71,7 +71,7 @@ class Server:
             name = client.recv(self.size).strip()
             greeting = [player_id, self.p, self.k, self.n] + self.item_list 
             client.send(list_to_flat_string(greeting) + self.eom)
-            c = Client((client, address), player_id, name, time)
+            c = Client((client, address), player_id, name)
             c.start()
             self.threads.append(c)
 
