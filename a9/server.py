@@ -71,7 +71,7 @@ class Server:
             name = client.recv(self.size).strip()
             greeting = [player_id, self.p, self.k, self.n] + self.item_list 
             client.send(list_to_flat_string(greeting) + self.eom)
-            c = Client((client, address), player_id, name)
+            c = Client((client, address), player_id, name, time)
             c.start()
             self.threads.append(c)
 
@@ -114,17 +114,16 @@ class Client(threading.Thread):
         self.bid_time = sys.float_info.max
         self.out_msg_queue = Queue.Queue(maxsize=1)
         self.inc_msg_queue = Queue.Queue(maxsize=1)
-        
+       
+        #Controls the number of ms per player 
         self.time = 120000
         self.client.settimeout(self.time)
         self.running = 1
 
     def run(self):
         while (self.running):
-#            pdb.set_trace()
             before = time.time()
             bid = str(self.client.recv(self.size))
-#            print "Bid received: " + str(bid)
             after = time.time()
             self.time -= after - before
             if self.time <= 0:
