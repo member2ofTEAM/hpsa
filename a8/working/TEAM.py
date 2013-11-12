@@ -94,6 +94,8 @@ if __name__ == "__main__":
 #    clf = SVR(kernel='linear')
     get_weight = lambda: clf.coef_
     
+#    init_data = np.vstack(init_data, 
+
     if n <= 40:
         size_b = 3000
     else:
@@ -111,7 +113,7 @@ if __name__ == "__main__":
         for trash in range(size_b):
             train_index[:20] = np.random.randint(20, size = 20)
             clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
-            ws[trash] = np.around(get_weight(), 2)
+            ws[trash] = np.array(map(lambda x: 2*int(x > 0), np.around(get_weight(), 2))) - 1
 #        clf.fit(init_data[:, :-1], init_data[:,-1])
 #        clf.fit(update[:, :-1], update[:, -1])
 #        pdb.set_trace()
@@ -121,11 +123,11 @@ if __name__ == "__main__":
 #        pdb.set_trace()
         app = i % 2
         candidate = ""
-        npph = np.percentile(w_std, 70)
-        nppl = np.percentile(w_std, 33)
+        npph = np.percentile(w_std, 50)
+#        nppl = np.percentile(w_std, 33)
         for j in range(len(w)):
 #            if True:
-            if w_std[j] > npph or w_std[j] < nppl:
+            if w_std[j] > npph:# or w_std[j] < nppl:
                 if w[j] > 0:
                     candidate += str(int(app)) + " "
                 else:
