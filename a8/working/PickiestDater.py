@@ -74,7 +74,7 @@ def uniform(n, num_zero, weights):
             weights.append(min)
         elif(x >= (n /2) + num_zero):
             weights.append(-1 * min)
-    print sum_values(n, weights) 
+    #print sum_values(n, weights) 
     random.shuffle(weights)
 	
 def determine_sign(num):
@@ -107,10 +107,10 @@ def random_choice_to_mod(n, possible_mod, orig, weights):
         if(i != to_change and possible_mod[i][up_or_down] != 0):
             possibles.append(i)
 
-    print "Chosen to mod: ", to_change
-    print "Its original value: ", orig[to_change]
-    print "Its possible mod: ", possible_mod[to_change]
-    print "Possibles:", possibles
+    #print "Chosen to mod: ", to_change
+    #print "Its original value: ", orig[to_change]
+    #print "Its possible mod: ", possible_mod[to_change]
+    #print "Possibles:", possibles
 		
     is_pos = determine_sign(orig[to_change])
     is_pos2 = -1
@@ -151,10 +151,10 @@ def random_choice_to_mod(n, possible_mod, orig, weights):
     if(len(rands) == 0):
         return(-1, -1, [], False)
 	
-    print "Others chosen to mod: ", rands
-    for x in rands:
-        print "Values: ", orig[x]
-    print "Sum: ", sum
+    #print "Others chosen to mod: ", rands
+    #for x in rands:
+    #    print "Values: ", orig[x]
+    #print "Sum: ", sum
 
     return(to_change, up_or_down, rands, True)
 	
@@ -169,16 +169,16 @@ def random_mod(n, possible_mod, orig, weights):
     possible = a[3]
 
     #pdb.set_trace()
-    print "Possibles to mod: ", rands
+    #print "Possibles to mod: ", rands
     #there's an error here somewhere
 
-    print possible
+    #print possible
     if(possible == False):
         return False
 
     amt = possible_mod[to_change][up_or_down]
     amt = random.randint(1, amt)
-    print "AMOUNT", amt
+    #print "AMOUNT", amt
     if(up_or_down == 1):
         weights[to_change] = weights[to_change] + amt
     elif(up_or_down == 0):
@@ -222,7 +222,7 @@ def determine_mod(n, possible_mod, orig, weight):
     for i in range(0, n):
         a = []
         current_change = weight[i] - orig[i]
-        if(abs(weight[i]) <= 5):
+        if(abs(weight[i]) < 5):
             max_increase = 0
             max_decrease = 0
         elif(weight[i] > 0):
@@ -354,7 +354,7 @@ def construct_string(weights):
                 neg_sum = neg_sum + float(tmp)
             string = string + tmp + ' '
     string = string + '\n'
-    print pos_sum, neg_sum
+    #print pos_sum, neg_sum
     #print "Inside construct_string " + string
     return string
 
@@ -393,6 +393,7 @@ if __name__ == "__main__":
 
     if(msg == "Team Name?"):
         send(name)
+
 	
     msg = receive()
     msg = msg.split(' ')
@@ -419,11 +420,11 @@ if __name__ == "__main__":
     #fix_values(weights)
 
     #pdb.set_trace()
-    print orig
+    #print orig
     to_send = construct_string2(weights)
     to_send = to_send + "\n"
-    print to_send
-    print sum_values(n, weights)
+    #print to_send
+    #print sum_values(n, weights)
     send(to_send)
    
     while(1):
@@ -444,10 +445,10 @@ if __name__ == "__main__":
                 #do some other sort of modification or something
             #pdb.set_trace()
             
-            print orig
-            print weights
-            print possible_mod
-            print sum_values(n, weights)
+           # print orig
+           # print weights
+           # print possible_mod
+           # print sum_values(n, weights)
            # print "check" + to_send
             send(to_send)
 		
