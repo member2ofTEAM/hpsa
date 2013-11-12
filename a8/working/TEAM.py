@@ -4,7 +4,10 @@ import sys
 import pdb
 import time
 import numpy as np
-from sklearn.linear_model import LinearRegression, BayesianRidge
+from sklearn.linear_model import SGDRegressor, LinearRegression, BayesianRidge, ARDRegression
+from sklearn.linear_model import OrthogonalMatchingPursuit
+from sklearn.svm import SVR
+from sklearn.cross_validation import Bootstrap
 
 
 def send(msg):
@@ -85,18 +88,25 @@ if __name__ == "__main__":
        clf = BayesianRidge(fit_intercept=False)
     get_weight = lambda: clf.coef_
     
+    l = []
+    for entry in init_data:
+        l.append(np.array(entry))
+        l.append(np.hstack((np.array(1 - entry[:-1]), np.array(-1 * entry[-1]))))
+    init_data = np.array(l)
     if n <= 40:
-        size_b = 3000
-    else:
         size_b = 2500
+    elif n <= 80:
+        size_b = 1100
+    else:
+        size_b = 900
     ws = size_b * [0]
     for i in range(19):
         if i > 0:
-            train_index = np.append(np.zeros(20, dtype=np.int8), np.array(range(20, 20 + i)))
+            train_index = np.append(np.zeros(40, dtype=np.int8), np.array(range(40, 40 + 2*i)))
         else:
-            train_index = np.zeros(20, dtype=np.int8)
+            train_index = np.zeros(40, dtype=np.int8)
         for trash in range(size_b):
-            train_index[:20] = np.random.randint(20, size = 20)
+            train_index[:40] = np.random.randint(40, size = 40)
             clf.fit(init_data[train_index, :-1], init_data[train_index,-1])
             ws[trash] = np.around(get_weight(), 2)
         w_std = np.std(ws, axis = 0)
@@ -113,9 +123,11 @@ if __name__ == "__main__":
                     candidate += str(int(not app)) + " "
             else:
                 candidate += "0 "
+            if w[j] >= 1:
+                print w
         send(candidate[:-1])
-        update = parse_update(receive())
-        init_data = np.vstack((init_data, update))
+        update = np.array(parse_update(receive()))
+        init_data = np.vstack((init_data, update, np.append((1 - update[:-1]), -update[-1])))
    
     clf.fit(init_data[:, :-1], init_data[:, -1]) 
     w = get_weight()

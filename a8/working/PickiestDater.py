@@ -387,7 +387,8 @@ if __name__ == "__main__":
     #pdb.set_trace()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
-    random.seed(int(sys.argv[2]))
+    if (len(sys.argv)) == 3:
+        random.seed(int(sys.argv[2]))
 		
     msg = receive()
 
