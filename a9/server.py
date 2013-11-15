@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 
-'''Protocol: 
+'''Protocol:
 S:Name?
 C:<TEAM_NAME>
-S:<player_id> <no_players> <no_types> <goal> <item_list> #Example: 1 3 3 4 0 0 1 2 3 2 1 3 2 2 1
+S:<player_id> <no_players> <no_types> <goal> <item_list>
+#Example: 1 3 3 4 0 0 1 2 3 2 1 3 2 2 1
 C:<bid>
 S:<winner_id> <winner_bid> <player_budget>
 .
 .
 .
-S:sends nothing (don't know why, but for now considered feature)
 '''
 
-import select
 import socket
 import sys
 import threading
 import time
-import pdb
 import random
 import Queue
+import os
+
 
 def list_to_flat_string(l):
     result = ""
@@ -27,33 +27,47 @@ def list_to_flat_string(l):
         result += str(item) + " "
     return result[:-1]
 
-class Server:
-    '''p is the number of players
+
+class Server(object):
+
+    """
+    p is the number of players.
+
     k is the number of types
-    n is the number that has to be achieved'''
-    def __init__(self, port, p, k, n, r):
+    n is the number that has to be achieved
+
+    """
+
+    def __init__(self, argport, argp, argk, argn, argr):
         self.host = ''
-        self.port = port
+        self.port = argport
         self.backlog = 5
         self.size = 1024
         self.eom = '<EOM>'
         self.server = None
         self.threads = []
-        self.no_items = 1000
-       
+        self.no_items = 10000
+
         #Game specific attributes
-        self.p = p
-        self.k = k 
-        self.n = n
-        self.r = r
-        self.item_list = map(lambda x: random.randint(0, k - 1), range(self.no_items))
-        #Matrix storing the owner; (i, j) = no. of items of type j player i owns 
-        self.item_owner = p*[k*[0]]
-       
+        self.p = argp
+        self.k = argk
+        self.n = argn
+        self.r = argr
+        self.item_list = [random.randint(0, k - 1)
+                          for i in range(self.no_items)]
+        #Matrix storing the owner; (i, j) = no.of items of type j player i owns
+        self.item_owner = []
+        for i in range(p):
+            l = []
+            for j in range(k):
+                l.append(0)
+            self.item_owner.append(l)
+
     def open_socket(self):
         try:
             self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server.settimeout(10)
             self.server.bind((self.host,self.port))
             self.server.listen(self.backlog)
         except socket.error, (value,message):
@@ -67,19 +81,30 @@ class Server:
         while (len(self.threads) < self.p):
             player_id = len(self.threads)
             if player_id < self.r:
-                c = RandomClient(player_id, 0, 10)
+                c = RandomClient(player_id, 0, 10, 0, 2)
             else:
-                client, address = self.server.accept()
+                try:
+                    client, address = self.server.accept()
+                except socket.timeout:
+                    print "Client took too long to connect"
+                    continue
                 #Do handshake
                 client.send("Name?" + self.eom)
-                name = client.recv(self.size).strip()
-                greeting = [player_id, self.p, self.k, self.n] + self.item_list 
+                try:
+                    name = client.recv(self.size).strip()
+                except socket.timeout:
+                    print "Client took too long to send name"
+                    continue
+                greeting = [player_id, self.p, self.k, self.n] + self.item_list
                 client.send(list_to_flat_string(greeting) + self.eom)
-                c = Client((client, address), player_id, name)
+                c = Client((client, address), player_id, name, 120000)
             c.start()
             self.threads.append(c)
+        #Accept no more incoming connections
+        self.server.close()
 
-        for item in self.item_list:
+        for i in range(len(self.item_list)):
+            item = self.item_list[i]
             alive_clients = [client for client in self.threads if client.is_alive()]
             #Wait for the clients to receive their bids
             highest_bid = max(alive_clients, key=lambda x: x.out_msg_queue.get(block=True))
@@ -90,20 +115,19 @@ class Server:
             winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
             self.item_owner[winner.player_id][item] += 1
-            if self.item_owner[winner.player_id][item] == self.n:
-            	print "Player " + str(winner.name) + " won the game."
-            	break
             for client in alive_clients:
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
- 
-        #Close server and all threads
-        self.server.close()
-        for c in self.threads:
-            c.join()
+            if self.item_owner[winner.player_id][item] == self.n:
+                print "Player " + str(winner.name) + " won the game."
+                break
+
+        #Close all threads
+        for c in [client for client in self.threads if client.is_alive()]:
+            c.inc_msg_queue.put(0)
 
 class RandomClient(threading.Thread):
 
-    def __init__(self,player_id, wait_low, wait_high):
+    def __init__(self,player_id, bid_low, bid_high, wait_low, wait_high):
         threading.Thread.__init__(self)
         #Game specific attributes
         self.budget = 100
@@ -114,20 +138,22 @@ class RandomClient(threading.Thread):
         self.bid_time = sys.float_info.max
         self.out_msg_queue = Queue.Queue(maxsize=1)
         self.inc_msg_queue = Queue.Queue(maxsize=1)
-       
-        #Controls the number of ms per player 
+
+        #Controls the number of ms per player
         self.time = 120000
-        self.running = 1
 
         #How long to wait after generating a bid
-        self.wait_low = 0
-        self.wait_high = 0
+        self.wait_low = wait_low
+        self.wait_high = wait_high
+
+        self.bid_low = bid_low
+        self.bid_high = bid_high
 
     def run(self):
-        while (self.running):
+        while (1):
             before = time.time()
-            bid = random.randint(0, self.budget)
-            time.sleep(random.randint(self.wait_low, self.wait_high))
+            bid = random.randint(self.bid_low, self.bid_high)
+            time.sleep(0.1 * random.randint(self.wait_low, self.wait_high))
             after = time.time()
             self.time -= after - before
             if self.time <= 0:
@@ -141,19 +167,20 @@ class RandomClient(threading.Thread):
             #If I bid ealier than my competitor I'd win
             self.bid_time = time.time()
             #Now I want to communicate my bid and receive the result
-            self.out_msg_queue.put(bid, block=True)
+            self.out_msg_queue.put(bid)
             #The parent has entered the information and I can continue
-            [winner_id, winner_bid] = self.inc_msg_queue.get(block=True)
-            if self.player_id == winner_id:
-                self.budget -= self.bid
-
-    def join(self, timeout=None):
-        self.running = 0
-        super(RandomClient, self).join(timeout)
+            inc = self.inc_msg_queue.get(block=True)
+            if inc:
+                [winner_id, winner_bid] = inc
+                if self.player_id == winner_id:
+                    self.budget -= self.bid
+            else:
+                break
+        self.out_msg_queue.put(-1)
 
 class Client(threading.Thread):
 
-    def __init__(self,(client,address), player_id, name):
+    def __init__(self,(client,address), player_id, name, time):
         threading.Thread.__init__(self)
         self.size = 1024
         self.eom = '<EOM>'
@@ -168,9 +195,9 @@ class Client(threading.Thread):
         self.bid_time = sys.float_info.max
         self.out_msg_queue = Queue.Queue(maxsize=1)
         self.inc_msg_queue = Queue.Queue(maxsize=1)
-       
-        #Controls the number of ms per player 
-        self.time = 120000
+
+        #Controls the number of ms per player
+        self.time = time
         self.client.settimeout(self.time)
         self.running = 1
 
@@ -189,7 +216,7 @@ class Client(threading.Thread):
                 try:
                     bid = int(bid)
                 except ValueError:
-                    print ("Player {0} sent invalid bid: {1}" 
+                    print ("Player {0} sent invalid bid: {1}"
                                         "and is disqualified.").format(self.name, self.bid)
                     self.client.close()
                     self.running = 0
@@ -208,15 +235,18 @@ class Client(threading.Thread):
             #Now I want to communicate my bid and receive the result
             self.out_msg_queue.put(bid, block=True)
             #The parent has entered the information and I can continue
-            [winner_id, winner_bid] = self.inc_msg_queue.get(block=True)
-            if self.player_id == winner_id:
-                self.budget -= self.bid
-            self.client.send(list_to_flat_string([winner_id, winner_bid, self.budget]) + self.eom)
-        self.client.close()
-
-    def join(self, timeout=None):
-        self.running = 0
-        super(Client, self).join(timeout)
+            inc = self.inc_msg_queue.get(block=True)
+            if inc:
+                [winner_id, winner_bid] = inc
+                if self.player_id == winner_id:
+                    self.budget -= self.bid
+                self.client.send(list_to_flat_string([winner_id, winner_bid, self.budget]) + self.eom)
+            else:
+                self.client.close()
+                break
+        #Something bad happened, but the server is still expecting us to deliver, so
+        #we just answer with a bid that cannot possibly win
+        self.out_msg_queue.put(-1, block=True)
 
 if __name__ == "__main__":
     if len(sys.argv) != 7:
@@ -234,5 +264,6 @@ if __name__ == "__main__":
             sys.exit(0)
         s = Server(port, p, k, n, r)
         s.run()
+        os._exit(0)
 
 
