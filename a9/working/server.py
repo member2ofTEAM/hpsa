@@ -67,7 +67,7 @@ class Server(object):
         try:
             self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.server.settimeout(10)
+            self.server.settimeout(20)
             self.server.bind((self.host,self.port))
             self.server.listen(self.backlog)
         except socket.error, (value,message):
@@ -78,7 +78,10 @@ class Server(object):
 
     def run(self):
         self.open_socket()
-        while (len(self.threads) < self.p):
+        i = 0
+        while (1):
+            if i == self.p:
+                break
             player_id = len(self.threads)
             if player_id < self.r:
                 c = RandomClient(player_id, 0, 10, 0, 2)
@@ -87,6 +90,7 @@ class Server(object):
                     client, address = self.server.accept()
                 except socket.timeout:
                     print "Client took too long to connect"
+                    i += 1
                     continue
                 #Do handshake
                 client.send("Name?" + self.eom)
@@ -94,12 +98,14 @@ class Server(object):
                     name = client.recv(self.size).strip()
                 except socket.timeout:
                     print "Client took too long to send name"
+                    i += 1
                     continue
                 greeting = [player_id, self.p, self.k, self.n] + self.item_list
                 client.send(list_to_flat_string(greeting) + self.eom)
                 c = Client((client, address), player_id, name, 120000)
             c.start()
             self.threads.append(c)
+            i += 1
         #Accept no more incoming connections
         self.server.close()
 
