@@ -19,7 +19,7 @@ import time
 import random
 import Queue
 import os
-
+import pdb
 
 def list_to_flat_string(l):
     result = ""
@@ -120,13 +120,18 @@ class Server(object):
         for i in range(len(self.item_list)):
             item = self.item_list[i]
             alive_clients = [client for client in self.threads if client.is_alive()]
-            #Wait for the clients to receive their bids
-            highest_bid = max(alive_clients, key=lambda x: x.out_msg_queue.get(block=True))
-            highest_bidder = [client for client in alive_clients if client.bid == highest_bid.bid]
+            #Receive bid
+            for client in alive_clients:
+                client.out_msg_queue.get(block=True)
+            highest_bid = max([client.bid for client in alive_clients])
+            highest_bidder = [client for client in alive_clients if client.bid == highest_bid]
             #If two player have the same bid and timestamp, the winner is chosen uniformly random
             lowest_time = min(highest_bidder, key=lambda x: x.time)
             fastest_winner = [client for client in highest_bidder if client.time == lowest_time.time]
             winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
+#Insert time.time() were appropiate and send difference via client.time to update
+#Make sure to use max(diff, 0) to not send negative values!
+#Sven works in seconds, so divide it by 1000.0 (if accepting floats, 1000 otherwise)
             if self.v:
                 for client in alive_clients:
                     self.visualizer.update(client.player_id, client.bid, client.bid_time)
@@ -136,7 +141,9 @@ class Server(object):
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
             self.item_owner[winner.player_id][item] += 1
             for client in alive_clients:
+            #print " pid: " + str(client.player_id) + ", b: " + str(client.budget) + ", bid: " + str(client.bid)
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
+            print "\n",
             if self.item_owner[winner.player_id][item] == self.n:
                 print "Player " + str(winner.name) + " won the game."
                 break
