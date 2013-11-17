@@ -38,7 +38,7 @@ class Server(object):
 
     """
 
-    def __init__(self, argport, argp, argk, argn, argr):
+    def __init__(self, argport, argp, argk, argn, argr, argv):
         self.host = ''
         self.port = argport
         self.backlog = 5
@@ -53,6 +53,7 @@ class Server(object):
         self.k = argk
         self.n = argn
         self.r = argr
+        self.v = argv
         self.item_list = [random.randint(0, k - 1)
                           for i in range(self.no_items)]
         #Matrix storing the owner; (i, j) = no.of items of type j player i owns
@@ -62,6 +63,7 @@ class Server(object):
             for j in range(k):
                 l.append(0)
             self.item_owner.append(l)
+
 
     def open_socket(self):
         try:
@@ -108,6 +110,12 @@ class Server(object):
             i += 1
         #Accept no more incoming connections
         self.server.close()
+        #Visualizer
+        if self.v:
+            self.visualizer = Visualizer(self.n,
+                                         [(client.name, client.time / 1000)
+                                          for client in self.threads if client.is_alive()],
+                                         self.item_list)
 
         for i in range(len(self.item_list)):
             item = self.item_list[i]
@@ -119,6 +127,12 @@ class Server(object):
             lowest_time = min(highest_bidder, key=lambda x: x.time)
             fastest_winner = [client for client in highest_bidder if client.time == lowest_time.time]
             winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
+            if self.v:
+                for client in alive_clients:
+                    self.visualizer.update(client.player_id, client.bid, client.bid_time)
+                    time.sleep(0.5)
+                self.visualizer.update(winner.player_id, -1)
+                time.sleep(1)
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
             self.item_owner[winner.player_id][item] += 1
             for client in alive_clients:
@@ -255,11 +269,11 @@ class Client(threading.Thread):
         self.out_msg_queue.put(-1, block=True)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 7:
-        print "Usage: " + sys.argv[0] + " port p k n seed r"
+    if len(sys.argv) != 8:
+        print "Usage: " + sys.argv[0] + " port p k n seed r v"
     else:
         try:
-            [port, p, k, n, seed, r] = map(int, sys.argv[1:])
+            [port, p, k, n, seed, r, v] = map(int, sys.argv[1:])
         except ValueError:
             print "Arguments have to be all integers"
             sys.exit(0)
@@ -268,7 +282,9 @@ if __name__ == "__main__":
         if r > p:
             print "Cannot have more random players than players"
             sys.exit(0)
-        s = Server(port, p, k, n, r)
+        if v:
+            from basic_visualizer import Visualizer
+        s = Server(port, p, k, n, r, v)
         s.run()
         os._exit(0)
 

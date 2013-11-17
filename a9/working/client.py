@@ -1,19 +1,21 @@
 import socket
 import sys
-import time
 import random
+
 
 def receive():
     msg = ''
     while '<EOM>' not in msg:
         chunk = s.recv(1024)
-        if not chunk: break
+        if not chunk:
+            break
         if chunk == '':
             raise RuntimeError("socket connection broken")
         msg += chunk
     msg = msg[:-5]
     return msg
-  
+
+
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', int(sys.argv[1])))
@@ -22,9 +24,10 @@ if __name__ == "__main__":
     print receive()
     while(1):
         s.send(str(random.randint(0, 4)))
-        inc = receive()
+        try:
+            inc = receive()
+        except socket.error:
+            break
         if not inc:
             break
         print inc
- #       time.sleep(1)
-
