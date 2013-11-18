@@ -147,7 +147,6 @@ class Server(object):
             for client in alive_clients:
             #print " pid: " + str(client.player_id) + ", b: " + str(client.budget) + ", bid: " + str(client.bid)
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
-            print "\n",
             if self.item_owner[winner.player_id][item] == self.n:
                 print "Player " + str(winner.name) + " won the game."
                 break
