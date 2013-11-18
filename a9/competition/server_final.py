@@ -143,7 +143,7 @@ class Server(object):
                                            client.bid,
                                            max(client.bid_time - round_start_time, 0))
                     time.sleep(0.5)
-                self.visualizer.update(winner.player_id, -1)
+                self.visualizer.update(v_ids[winner.name], -1)
                 time.sleep(1)
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
             self.item_owner[winner.player_id][item] += 1
@@ -152,6 +152,7 @@ class Server(object):
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
             if self.item_owner[winner.player_id][item] == self.n:
                 print "Player " + str(winner.name) + " won the game."
+                self.visualizer.update(v_ids[winner.name])
                 break
 
         #Close all threads
