@@ -132,6 +132,7 @@ class Server(object):
 #Insert time.time() were appropiate and send difference via client.time to update
 #Make sure to use max(diff, 0) to not send negative values!
 #Sven works in seconds, so divide it by 1000.0 (if accepting floats, 1000 otherwise)
+#Make CSV file with "command", "parakeet", "strategy name", "image file"
             if self.v:
                 for client in alive_clients:
                     self.visualizer.update(client.player_id, client.bid, client.bid_time)
