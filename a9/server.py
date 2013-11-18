@@ -121,6 +121,7 @@ class Server(object):
             item = self.item_list[i]
             alive_clients = [client for client in self.threads if client.is_alive()]
             #Receive bid
+            round_start_time = time.time()
             for client in alive_clients:
                 client.out_msg_queue.get(block=True)
             highest_bid = max([client.bid for client in alive_clients])
@@ -135,7 +136,9 @@ class Server(object):
 #Make CSV file with "command", "parakeet", "strategy name", "image file"
             if self.v:
                 for client in alive_clients:
-                    self.visualizer.update(client.player_id, client.bid, client.bid_time)
+                    self.visualizer.update(client.player_id,
+                                           client.bid,
+                                           max(client.bid_time - round_start_time, 0))
                     time.sleep(0.5)
                 self.visualizer.update(winner.player_id, -1)
                 time.sleep(1)
