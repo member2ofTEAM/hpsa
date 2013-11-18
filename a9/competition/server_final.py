@@ -20,6 +20,7 @@ import random
 import Queue
 import os
 import pdb
+import csv
 
 def list_to_flat_string(l):
     result = ""
@@ -47,7 +48,12 @@ class Server(object):
         self.server = None
         self.threads = []
         self.no_items = 10000
-
+        #name : cmd, P, strat
+        self.client_data = {}
+        with open('client_data.csv', 'rb') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                self.client_data[row[0]] = row[1:]
         #Game specific attributes
         self.p = argp
         self.k = argk
@@ -85,26 +91,23 @@ class Server(object):
             if i == self.p:
                 break
             player_id = len(self.threads)
-            if player_id < self.r:
-                c = RandomClient(player_id, 0, 10, 0, 2)
-            else:
-                try:
-                    client, address = self.server.accept()
-                except socket.timeout:
-                    print "Client took too long to connect"
-                    i += 1
-                    continue
-                #Do handshake
-                client.send("Name?" + self.eom)
-                try:
-                    name = client.recv(self.size).strip()
-                except socket.timeout:
-                    print "Client took too long to send name"
-                    i += 1
-                    continue
-                greeting = [player_id, self.p, self.k, self.n] + self.item_list
-                client.send(list_to_flat_string(greeting) + self.eom)
-                c = Client((client, address), player_id, name, 120000)
+            try:
+                client, address = self.server.accept()
+            except socket.timeout:
+                print "Client took too long to connect"
+                i += 1
+                continue
+            #Do handshake
+            client.send("Name?" + self.eom)
+            try:
+                name = client.recv(self.size).strip()
+            except socket.timeout:
+                print "Client took too long to send name"
+                i += 1
+                continue
+            greeting = [player_id, self.p, self.k, self.n] + self.item_list
+            client.send(list_to_flat_string(greeting) + self.eom)
+            c = Client((client, address), player_id, name, int(self.client_data[name][1]))
             c.start()
             self.threads.append(c)
             i += 1
@@ -112,6 +115,9 @@ class Server(object):
         self.server.close()
         #Visualizer
         if self.v:
+            v_ids = dict([(client.name, i)
+                           for client in self.threads
+                           for i in range(len(self.threads))])
             self.visualizer = Visualizer(self.n,
                                          [(client.name, client.time)
                                           for client in self.threads if client.is_alive()],
@@ -130,13 +136,10 @@ class Server(object):
             lowest_time = min(highest_bidder, key=lambda x: x.time)
             fastest_winner = [client for client in highest_bidder if client.time == lowest_time.time]
             winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
-#Insert time.time() were appropiate and send difference via client.time to update
-#Make sure to use max(diff, 0) to not send negative values!
-#Sven works in seconds, so divide it by 1000.0 (if accepting floats, 1000 otherwise)
-#Make CSV file with "command", "parakeet", "strategy name", "image file"
+            alive_clients.sort(key=lambda x: x.bid_time)
             if self.v:
                 for client in alive_clients:
-                    self.visualizer.update(client.player_id,
+                    self.visualizer.update(v_ids[client.name],
                                            client.bid,
                                            max(client.bid_time - round_start_time, 0))
                     time.sleep(0.5)
@@ -154,59 +157,6 @@ class Server(object):
         #Close all threads
         for c in [client for client in self.threads if client.is_alive()]:
             c.inc_msg_queue.put(0)
-
-class RandomClient(threading.Thread):
-
-    def __init__(self,player_id, bid_low, bid_high, wait_low, wait_high):
-        threading.Thread.__init__(self)
-        #Game specific attributes
-        self.budget = 100
-        self.player_id = player_id
-        self.name = "Random" + str(self.player_id)
-        #The bidding system
-        self.bid = 0
-        self.bid_time = sys.float_info.max
-        self.out_msg_queue = Queue.Queue(maxsize=1)
-        self.inc_msg_queue = Queue.Queue(maxsize=1)
-
-        #Controls the number of ms per player
-        self.time = 120000
-
-        #How long to wait after generating a bid
-        self.wait_low = wait_low
-        self.wait_high = wait_high
-
-        self.bid_low = bid_low
-        self.bid_high = bid_high
-
-    def run(self):
-        while (1):
-            before = time.time()
-            bid = random.randint(self.bid_low, self.bid_high)
-            time.sleep(0.1 * random.randint(self.wait_low, self.wait_high))
-            after = time.time()
-            self.time -= after - before
-            if self.time <= 0:
-                print "Player {0} timed out and is disqualified.".format(self.name)
-                self.running = 0
-                break
-            if bid > self.budget:
-                self.bid = 0
-            else:
-                self.bid = bid
-            #If I bid ealier than my competitor I'd win
-            self.bid_time = time.time()
-            #Now I want to communicate my bid and receive the result
-            self.out_msg_queue.put(bid)
-            #The parent has entered the information and I can continue
-            inc = self.inc_msg_queue.get(block=True)
-            if inc:
-                [winner_id, winner_bid] = inc
-                if self.player_id == winner_id:
-                    self.budget -= self.bid
-            else:
-                break
-        self.out_msg_queue.put(-1)
 
 class Client(threading.Thread):
 
@@ -293,7 +243,7 @@ if __name__ == "__main__":
             print "Cannot have more random players than players"
             sys.exit(0)
         if v:
-            from basic_visualizer import Visualizer
+            from advanced_visualizer import Visualizer
         s = Server(port, p, k, n, r, v)
         s.run()
         os._exit(0)

@@ -113,7 +113,7 @@ class Server(object):
         #Visualizer
         if self.v:
             self.visualizer = Visualizer(self.n,
-                                         [(client.name, client.time / 1000)
+                                         [(client.name, client.time)
                                           for client in self.threads if client.is_alive()],
                                          self.item_list)
 
@@ -133,6 +133,7 @@ class Server(object):
 #Insert time.time() were appropiate and send difference via client.time to update
 #Make sure to use max(diff, 0) to not send negative values!
 #Sven works in seconds, so divide it by 1000.0 (if accepting floats, 1000 otherwise)
+#Make CSV file with "command", "parakeet", "strategy name", "image file"
             if self.v:
                 for client in alive_clients:
                     self.visualizer.update(client.player_id,
@@ -146,7 +147,6 @@ class Server(object):
             for client in alive_clients:
             #print " pid: " + str(client.player_id) + ", b: " + str(client.budget) + ", bid: " + str(client.bid)
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
-            #print "\n",
             if self.item_owner[winner.player_id][item] == self.n:
                 print "Player " + str(winner.name) + " won the game."
                 break
