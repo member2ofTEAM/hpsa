@@ -320,7 +320,7 @@ class Visualizer():
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",10),anchor='center')
                        
         if(no_players>4):  
             if(no_players%2):
@@ -428,7 +428,7 @@ class Visualizer():
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",10),anchor='center')
                        
                 i+=1
     
@@ -530,7 +530,7 @@ class Visualizer():
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",10),anchor='center')
                        
                 i+=1
       
