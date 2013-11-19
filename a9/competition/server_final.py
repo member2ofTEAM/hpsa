@@ -252,7 +252,7 @@ if __name__ == "__main__":
             print "Cannot have more random players than players"
             sys.exit(0)
         if v:
-            from advanced_visualizer import Visualizer
+            from visualizer import Visualizer
         s = Server(port, p, k, n, r, v)
         s.run()
         os._exit(0)
