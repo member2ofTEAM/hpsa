@@ -1,0 +1,4 @@
+ADD,java Auction 1234 ADD,120000,HonestBidder$,shasha.gif
+JJ,java AuctionGame 1234,120000,patient bid$,shasha.gif
+Orange,python orange_client.py 1234,120000,Estimating value.$,shasha.gif
+WhiteTruffle,python whiteTruffle.py 1234 WhiteTruffle,120000,Aggressive bids$,shasha.gif
