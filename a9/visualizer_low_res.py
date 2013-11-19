@@ -14,7 +14,7 @@ class Visualizer():
             self.teamid = teamid
             self.teamname = teamname
             self.money = money
-            self.time = time
+            self.time = time/1000
             self.strategy = strategy
             if self.strategy=="":
                 random.shuffle(strategies)
@@ -697,7 +697,7 @@ if __name__ == "__main__":
     #Visualizer is created with goal of 3, 2 players and an itemlist
     #v = Visualizer(3,[('Shrivelled Turtleman',120),('White Truffle',150),("john",120),("joe",120),("anna",120),('mark',120),('tom',150),("john",120),("joe",120),("anna",120),("anna",120)],[4,3,3,3,2,1,2,0,3,4])
     #v = Visualizer(5,[('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('White Truffle',150,'','')],[4,3,3,3,2,1,2,0,3,4])
-    v = Visualizer(3,[('Blue Dragonfly',120,'score function','blue_dragonfly.gif'),('Gamma',120,'Bid one more','gamma.gif'),('SuperShaq',120,'Use the Force','supershaq.gif'),('White Truffle',150,'',''),('Brie',120,'Anything can happen','brie.gif'),('Orange',120,'estimating value',''),('Off by One',120,'Make it rain $$$','off_by_one.gif'),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'','')],[4,3,3,3,2,1,2,0,3,4])
+    v = Visualizer(3,[('Blue Dragonfly',120000,'score function','blue_dragonfly.gif'),('Gamma',120000,'Bid one more','gamma.gif'),('SuperShaq',120,'Use the Force','supershaq.gif'),('White Truffle',150,'',''),('Brie',120,'Anything can happen','brie.gif'),('Orange',120,'estimating value',''),('Off by One',120,'Make it rain $$$','off_by_one.gif'),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'','')],[4,3,3,3,2,1,2,0,3,4])
     
     
     v.update(0,10,15000) #Player 0, Bid 10, Time used 15
