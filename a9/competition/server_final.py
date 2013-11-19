@@ -19,7 +19,6 @@ import time
 import random
 import Queue
 import os
-import pdb
 import csv
 
 def list_to_flat_string(l):
@@ -153,7 +152,6 @@ class Server(object):
                     self.visualizer.update(v_ids[client.name],
                                            client.bid,
                                            max(client.bid_time - round_start_time, 0))
-                    time.sleep(0.5)
                 self.visualizer.update(v_ids[winner.name], -1)
                 time.sleep(1)
             print "Player {0} wins item {1} for {2}.".format(winner.name, item, winner.bid)
