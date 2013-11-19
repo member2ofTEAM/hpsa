@@ -117,7 +117,6 @@ class Server(object):
             self.threads.append(c)
             i += 1
 
-        pdb.set_trace()
         #Accept no more incoming connections
         self.server.close()
         #Visualizer

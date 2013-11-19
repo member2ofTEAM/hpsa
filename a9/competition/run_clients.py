@@ -16,7 +16,6 @@ if __name__ == "__main__":
         root = os.getcwd()
         os.chdir(os.getcwd() + "/" + str(name))
         cmd = client_data[name][0].strip().split(" ")
-        #pdb.set_trace()
         Popen(cmd)
         os.chdir(root)
 
