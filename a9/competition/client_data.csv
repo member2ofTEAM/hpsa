@@ -1,3 +1,6 @@
-Random0, python client.py 1234 Random0, 120000, random nonsense, random_0.gif 
-Random1, python client.py 1234 Random1, 150000, random nonsense, random_1.gif
-Random2, python client.py 1234 Random2, 150000, random nonsense, random_2.gif
+whiteTruffle,python whiteTruffle.py 1234 WhiteTruffle,120000,Aggressive bids
+ADD,java Auction 1234 ADD,120000,HonestBidder
+Brie,cmd,120000,Anything can happen
+OffByOne,cmd,120000,Make it rain $$$
+Orange,python orange_client.py 1234,120000,Estimating value.
+JJ,java AuctionGame 1234,120000,patient bid
