@@ -57,7 +57,7 @@ class Visualizer():
             pause = 0.5 + len(text)/25. 
         self.w.create_image(((self.width*3/4)+110,(self.height/6)+40),image=self.bubble,anchor='se', tag="bubble")
         shasha = text
-        self.w.create_text(((self.width*3/4),(self.height/6)-30), font=("Arial",12), text = shasha, justify="center", anchor = 'center', tag = "shasha")
+        self.w.create_text(((self.width*3/4),(self.height/6)-30), font=("Arial",11), text = shasha, justify="center", anchor = 'center', tag = "shasha")
         self.w.update()
         time.sleep(pause)
         if delete:
@@ -209,7 +209,7 @@ class Visualizer():
         self.w = Canvas(self.master, width=self.width, height=self.height)
         self.w.pack()
         
-        if not intro:
+        if intro:
             self.intro()
         
         self.draw_scoreboard(-1)
