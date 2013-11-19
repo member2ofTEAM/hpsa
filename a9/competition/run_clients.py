@@ -1,4 +1,6 @@
 import csv
+import pdb
+import os
 from subprocess import Popen
 import time
 
@@ -11,5 +13,10 @@ if __name__ == "__main__":
         for row in reader:
             client_data[row[0]] = row[1:]
     for name in client_data:
-        Popen(client_data[name][0].strip().split(" "))
+        root = os.getcwd()
+        os.chdir(os.getcwd() + "/" + str(name))
+        cmd = client_data[name][0].strip().split(" ")
+        #pdb.set_trace()
+        Popen(cmd)
+        os.chdir(root)
 

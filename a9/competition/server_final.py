@@ -116,18 +116,23 @@ class Server(object):
             c.start()
             self.threads.append(c)
             i += 1
+
+        pdb.set_trace()
         #Accept no more incoming connections
         self.server.close()
         #Visualizer
         if self.v:
-            v_ids = dict([(client.name, i)
-                           for client in self.threads
-                           for i in range(len(self.threads))])
+            v_ids = {}
+            i = 0
+            for client in self.threads:
+                v_ids[client.name] = i
+                i += 1
+
             self.visualizer = Visualizer(self.n,
                                          [(client.name, client.time,
                                            self.client_data[client.name][2],
                                            self.client_data[client.name][3])
-                                          for client in self.threads if client.is_alive()],
+                                          for client in self.threads],
                                          self.item_list)
 
         for i in range(len(self.item_list)):
