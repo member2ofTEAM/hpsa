@@ -107,7 +107,12 @@ class Server(object):
                 continue
             greeting = [player_id, self.p, self.k, self.n] + self.item_list
             client.send(list_to_flat_string(greeting) + self.eom)
-            c = Client((client, address), player_id, name, int(self.client_data[name][1]))
+            try:
+                c = Client((client, address), player_id, name, int(self.client_data[name][1]))
+            except KeyError:
+                print "Submitted name does not match sent name: " + str(name)
+                i += 1
+                continue
             c.start()
             self.threads.append(c)
             i += 1
@@ -119,7 +124,9 @@ class Server(object):
                            for client in self.threads
                            for i in range(len(self.threads))])
             self.visualizer = Visualizer(self.n,
-                                         [(client.name, client.time)
+                                         [(client.name, client.time,
+                                           self.client_data[client.name][2],
+                                           self.client_data[client.name][3])
                                           for client in self.threads if client.is_alive()],
                                          self.item_list)
 
@@ -152,7 +159,8 @@ class Server(object):
                 client.inc_msg_queue.put([winner.player_id, winner.bid], block=True)
             if self.item_owner[winner.player_id][item] == self.n:
                 print "Player " + str(winner.name) + " won the game."
-                self.visualizer.update(v_ids[winner.name])
+                if self.v:
+                    self.visualizer.update(v_ids[winner.name])
                 break
 
         #Close all threads
