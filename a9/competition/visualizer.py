@@ -55,9 +55,9 @@ class Visualizer():
     def shasha_says(self,text,pause=0, delete=True):
         if pause == 0:
             pause = 0.5 + len(text)/25. 
-        self.w.create_image(((self.width*3/4)+50,(self.height/6)+20),image=self.bubble,anchor='se', tag="bubble")
+        self.w.create_image(((self.width*3/4)+110,(self.height/6)+40),image=self.bubble,anchor='se', tag="bubble")
         shasha = text
-        self.w.create_text((800,85), font=("Purisa",15), text = shasha, justify="center", anchor = 'center', tag = "shasha")
+        self.w.create_text(((self.width*3/4),(self.height/6)-30), font=("Arial",12), text = shasha, justify="center", anchor = 'center', tag = "shasha")
         self.w.update()
         time.sleep(pause)
         if delete:
@@ -65,7 +65,7 @@ class Visualizer():
             self.w.delete("bubble")
             
         
-    def screen_says(self,text,pause = 3, font=("Purisa",30), pos=(300,200)):
+    def screen_says(self,text,pause = 3, font=("Arial",30), pos=(300,150)):
         shasha = text
         self.w.create_text(pos, text = shasha, anchor = 'center', font=font, justify='center', tag = "screen")
         self.w.update()
@@ -97,7 +97,7 @@ class Visualizer():
             self.screen_says(self.players[i].teamname,0)
             self.shasha_says(self.players[i].teamname,3)
             self.shasha_says("Please come on stage and\n present us your strategy:")
-            self.screen_says(self.players[i].strategy, 0,pos=(300,250))
+            self.screen_says(self.players[i].strategy, 0,pos=(300,200))
             self.shasha_says(self.players[i].strategy)
             raw_input()
                   
@@ -167,22 +167,22 @@ class Visualizer():
         self.candyimage = []
         self.small_candy = []
         
-        self.kitkat = (PhotoImage(file="Images/Kit_Kat.gif"))
+        self.kitkat = (PhotoImage(file="Images_low/Kit_Kat.gif"))
         
         for i in range(self.diff_items):
-            self.candyimage.append(PhotoImage(file="Images/"+self.item_files[i]+".gif"))
-            self.small_candy.append(PhotoImage(file="Images/"+self.item_files[i]+"_small.gif"))
+            self.candyimage.append(PhotoImage(file="Images_low/"+self.item_files[i]+".gif"))
+            self.small_candy.append(PhotoImage(file="Images_low/"+self.item_files[i]+"_small.gif"))
         
         
         for i in range(11):
             str_num = str(i+1)
-            self.randomimage.append(PhotoImage(file="Images/picture"+str_num+".gif"))
+            self.randomimage.append(PhotoImage(file="Images_low/picture"+str_num+".gif"))
         for i in range(len(self.players)):
             if(self.players[i].image == ""):
                 random.shuffle(self.randomimage)
                 self.tkimage.append(self.randomimage.pop(0))
             else:
-                self.tkimage.append(PhotoImage(file="Images/"+self.players[i].image))
+                self.tkimage.append(PhotoImage(file="Images_low/"+self.players[i].image))
             #self.darkimage.append(self.make_dark(self.tkimage[i]))
             self.darkimage.append(self.make_dark(self.tkimage[i]))
                      
@@ -191,20 +191,20 @@ class Visualizer():
         self.numimage = []
         for i in range(10):
             str_num = str(i)
-            self.numimage.append(PhotoImage(file="Images/"+str_num+".gif"))
+            self.numimage.append(PhotoImage(file="Images_low/"+str_num+".gif"))
         
-        self.numimage.append(PhotoImage(file="Images/number_template.gif"))
-        self.numimage.append(PhotoImage(file="Images/W.gif"))
-        self.numimage.append(PhotoImage(file="Images/I.gif"))
-        self.numimage.append(PhotoImage(file="Images/N.gif"))
-        self.numimage.append(PhotoImage(file="Images/x_1.gif"))
-        self.podium = PhotoImage(file="Images/podium2.gif")
-        self.shasha= PhotoImage(file="Images/shasha.gif")
-        self.bubble= PhotoImage(file="Images/bubble.gif")
+        self.numimage.append(PhotoImage(file="Images_low/number_template.gif"))
+        self.numimage.append(PhotoImage(file="Images_low/W.gif"))
+        self.numimage.append(PhotoImage(file="Images_low/I.gif"))
+        self.numimage.append(PhotoImage(file="Images_low/N.gif"))
+        self.numimage.append(PhotoImage(file="Images_low/x_1.gif"))
+        self.podium = PhotoImage(file="Images_low/podium2.gif")
+        self.shasha= PhotoImage(file="Images_low/shasha.gif")
+        self.bubble= PhotoImage(file="Images_low/bubble.gif")
         
         # Height is dependent on number of players
-        self.width = 1200
-        self.height = 1000
+        self.width = 1000
+        self.height = 700 
         
         self.w = Canvas(self.master, width=self.width, height=self.height)
         self.w.pack()
@@ -232,95 +232,95 @@ class Visualizer():
                 center_x = player_box_left_x + (player_box_x_offset/2)
                 center_y = player_box_upper_y + (player_box_y_offset/2)
                 if intro and player.teamid > pid:
-                    self.w.create_image((center_x,center_y-95),image=self.darkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.darkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-73),text="???",font=("Purisa",11),anchor='center')
-                    self.w.create_text((center_x,center_y-53),text="???",font=("Purisa",12),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text="???",font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text="???",font=("Arial",8),anchor='center')
                 else:
-                    self.w.create_image((center_x,center_y-95),image=self.tkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.tkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-73),text=player.teamname,font=("Purisa",11),anchor='center')
-                    self.w.create_text((center_x,center_y-53),text=player.strategy,font=("Purisa",12),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Arial",8),anchor='center')
                 #self.w.create_rectangle(center_x-75,center_y-100,center_x+75,center_y+100,fill="brown")
                 player_box_left_x += player_box_x_offset
 
                 if(state==-1):
                     if((player.teamid == pid) or ((player.teamid in self.bidqueue) and (self.bidqueue.index(player.teamid)<self.bidqueue.index(pid)))):
                         if player.current_bid < 10:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[0],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
                         elif player.current_bid < 100:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
                         else:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[2])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[2])],anchor='center')
                     else:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[-1],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[-1],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[-1],anchor='center')
                     if self.current_item in player.items:
                         (key,value) = (self.current_item,player.items[self.current_item])
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",12), justify='left', anchor='nw')
                     item = self.item_names[key]
-                    self.w.create_image((center_x+5,center_y+42), image=self.small_candy[key], anchor="center")
+                    self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                     #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                         
                 elif state == 0:
                     if player.teamid in self.bidqueue:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[-1],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[-1],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[-1],anchor='center')
                     else:        
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[10],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[10],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[10],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[10],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[10],anchor='center')
                     if self.current_item in player.items:
                         (key,value) = (self.current_item,player.items[self.current_item])
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                     item = self.item_names[key]
-                    self.w.create_image((center_x+5,center_y+42), image=self.small_candy[key], anchor="center")
+                    self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                     
                         
                 else:
                     if player.teamid == pid and not intro:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[11],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[11],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[12],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[13],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[13],anchor='center')
                     else:
                         if player.money < 10:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[0],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
                         elif player.money < 100:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
                         else:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
                     for (key, value) in sorted(player.items.iteritems(), key=operator.itemgetter(1), reverse=True)[:1]:
                         text_in = str(value) + "* "
-                        self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                         item = self.item_names[key]
                         
-                        self.w.create_image((center_x+5,center_y+42), image=self.small_candy[key], anchor="center")
+                        self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+75),text="Time left:  " + str(int(player.time)),font=("Purisa",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
                        
         if(no_players>4):  
             if(no_players%2):
@@ -337,97 +337,99 @@ class Visualizer():
             
             while i<upper:
                 player = self.players[i]
-                self.labelList.append(self.tkimage[self.players[i].teamid])
                 center_x = player_box_left_x + (player_box_x_offset/2)
-                center_y = player_box_upper_y + (player_box_y_offset/2)/2 + 75 + 36
+                center_y = player_box_upper_y + (player_box_y_offset/2) - 25
                 if intro and player.teamid > pid:
-                    self.w.create_image((center_x,center_y-95),image=self.darkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.darkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-73),text="???",font=("Purisa",11),anchor='center')
-                    self.w.create_text((center_x,center_y-53),text="???",font=("Purisa",12),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text="???",font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text="???",font=("Arial",8),anchor='center')
                 else:
-                    self.w.create_image((center_x,center_y-95),image=self.tkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.tkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-73),text=player.teamname,font=("Purisa",11),anchor='center')
-                    self.w.create_text((center_x,center_y-53),text=player.strategy,font=("Purisa",12),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Arial",8),anchor='center')
                 #self.w.create_rectangle(center_x-75,center_y-100,center_x+75,center_y+100,fill="brown")
-                
                 player_box_left_x += player_box_x_offset
-                
+
                 if(state==-1):
                     if((player.teamid == pid) or ((player.teamid in self.bidqueue) and (self.bidqueue.index(player.teamid)<self.bidqueue.index(pid)))):
                         if player.current_bid < 10:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[0],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
                         elif player.current_bid < 100:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
                         else:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[2])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[2])],anchor='center')
                     else:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[-1],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[-1],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[-1],anchor='center')
                     if self.current_item in player.items:
                         (key,value) = (self.current_item,player.items[self.current_item])
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",12), justify='left', anchor='nw')
                     item = self.item_names[key]
-                    self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
-                    self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
+                    self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
+                    #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
+                    #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                         
                 elif state == 0:
                     if player.teamid in self.bidqueue:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[-1],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[-1],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[-1],anchor='center')
                     else:        
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[10],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[10],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[10],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[10],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[10],anchor='center')
                     if self.current_item in player.items:
                         (key,value) = (self.current_item,player.items[self.current_item])
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                     item = self.item_names[key]
-                    self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
-                    self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
+                    self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
+                    #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
+                    
                         
                 else:
                     if player.teamid == pid and not intro:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[11],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[11],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[12],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[13],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[13],anchor='center')
                     else:
                         if player.money < 10:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[0],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
                         elif player.money < 100:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
                         else:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
                     for (key, value) in sorted(player.items.iteritems(), key=operator.itemgetter(1), reverse=True)[:1]:
                         text_in = str(value) + "* "
-                        self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                         item = self.item_names[key]
-                        self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
-                        self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
+                        
+                        self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
+                        #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
+                        #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+75),text="Time left:  " + str(int(player.time)),font=("Purisa",11),anchor='center')
-                
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                       
                 i+=1
     
             player_box_upper_y = height/3
@@ -437,97 +439,99 @@ class Visualizer():
             
             while(i<no_players):
                 player = self.players[i]
-                self.labelList.append(self.tkimage[self.players[i].teamid])
                 center_x = player_box_left_x + (player_box_x_offset/2)
-                center_y = player_box_upper_y + (player_box_y_offset/2) + (player_box_y_offset/2)/2 + 75
+                center_y = player_box_upper_y + (player_box_y_offset/2) + (player_box_y_offset/2)/2 + 45
                 if intro and player.teamid > pid:
-                    self.w.create_image((center_x,center_y-95),image=self.darkimage[player.teamid],anchor='s')
-                    self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')  
-                    self.w.create_text((center_x,center_y-73),text="???",font=("Purisa",11),anchor='center')
-                    self.w.create_text((center_x,center_y-53),text="???",font=("Purisa",12),anchor='center')
-                else:
-                    self.w.create_image((center_x,center_y-95),image=self.tkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-65),image=self.darkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-73),text=player.teamname,font=("Purisa",11),anchor='center')
-                    self.w.create_text((center_x,center_y-53),text=player.strategy,font=("Purisa",12),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text="???",font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text="???",font=("Arial",8),anchor='center')
+                else:
+                    self.w.create_image((center_x,center_y-65),image=self.tkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
+                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Arial",8),anchor='center')
                 #self.w.create_rectangle(center_x-75,center_y-100,center_x+75,center_y+100,fill="brown")
-                
                 player_box_left_x += player_box_x_offset
-                
+
                 if(state==-1):
                     if((player.teamid == pid) or ((player.teamid in self.bidqueue) and (self.bidqueue.index(player.teamid)<self.bidqueue.index(pid)))):
                         if player.current_bid < 10:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[0],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
                         elif player.current_bid < 100:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
                         else:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[int(str(player.current_bid)[0])],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.current_bid)[1])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.current_bid)[2])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.current_bid)[2])],anchor='center')
                     else:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[-1],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[-1],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[-1],anchor='center')
                     if self.current_item in player.items:
                         (key,value) = (self.current_item,player.items[self.current_item])
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",12), justify='left', anchor='nw')
                     item = self.item_names[key]
-                    self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
-                    self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
+                    self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
+                    #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
+                    #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                         
                 elif state == 0:
                     if player.teamid in self.bidqueue:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[-1],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[-1],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[-1],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[-1],anchor='center')
                     else:        
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[10],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[10],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[10],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[10],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[10],anchor='center')
                     if self.current_item in player.items:
                         (key,value) = (self.current_item,player.items[self.current_item])
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                     item = self.item_names[key]
-                    self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
-                    self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
+                    self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
+                    #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
+                    
                         
                 else:
                     if player.teamid == pid and not intro:
-                        self.w.create_image((center_x-37,center_y-8),image=self.numimage[11],anchor='center')
+                        self.w.create_image((center_x-27,center_y-8),image=self.numimage[11],anchor='center')
                         self.w.create_image((center_x,center_y-8),image=self.numimage[12],anchor='center')
-                        self.w.create_image((center_x+37,center_y-8),image=self.numimage[13],anchor='center')
+                        self.w.create_image((center_x+27,center_y-8),image=self.numimage[13],anchor='center')
                     else:
                         if player.money < 10:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[0],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
                         elif player.money < 100:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[0],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[0],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
                         else:
-                            self.w.create_image((center_x-37,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
+                            self.w.create_image((center_x-27,center_y-8),image=self.numimage[int(str(player.money)[0])],anchor='center')
                             self.w.create_image((center_x,center_y-8),image=self.numimage[int(str(player.money)[1])],anchor='center')
-                            self.w.create_image((center_x+37,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
+                            self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
                     for (key, value) in sorted(player.items.iteritems(), key=operator.itemgetter(1), reverse=True)[:1]:
                         text_in = str(value) + "* "
-                        self.w.create_text((center_x-35, center_y+36), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                         item = self.item_names[key]
-                        self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
-                        self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
+                        
+                        self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
+                        #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
+                        #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+75),text="Time left:  " + str(int(player.time)),font=("Purisa",11),anchor='center')
-                
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                       
                 i+=1
       
         
@@ -538,7 +542,7 @@ class Visualizer():
         y_offset = 10
         
         
-        self.w.create_image(((self.width*3/4)+100,(self.height/6)+100),image=self.shasha,anchor='center')
+        self.w.create_image(((self.width*3/4)+150,(self.height/6)+100),image=self.shasha,anchor='center')
         
         if(intro):
             pass    
@@ -576,18 +580,18 @@ class Visualizer():
             
             self.w.create_line(10, y_offset, 600, y_offset)
             
-            y_offset += 27
+            y_offset += 10
             
             x_offset = 20
             text_in = 'Current item:'
             self.w.create_text((x_offset, y_offset), text=text_in, justify='left', anchor='nw')
             x_offset += len(text_in) * 6 + 20
             item = self.item_names[self.current_item]
-            self.w.create_image((x_offset+180,y_offset+100), image=self.candyimage[self.current_item], anchor="center")
+            self.w.create_image((x_offset+180,y_offset+75), image=self.candyimage[self.current_item], anchor="center")
             x_offset += 180
-            self.w.create_text((x_offset, y_offset+200), text=item, justify='center', font=("Purisa",30), anchor='center', fill=self.item_colors[self.current_item]) 
-            y_offset += 150
-            self.w.create_text((20, 350), text="Current best bid: "+str(self.current_bid) +"        Time needed: "+str(self.current_time)+"         by "+self.current_high, justify='left', anchor='nw')
+            self.w.create_text((x_offset, y_offset+150), text=item, justify='center', font=("Arial",30), anchor='center', fill=self.item_colors[self.current_item]) 
+            y_offset += 210
+            self.w.create_text((20, y_offset), text="Current best bid: "+str(self.current_bid) +"        Time needed: "+str(self.current_time)+"         by "+self.current_high, justify='left', anchor='nw')
         elif end == -2:
             ranking = self.players[:]
             ranking.sort(key = lambda x: max(x.items.values(),0),reverse=True)
@@ -611,7 +615,7 @@ class Visualizer():
                     self.w.create_text((x_offset, y_offset), text=item, justify='left', anchor='nw')
                     x_offset += len(item) * 6 + 20  
                 x_offset = 100
-                y_offset += 35
+                y_offset += 25
             
             self.w.create_line(10, y_offset, 600, y_offset)
             x_offset = 10
@@ -623,12 +627,12 @@ class Visualizer():
             y_offset += 20
             
         else:
-            self.w.create_text((300,70),text="CONGRATULATIONS\n\n"+self.players[pid].teamname,font=('Purisa',30),anchor="center",justify="center")
+            self.w.create_text((300,70),text="CONGRATULATIONS\n\n"+self.players[pid].teamname,font=('Arial',30),anchor="center",justify="center")
             self.w.create_image((300,200), image=self.kitkat, anchor="center")
-            self.w.create_text((300, 350), text="KIT KAT", justify='center', font=("Purisa",30), anchor='center', fill='red') 
+            self.w.create_text((300, 290), text="KIT KAT", justify='center', font=("Arial",30), anchor='center', fill='red') 
  
         
-        final_y = self.height/3 + (self.height - self.height/3)/4 - 83
+        final_y = self.height/3 + (self.height - self.height/3)/4 - 40
         
         self.w.create_line(5, 5, 5, final_y)
         self.w.create_line(600, 5, 600, final_y)
@@ -683,7 +687,7 @@ class Visualizer():
         elif bid == -2:
             self.w.delete("all")
             self.set_podiums(-2,pid)
-            self.draw_scoreboard(pid)
+            self.draw_scoreboard(0,pid)
             self.shasha_says("THE WINNER IS\n "+self.players[pid].teamname, 5)
             self.w.update()
 
@@ -692,7 +696,8 @@ if __name__ == "__main__":
     '''EXAMPLE'''
     #Visualizer is created with goal of 3, 2 players and an itemlist
     #v = Visualizer(3,[('Shrivelled Turtleman',120),('White Truffle',150),("john",120),("joe",120),("anna",120),('mark',120),('tom',150),("john",120),("joe",120),("anna",120),("anna",120)],[4,3,3,3,2,1,2,0,3,4])
-    v = Visualizer(5,[('Shrivelled Turtleman',120,'',''),('White Truffle',150,'','')],[4,3,3,3,2,1,2,0,3,4])
+    #v = Visualizer(5,[('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('White Truffle',150,'','')],[4,3,3,3,2,1,2,0,3,4])
+    v = Visualizer(3,[('Blue Dragonfly',120,'score function','blue_dragonfly.gif'),('Gamma',120,'Bid one more','gamma.gif'),('SuperShaq',120,'Use the Force','supershaq.gif'),('White Truffle',150,'',''),('Brie',120,'Anything can happen','brie.gif'),('Orange',120,'estimating value',''),('Off by One',120,'Make it rain $$$','off_by_one.gif'),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'','')],[4,3,3,3,2,1,2,0,3,4])
     
     
     v.update(0,10,15000) #Player 0, Bid 10, Time used 15
@@ -701,22 +706,21 @@ if __name__ == "__main__":
     time.sleep(2)
     v.update(0,-1) # Player 0 wins the item
     time.sleep(2)
-    v.update(0,10,15000) 
+    v.update(1,15,15000) 
     time.sleep(2)
-    v.update(1,15,20000)
+    v.update(0,10,20000)
     time.sleep(2)
     v.update(1,-1)
-    time.sleep(2)
-    v.update(0,10,21000)
     time.sleep(2)
     v.update(1,10,20000)
     time.sleep(2)
-    v.update(1,-1)
+    v.update(0,10,21000)
     time.sleep(2)
-    v.update(0,10,15000)
+    v.update(1,-1)
     time.sleep(2)
     v.update(1,10,10000)
     time.sleep(2)
+    v.update(0,10,15000)
+    time.sleep(2)
     v.update(1,-1)
     v.update(1) #Player 0 wins the game
-    v.w.mainloop()
