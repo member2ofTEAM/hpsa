@@ -57,7 +57,7 @@ class Visualizer():
             pause = 0.5 + len(text)/25. 
         self.w.create_image(((self.width*3/4)+110,(self.height/6)+40),image=self.bubble,anchor='se', tag="bubble")
         shasha = text
-        self.w.create_text(((self.width*3/4),(self.height/6)-30), font=("Purisa",12), text = shasha, justify="center", anchor = 'center', tag = "shasha")
+        self.w.create_text(((self.width*3/4),(self.height/6)-30), font=("Arial",12), text = shasha, justify="center", anchor = 'center', tag = "shasha")
         self.w.update()
         time.sleep(pause)
         if delete:
@@ -65,7 +65,7 @@ class Visualizer():
             self.w.delete("bubble")
             
         
-    def screen_says(self,text,pause = 3, font=("Purisa",30), pos=(300,150)):
+    def screen_says(self,text,pause = 3, font=("Arial",30), pos=(300,150)):
         shasha = text
         self.w.create_text(pos, text = shasha, anchor = 'center', font=font, justify='center', tag = "screen")
         self.w.update()
@@ -209,7 +209,7 @@ class Visualizer():
         self.w = Canvas(self.master, width=self.width, height=self.height)
         self.w.pack()
         
-        if intro:
+        if not intro:
             self.intro()
         
         self.draw_scoreboard(-1)
@@ -232,15 +232,15 @@ class Visualizer():
                 center_x = player_box_left_x + (player_box_x_offset/2)
                 center_y = player_box_upper_y + (player_box_y_offset/2)
                 if intro and player.teamid > pid:
-                    self.w.create_image((center_x,center_y-65),image=self.darkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.darkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-53),text="???",font=("Purisa",8),anchor='center')
-                    self.w.create_text((center_x,center_y-38),text="???",font=("Purisa",8),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text="???",font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text="???",font=("Arial",8),anchor='center')
                 else:
-                    self.w.create_image((center_x,center_y-65),image=self.tkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.tkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Purisa",8),anchor='center')
-                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Purisa",8),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Arial",8),anchor='center')
                 #self.w.create_rectangle(center_x-75,center_y-100,center_x+75,center_y+100,fill="brown")
                 player_box_left_x += player_box_x_offset
 
@@ -267,7 +267,7 @@ class Visualizer():
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",12), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",12), justify='left', anchor='nw')
                     item = self.item_names[key]
                     self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
@@ -287,7 +287,7 @@ class Visualizer():
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                     item = self.item_names[key]
                     self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
@@ -313,14 +313,14 @@ class Visualizer():
                             self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
                     for (key, value) in sorted(player.items.iteritems(), key=operator.itemgetter(1), reverse=True)[:1]:
                         text_in = str(value) + "* "
-                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                         item = self.item_names[key]
                         
                         self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Purisa",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
                        
         if(no_players>4):  
             if(no_players%2):
@@ -338,17 +338,17 @@ class Visualizer():
             while i<upper:
                 player = self.players[i]
                 center_x = player_box_left_x + (player_box_x_offset/2)
-                center_y = player_box_upper_y + (player_box_y_offset/2) - 15
+                center_y = player_box_upper_y + (player_box_y_offset/2) - 25
                 if intro and player.teamid > pid:
-                    self.w.create_image((center_x,center_y-65),image=self.darkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.darkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-53),text="???",font=("Purisa",8),anchor='center')
-                    self.w.create_text((center_x,center_y-38),text="???",font=("Purisa",8),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text="???",font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text="???",font=("Arial",8),anchor='center')
                 else:
-                    self.w.create_image((center_x,center_y-65),image=self.tkimage[player.teamid],anchor='s')
+                    self.w.create_image((center_x,center_y-60),image=self.tkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Purisa",8),anchor='center')
-                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Purisa",8),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Arial",8),anchor='center')
                 #self.w.create_rectangle(center_x-75,center_y-100,center_x+75,center_y+100,fill="brown")
                 player_box_left_x += player_box_x_offset
 
@@ -375,7 +375,7 @@ class Visualizer():
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",12), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",12), justify='left', anchor='nw')
                     item = self.item_names[key]
                     self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
@@ -395,7 +395,7 @@ class Visualizer():
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                     item = self.item_names[key]
                     self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
@@ -421,14 +421,14 @@ class Visualizer():
                             self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
                     for (key, value) in sorted(player.items.iteritems(), key=operator.itemgetter(1), reverse=True)[:1]:
                         text_in = str(value) + "* "
-                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                         item = self.item_names[key]
                         
                         self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Purisa",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
                        
                 i+=1
     
@@ -440,17 +440,17 @@ class Visualizer():
             while(i<no_players):
                 player = self.players[i]
                 center_x = player_box_left_x + (player_box_x_offset/2)
-                center_y = player_box_upper_y + (player_box_y_offset/2) + (player_box_y_offset/2)/2 + 60
+                center_y = player_box_upper_y + (player_box_y_offset/2) + (player_box_y_offset/2)/2 + 45
                 if intro and player.teamid > pid:
                     self.w.create_image((center_x,center_y-65),image=self.darkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-53),text="???",font=("Purisa",8),anchor='center')
-                    self.w.create_text((center_x,center_y-38),text="???",font=("Purisa",8),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text="???",font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text="???",font=("Arial",8),anchor='center')
                 else:
                     self.w.create_image((center_x,center_y-65),image=self.tkimage[player.teamid],anchor='s')
                     self.w.create_image((center_x,center_y-10),image=self.podium,anchor='center')
-                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Purisa",8),anchor='center')
-                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Purisa",8),anchor='center')
+                    self.w.create_text((center_x,center_y-53),text=player.teamname,font=("Arial",8),anchor='center')
+                    self.w.create_text((center_x,center_y-38),text=player.strategy,font=("Arial",8),anchor='center')
                 #self.w.create_rectangle(center_x-75,center_y-100,center_x+75,center_y+100,fill="brown")
                 player_box_left_x += player_box_x_offset
 
@@ -477,7 +477,7 @@ class Visualizer():
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",12), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",12), justify='left', anchor='nw')
                     item = self.item_names[key]
                     self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
@@ -497,7 +497,7 @@ class Visualizer():
                     else:
                         (key,value) = (self.current_item,0)
                     text_in = str(value) + "* "
-                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                    self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                     item = self.item_names[key]
                     self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                     #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
@@ -523,14 +523,14 @@ class Visualizer():
                             self.w.create_image((center_x+27,center_y-8),image=self.numimage[int(str(player.money)[2])],anchor='center')
                     for (key, value) in sorted(player.items.iteritems(), key=operator.itemgetter(1), reverse=True)[:1]:
                         text_in = str(value) + "* "
-                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Purisa",15), justify='left', anchor='nw')
+                        self.w.create_text((center_x-25, center_y+20), text=text_in, font=("Arial",15), justify='left', anchor='nw')
                         item = self.item_names[key]
                         
                         self.w.create_image((center_x+5,center_y+26), image=self.small_candy[key], anchor="center")
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Purisa",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
                        
                 i+=1
       
@@ -589,7 +589,7 @@ class Visualizer():
             item = self.item_names[self.current_item]
             self.w.create_image((x_offset+180,y_offset+75), image=self.candyimage[self.current_item], anchor="center")
             x_offset += 180
-            self.w.create_text((x_offset, y_offset+150), text=item, justify='center', font=("Purisa",30), anchor='center', fill=self.item_colors[self.current_item]) 
+            self.w.create_text((x_offset, y_offset+150), text=item, justify='center', font=("Arial",30), anchor='center', fill=self.item_colors[self.current_item]) 
             y_offset += 210
             self.w.create_text((20, y_offset), text="Current best bid: "+str(self.current_bid) +"        Time needed: "+str(self.current_time)+"         by "+self.current_high, justify='left', anchor='nw')
         elif end == -2:
@@ -627,9 +627,9 @@ class Visualizer():
             y_offset += 20
             
         else:
-            self.w.create_text((300,70),text="CONGRATULATIONS\n\n"+self.players[pid].teamname,font=('Purisa',30),anchor="center",justify="center")
+            self.w.create_text((300,70),text="CONGRATULATIONS\n\n"+self.players[pid].teamname,font=('Arial',30),anchor="center",justify="center")
             self.w.create_image((300,200), image=self.kitkat, anchor="center")
-            self.w.create_text((300, 290), text="KIT KAT", justify='center', font=("Purisa",30), anchor='center', fill='red') 
+            self.w.create_text((300, 290), text="KIT KAT", justify='center', font=("Arial",30), anchor='center', fill='red') 
  
         
         final_y = self.height/3 + (self.height - self.height/3)/4 - 40
@@ -687,7 +687,7 @@ class Visualizer():
         elif bid == -2:
             self.w.delete("all")
             self.set_podiums(-2,pid)
-            self.draw_scoreboard(pid)
+            self.draw_scoreboard(0,pid)
             self.shasha_says("THE WINNER IS\n "+self.players[pid].teamname, 5)
             self.w.update()
 
@@ -706,21 +706,21 @@ if __name__ == "__main__":
     time.sleep(2)
     v.update(0,-1) # Player 0 wins the item
     time.sleep(2)
-    v.update(0,10,15000) 
+    v.update(1,15,15000) 
     time.sleep(2)
-    v.update(1,15,20000)
+    v.update(0,10,20000)
     time.sleep(2)
     v.update(1,-1)
-    time.sleep(2)
-    v.update(0,10,21000)
     time.sleep(2)
     v.update(1,10,20000)
     time.sleep(2)
+    v.update(0,10,21000)
+    time.sleep(2)
     v.update(1,-1)
     time.sleep(2)
-    v.update(0,10,15000)
-    time.sleep(2)
     v.update(1,10,10000)
+    time.sleep(2)
+    v.update(0,10,15000)
     time.sleep(2)
     v.update(1,-1)
     v.update(1) #Player 0 wins the game
