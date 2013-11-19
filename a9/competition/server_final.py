@@ -143,7 +143,7 @@ class Server(object):
             highest_bid = max([client.bid for client in alive_clients])
             highest_bidder = [client for client in alive_clients if client.bid == highest_bid]
             #If two player have the same bid and timestamp, the winner is chosen uniformly random
-            lowest_time = min(highest_bidder, key=lambda x: x.time)
+            lowest_time = min(highest_bidder, key=lambda x: x.bid_time)
             fastest_winner = [client for client in highest_bidder if client.time == lowest_time.time]
             winner = fastest_winner[random.randint(0, (len(fastest_winner) - 1))]
             alive_clients.sort(key=lambda x: x.bid_time)
@@ -163,6 +163,7 @@ class Server(object):
                 print "Player " + str(winner.name) + " won the game."
                 if self.v:
                     self.visualizer.update(v_ids[winner.name])
+                    time.sleep(10)
                 break
 
         #Close all threads

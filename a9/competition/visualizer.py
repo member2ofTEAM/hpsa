@@ -14,7 +14,7 @@ class Visualizer():
             self.teamid = teamid
             self.teamname = teamname
             self.money = money
-            self.time = time
+            self.time = time/1000
             self.strategy = strategy
             if self.strategy=="":
                 random.shuffle(strategies)
@@ -75,17 +75,17 @@ class Visualizer():
         self.set_podiums(-2,-1, True)
         self.draw_scoreboard(-1,-1, True)
         
-        self.shasha_says("Welcome to tonights game")
-        self.shasha_says("This will be a lot of fun")
+        self.shasha_says("Welcome to tonight's game.")
+        self.shasha_says("This will be a lot of fun!")
         self.shasha_says("I guess everyone of us has\n participated in an auction")
-        self.shasha_says("since the rise of webbased\n auction sites like Ebay.")
+        self.shasha_says("since the rise of webbased\n auction sites like eBay.")
         self.shasha_says("But the game we play tonight\n is not a regular auction.")
         self.shasha_says("It is...")
         self.screen_says("CAUTION\nThe Candy Auction", 0)
         self.shasha_says("... Caution!\nThe Candy Auction.",5)
         self.shasha_says("Every round I will offer you a\nparticular candy.")
         self.shasha_says("There will be\n " + str(self.diff_items)+ " different types of candy.")
-        self.shasha_says("The first team that manages to\n win "+str(self.goal)+" candys of the same type")
+        self.shasha_says("The first team that manages to\n win "+str(self.goal)+" candies of the same type")
         self.shasha_says("will win the auction and\n receive something special!")
         self.shasha_says("It's kind of a metaphor for\n this course, isn't it?")
         self.shasha_says("Tonight we have\n "+str(len(self.players)) + " competitors.")
@@ -209,7 +209,7 @@ class Visualizer():
         self.w = Canvas(self.master, width=self.width, height=self.height)
         self.w.pack()
         
-        if intro:
+        if not intro:
             self.intro()
         
         self.draw_scoreboard(-1)
@@ -320,7 +320,7 @@ class Visualizer():
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",10),anchor='center')
                        
         if(no_players>4):  
             if(no_players%2):
@@ -428,7 +428,7 @@ class Visualizer():
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",10),anchor='center')
                        
                 i+=1
     
@@ -530,7 +530,7 @@ class Visualizer():
                         #self.w.create_oval((center_x-16, center_y +26, center_x + 16, center_y+36 + 20 + 3), fill=self.item_colors[key])
                         #self.w.create_text((center_x + 1, center_y+40), text=item[0], justify='left', anchor='center')
                 
-                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",11),anchor='center')
+                self.w.create_text((center_x,center_y+50),text="Time left:  " + str(int(player.time)),font=("Arial",10),anchor='center')
                        
                 i+=1
       
@@ -697,7 +697,7 @@ if __name__ == "__main__":
     #Visualizer is created with goal of 3, 2 players and an itemlist
     #v = Visualizer(3,[('Shrivelled Turtleman',120),('White Truffle',150),("john",120),("joe",120),("anna",120),('mark',120),('tom',150),("john",120),("joe",120),("anna",120),("anna",120)],[4,3,3,3,2,1,2,0,3,4])
     #v = Visualizer(5,[('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('White Truffle',150,'','')],[4,3,3,3,2,1,2,0,3,4])
-    v = Visualizer(3,[('Blue Dragonfly',120,'score function','blue_dragonfly.gif'),('Gamma',120,'Bid one more','gamma.gif'),('SuperShaq',120,'Use the Force','supershaq.gif'),('White Truffle',150,'',''),('Brie',120,'Anything can happen','brie.gif'),('Orange',120,'estimating value',''),('Off by One',120,'Make it rain $$$','off_by_one.gif'),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'','')],[4,3,3,3,2,1,2,0,3,4])
+    v = Visualizer(3,[('Blue Dragonfly',120000,'score function','blue_dragonfly.gif'),('Gamma',120000,'Bid one more','gamma.gif'),('SuperShaq',120,'Use the Force','supershaq.gif'),('White Truffle',150,'',''),('Brie',120,'Anything can happen','brie.gif'),('Orange',120,'estimating value',''),('Off by One',120,'Make it rain $$$','off_by_one.gif'),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'',''),('White Truffle',150,'',''),('Shrivelled Turtleman',120,'','')],[4,3,3,3,2,1,2,0,3,4])
     
     
     v.update(0,10,15000) #Player 0, Bid 10, Time used 15
