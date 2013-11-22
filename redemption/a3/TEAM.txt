@@ -1,0 +1,3 @@
+python NoTippingTEAM.py
+python NoTippingTEAM.py
+
