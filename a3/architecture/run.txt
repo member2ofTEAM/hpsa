@@ -1,0 +1,2 @@
+python /home/pc1218/heuristic_problem_solving/architecture-NoTippingGame/random_player.py
+python /home/pc1218/heuristic_problem_solving/architecture-NoTippingGame/random_player.py
