@@ -1,2 +1,0 @@
-python random_player.py
-python random_player.py
