@@ -14,7 +14,7 @@ import time
 infinity = 1.0e400
 
 class NoTipping:
-    
+
     def __init__(self):
         self.board = Board()
         self.to_move = 1
@@ -23,42 +23,42 @@ class NoTipping:
         self.valid_moves = self._get_valid_moves()
         self.non_tipping_moves = self._get_non_tipping_moves()
     #change
-    
+
     def magic_alphabeta_search(self):
         if(len(self.non_tipping_moves[self.to_move])>0):
-			parallel = 1
-			if parallel:
-				l = []
-				for move in self.non_tipping_moves[self.to_move]:
-					temp_board = copy.deepcopy(self.board.board)
-					temp_board[move[0]] = move[1]
-					x = []
-					x.append(self.to_move*-1)
-					x.append(self.phase)
-					inp = x + temp_board[16:32] + temp_board[0:16]
-					inp = map(lambda x : str(x), inp)
-					# This is wrong! because list(str(self.to_move))
-					l.append(Popen(['./TEAM.out'] + inp, stdout=PIPE))
-				l = map(lambda x : x.communicate(), l)
-				l = map(lambda x : (int(x[0].split(" ")[0]), 
-									int(x[0].split(" ")[1]), 
-									int(x[0].split(" ")[2])), l)
+            parallel = 1
+            if parallel:
+                l = []
+                for move in self.non_tipping_moves[self.to_move]:
+                    temp_board = copy.deepcopy(self.board.board)
+                    temp_board[move[0]] = move[1]
+                    x = []
+                    x.append(self.to_move*-1)
+                    x.append(self.phase)
+                    inp = x + temp_board[16:32] + temp_board[0:16]
+                    inp = map(lambda x : str(x), inp)
+                    # This is wrong! because list(str(self.to_move))
+                    l.append(Popen(['./TEAM.out'] + inp, stdout=PIPE))
+                l = map(lambda x : x.communicate(), l)
+                l = map(lambda x : (int(x[0].split(" ")[0]),
+                                    int(x[0].split(" ")[1]),
+                                    int(x[0].split(" ")[2])), l)
 #                   pdb.set_trace()
-				v = map(lambda x : x[2], l)
-				i = v.index(min(v))
-				return self.non_tipping_moves[self.to_move][i]
-			else:
+                v = map(lambda x : x[2], l)
+                i = v.index(min(v))
+                return self.non_tipping_moves[self.to_move][i]
+            else:
 #                    pdb.set_trace()
-				x = []
-				x.append(self.to_move)
-				x.append(self.phase)
-				inp = x + self.board.board[16:32] + self.board.board[0:16]
-				inp = map(lambda x : str(x), inp)
+                x = []
+                x.append(self.to_move)
+                x.append(self.phase)
+                inp = x + self.board.board[16:32] + self.board.board[0:16]
+                inp = map(lambda x : str(x), inp)
 #                    print inp
-				result = Popen(['./TEAM.out'] + inp, stdout=PIPE)
-				result = result.communicate()
-				ints = result[0].split(" ")
-				return (int(ints[0]) - 15, int(ints[1]))
+                result = Popen(['./TEAM.out'] + inp, stdout=PIPE)
+                result = result.communicate()
+                ints = result[0].split(" ")
+                return (int(ints[0]) - 15, int(ints[1]))
         else:
             return random.choice(self.valid_moves[self.to_move])
 
@@ -66,10 +66,10 @@ class NoTipping:
         "Legal moves are any square not yet taken."
         return self.valid_moves
 
-    def make_move(self, move):            
+    def make_move(self, move):
         if(self.phase==1):
             move = (move[0],self.to_move*abs(move[1]))
-                
+
         if self.to_move == 1:
             if move not in self.valid_moves[1]:
             #DOES THIS HAVE TO BE A DEEP COPY?
@@ -88,15 +88,15 @@ class NoTipping:
            (len(self.valid_moves[1])==0) and \
            (len(self.valid_moves[-1])==0)):
             self.phase = 2
-            
+
         if(self.phase == 2):
-            self.valid_moves = self._get_valid_moves() 
+            self.valid_moves = self._get_valid_moves()
         self.non_tipping_moves = self._get_non_tipping_moves()
-            
-        self.change_player()       
-        
+
+        self.change_player()
+
         return self
-    
+
     def get_utility(self):
         return self.utility
 
@@ -104,17 +104,17 @@ class NoTipping:
     def _get_non_tipping_moves(self):
         non_tipping_moves_1 = []
         non_tipping_moves_2 = []
-        
+
         for move in self.valid_moves[1]:
             if(self.board.tip_lookAhead(move,self.phase)):
                 continue
-            non_tipping_moves_1.append(move) 
-            
+            non_tipping_moves_1.append(move)
+
         for move in self.valid_moves[-1]:
             if(self.board.tip_lookAhead(move, self.phase)):
                 continue
-            non_tipping_moves_2.append(move) 
-                    
+            non_tipping_moves_2.append(move)
+
         return (0,non_tipping_moves_1,non_tipping_moves_2)
 
     def _get_valid_moves(self):
@@ -141,17 +141,17 @@ class NoTipping:
                         else:
                             moves_p1.append((x,self.board.board[x]))
                             moves_p2.append((x,self.board.board[x]))
-                            
+
                     else:
-						moves_p1.append((x,self.board.board[x]))
-						moves_p2.append((x,self.board.board[x]))
-                        
+                        moves_p1.append((x,self.board.board[x]))
+                        moves_p2.append((x,self.board.board[x]))
+
 
             return (0, moves_p1, moves_p2)
-        
+
     def _weights_left_1(self):
         return sum(map(lambda x : x > 0, self.board.board))
-        
+
 
     def _update_moves(self, pos, weight):
         move_1 = []
@@ -179,7 +179,7 @@ class NoTipping:
                 else:
                     move_2.append((x,y))
         self.valid_moves = (0,move_1,move_2)
-            
+
 
     def change_player(self):
         if self.to_move == 1:
@@ -250,24 +250,24 @@ class NoTipping:
         print ''
 
     def get_input(self,player,phase):
-        
+
         if int(player) == 2:
             self.to_move = -1
         else:
             self.to_move = 1
-            
-        self.phase = phase       
-                    
+
+        self.phase = phase
+
         board = 31*[0]
         f = open("board.txt")
         lines = f.readlines()
         for line in lines:
             indices = line.split()
-            
+
             pos = int(indices[0])
             weight = int(indices[1])
             player = int(indices[2])
-            
+
             if player == 1:
                 board[pos] = weight
                 if(phase == 1):
@@ -285,7 +285,7 @@ class NoTipping:
         if(phase == 2):
             self.valid_moves = self._get_valid_moves()
             self.non_tipping_moves = self._get_non_tipping_moves()
-    
+
 
 class Board():
 
@@ -296,7 +296,7 @@ class Board():
         self.board[-4] = 3
         self.weightsPos[0] = -4
         self.supports = self.updateTorques()
-        
+
     def renew_board(self,board):
         for i in range(-15,16,1):
             self.board[i] = board[i]
@@ -304,8 +304,8 @@ class Board():
                 self.weightsPos[board[i]] = i
             if(i==-4):
                 if(board[i]==3):
-                    self.weightsPos[0] = -4 
-        
+                    self.weightsPos[0] = -4
+
         self.supports = self.updateTorques()
 
     def get_weights_set(self):
@@ -321,7 +321,7 @@ class Board():
         else:
             raise ValueError("Invalid placement")
         self.supports = self.updateTorques()
-        
+
     def _remove_weight(self, pos, weight):
         self.board[pos] = 0
         self.weightsPos[weight] = 99
@@ -336,7 +336,7 @@ class Board():
     def valid_placement(self,pos, weight):
         return self.board[pos] == 0 and \
                self.weightsPos[weight] == 0
-               
+
     def valid_removement(self,pos, weight):
         return abs(self.board[pos]) == abs(weight)
 
@@ -371,10 +371,10 @@ class Board():
     def tip_lookAhead(self, move, phase):
         sup1 = self.supports[0]
         sup2 = self.supports[1]
-        
+
         pos = move[0]
         weight = move[1]
-        
+
         if phase == 1:
             if pos < -3:
                 sup1 += abs(pos + 3) * abs(weight)
@@ -393,7 +393,7 @@ class Board():
                 sup2 -= abs(pos + 1) * abs(weight)
             else:
                 sup2 += abs(pos + 1) * abs(weight)
-            
+
         if sup1 > 0 and sup2 == 0:
             return True
         return (sup1*sup2 > 0)

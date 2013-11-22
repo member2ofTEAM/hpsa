@@ -1,4 +1,4 @@
-from subprocess import check_output as checkout
+from subprocess import Popen, PIPE
 import subprocess as sp
 import numpy as np
 import sys
@@ -13,9 +13,10 @@ def calc_torque(board_info,grav_center,support):
 
 def player_move(player_arg,mode,player,player_time):
     time_remain = 120 - player_time
-    args = (player_arg + ' ' + str(mode) + ' ' + str(player) + ' ' + 
-           str(time_remain))
-    output = checkout(args,shell = True)
+    player_arg = player_arg.split(" ")
+    args = player_arg + [str(mode),  str(player), str(time_remain)]
+    ps = Popen(list(args), stdout=PIPE)
+    output = ps.communicate()[0]
     output = output.split()
     move = [int(output[0]),int(output[1]),player]
     return move
@@ -78,7 +79,7 @@ init_board[:,0] = range(-15,16)
 init_board[-4 + 15][1] = 3
 np.savetxt('board.txt',init_board,fmt='%d')
 
-# mode = 1: adding mode. mode = 2: removing mode. 
+# mode = 1: adding mode. mode = 2: removing mode.
 mode = 1
 step = 0
 p1wt = range(1,13)
