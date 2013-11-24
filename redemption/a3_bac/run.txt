@@ -1,2 +1,2 @@
 python random_player.py
-python NoTippingTEAM.py
+python TEAM.py

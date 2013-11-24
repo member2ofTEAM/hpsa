@@ -15,6 +15,8 @@ def get_input():
         pos = int(indices[0])
         weight = int(indices[1])
         player = int(indices[2])
+        if player == 2:
+            player = -1
 
         if pos < -3:
             sup1 += abs(pos + 3) * abs(weight)
@@ -28,7 +30,7 @@ def get_input():
         if player == 1:
             board[pos] = weight
             weights[player][weight] = 1
-        elif player == 2:
+        elif player == -1:
             board[pos] = -weight
             weights[player][-weight] = 1
         else:
@@ -64,16 +66,24 @@ def tipping(move, torque, phase):
         return True
     return (sup1*sup2 > 0)
 
-
+#Can the initial weight be removed in phase 2?
 def valid(move, board, weights, to_move, phase, torque):
     if phase == 1:
-        return (not weights[to_move].get(move[1], 0)
-                and not board[move[0]] and not tipping(move, torque, phase))
+        if to_move * move[1] > 0:
+            return (not weights[to_move].get(move[1], 0)
+                    and not board[move[0]] and not tipping(move, torque, phase))
     else:
-        return board[move[0]] and not tipping(move, torque)
+        if to_move == 1:
+            if weights[to_move].keys():
+                if move[1] > 0:
+                    return board[move[0]] and not tipping(move, torque)
+            else:
+                return board[move[0]] and not tipping(move, torque)
+        else:
+            return board[move[0]] and not tipping(move, torque)
 
 def magic_alphabeta_search(to_move, board, weights, phase, moves, torque):
-    parallel = 0
+    parallel = 1
     if parallel:
         l = []
         for move in moves:
@@ -87,14 +97,14 @@ def magic_alphabeta_search(to_move, board, weights, phase, moves, torque):
             inp = x + temp_board[16:32] + temp_board[0:16]
             inp = map(lambda x : str(x), inp)
             # This is wrong! because list(str(self.to_move))
-            l.append(Popen(['./TEAM.out'] + inp, stdout=PIPE))
-        l = map(lambda x : x.communicate(), l)
-        l = map(lambda x : (int(x[0].split(" ")[0]),
-                            int(x[0].split(" ")[1]),
-                            int(x[0].split(" ")[2])), l)
-        v = map(lambda x : x[2], l)
+            l.append([Popen(['./TEAM.out'] + inp, stdout=PIPE)] + list(move))
+        l = map(lambda x : [x[0].communicate(), x[1], x[2]], l)
+        v = map(lambda x : (int(x[0][0].strip().split(" ")[0]),
+                            int(x[0][0].strip().split(" ")[1]),
+                            int(x[0][0].strip().split(" ")[2])), l)
+        v = map(lambda x : x[2], v)
         i = v.index(min(v))
-        return self.non_tipping_moves[to_move][i]
+        return l[i][1:]
     else:
         x = []
         x.append(to_move)

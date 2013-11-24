@@ -15,7 +15,6 @@ def player_move(player_arg,mode,player,player_time):
     time_remain = 120 - player_time
     player_arg = player_arg.split(" ")
     args = player_arg + [str(mode),  str(player), str(time_remain)]
-    pdb.set_trace()
     ps = Popen(list(args), stdout=PIPE)
     output = ps.communicate()[0]
     output = output.split()
