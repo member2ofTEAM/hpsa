@@ -357,7 +357,11 @@ int eval_fn(int exhausted, int phase)
        score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
 
-    printf("score");
+   if(abs(t[0]) <= 4 || abs(t[1]) <= 4)
+   {
+      player = -1 * player;
+      return player * inf;
+   }
 
    /* if (exhausted)
     {
