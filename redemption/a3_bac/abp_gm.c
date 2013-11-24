@@ -14,7 +14,7 @@ int inf = 999999999;
 int p1w[12];
 int p2w[12];
 
-int d = 6;
+int d = 16;
 
 int w1 = 4;
 int w2 = 10;
@@ -356,12 +356,12 @@ int eval_fn(int exhausted, int phase)
  //   if(pplayer == 1)
  //      score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
-   if(t[0] == 0 || t[1] == 0)
-      return inf;
-   else
-      return (1.0 / (float)(min(abs(t[0]),abs(t[1]))));
+//   if(t[0] == 0 || t[1] == 0)
+  //    return inf;
+//   else
+//      return (1.0 / (float)(min(abs(t[0]),abs(t[1]))));
    
-
+   return 500 - min(abs(t[0]), abs(t[1]));
    if(abs(t[0]) <= 4 || abs(t[1]) <= 4)
    {
       player = -1 * player;

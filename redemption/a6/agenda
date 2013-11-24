@@ -1,0 +1,16 @@
+figure out time stuff
+	can we win by having the other time just time out before us?
+	do we have to send a move every tick or just the change?
+
+figure out a simple (100 lines) and readable implementation of the game
+	hunter
+	prey
+	board
+	encode everything as change in direction?
+	queue for moves
+	N determines the max number of steps we can look ahead
+	implement greedy strategy for the hunter
+		make sure the hunter and prey remain in the same box
+			when building a wall
+		build the wall as fast as possible while fullfilling that
+			constraint
