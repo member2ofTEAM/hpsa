@@ -250,6 +250,8 @@ class NoTipping:
         print ''
 
     def get_input(self,player,phase):
+        import pdb
+        pdb.set_trace()
 
         if int(player) == 2:
             self.to_move = -1
