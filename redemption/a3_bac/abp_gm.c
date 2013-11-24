@@ -357,16 +357,15 @@ int eval_fn(int exhausted, int phase)
        score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
 
-    if (exhausted)
+   /* if (exhausted)
     {
         player = -1 * player;
         return player * inf;
     }
     else
-    {
-        player = -1 * player;
+    { */
         return score;
-    }
+   // }
 }
 
 int value(int alpha, int beta, int depth, int max, int phase)
