@@ -357,6 +357,8 @@ int eval_fn(int exhausted, int phase)
        score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
 
+    printf("score");
+
    /* if (exhausted)
     {
         player = -1 * player;
@@ -568,7 +570,59 @@ void alpha_better(int phase)
         }
         board[i] = tmp;
     }
-	}
+    }
+
+    if (best_move[1] == 0)
+    {
+       if(phase == 1)
+       {
+          for(i = 0; i < 12; i++)
+          {
+             if(p1w[i] != 0 && player == 1)
+             {
+                best_move[1] = i + 1;
+                break;
+             }
+             else if(p2w[i] != 0 && player == -1)
+             {
+                best_move[1] = i + 1;
+                break;
+             }
+          }
+          for(i = 0; i < 32; i++)
+          {
+             if(board[i] == 0)
+             {
+                best_move[0] = i;
+                break;
+             }
+          }
+       }
+       else if(phase == 2)
+       {
+          for(i = 0; i < 32; i++)
+          {
+             if(board[i] > 0 && player == 1)
+             {
+                best_move[1] = board[i];
+                best_move[0] = i;
+                break;
+             } 
+          }
+          if(best_move[1] == 0)
+          {
+             for(i = 0; i < 32; i++)
+             {
+                if(board[i] < 0)
+                {
+                   best_move[1] = board[i];
+                   best_move[0] = i;
+                   break;
+                }
+             }
+          }
+       }
+    }
     printf("%d %d %d\n", best_move[0], abs(best_move[1]), best_v);
 }
 
