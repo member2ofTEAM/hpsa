@@ -351,11 +351,16 @@ int eval_fn(int exhausted, int phase)
     if(abs(num1 - num2) > 2)
        count++;
 
-    if(pplayer == -1)
-       score = w1 * stab2 - w2 * count;
-    if(pplayer == 1)
-       score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
+//    if(pplayer == -1)
+ //      score = w1 * stab2 - w2 * count;
+ //   if(pplayer == 1)
+ //      score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
+   if(t[0] == 0 || t[1] == 0)
+      return inf;
+   else
+      return (1.0 / (float)(min(abs(t[0]),abs(t[1]))));
+   
 
    if(abs(t[0]) <= 4 || abs(t[1]) <= 4)
    {
