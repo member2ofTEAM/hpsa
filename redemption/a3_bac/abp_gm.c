@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
         board[i - 3] = atoi(argv[i]);
     }
     
-    
     //phase = 1;
     //player = 1;
     //board[11] = 3;
@@ -239,22 +238,24 @@ int eval_fn(int exhausted, int phase)
 //   else
 //      return (1.0 / (float)(min(abs(t[0]),abs(t[1]))));
    
-   return 500 - min(abs(t[0]), abs(t[1]));
-   if(abs(t[0]) <= 4 || abs(t[1]) <= 4)
-   {
-      player = -1 * player;
-      return player * inf;
-   }
+   //return 500 - min(abs(t[0]), abs(t[1]));
+//    if(abs(t[0]) <= 4 || abs(t[1]) <= 4)
+//    {
+//       player = -1 * player;
+//       return player * inf;
+//    }
 
-   /* if (exhausted)
+    if (exhausted)
     {
         player = -1 * player;
+//        printf("%d\n", player * inf);
         return player * inf;
     }
     else
-    { */
-    return score;
-   // }
+    {
+//       printf("%d\n", 500 - min(abs(t[0]), abs(t[1])));
+       return (500 - min(abs(t[0]), abs(t[1])));
+    }
 }
 
 int value(int alpha, int beta, int depth, int max, int phase)
@@ -262,6 +263,7 @@ int value(int alpha, int beta, int depth, int max, int phase)
     int v = -inf, i, next = 0, j, *pw;
     int t[2], wleft = 0, tmp, p1wn = 0;
     
+
     for (i = 0; i < 12; i++)
     {
         wleft += p1w[i] + p2w[i];
@@ -271,7 +273,6 @@ int value(int alpha, int beta, int depth, int max, int phase)
         phase += 1;
         p1w[0] = 2;
     }
-
 	
     player = -1 * player;
 	
