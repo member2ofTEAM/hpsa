@@ -343,109 +343,112 @@ while(1):
       #Build wall
       if can_set and len(wall_horizontal.keys()+wall_vertical.keys())<max_walls+4:
 
-	  #build vertical wall
-	  if (prey_pos_in_box((h_x, h_y)) and abs(h_x + vx - x_prey) <= 2 and (math.copysign(1,vx)!=math.copysign(1,(h_x - x_prey))) and h_x != x_prey):
-	    id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
-	    wall_vertical[str(id)] = h_x
-	    prey_boundary = prey_update_box()
-	    hunter_boundary = hunter_update_box()
-	    (y_i, y_j) = hunter_boundary[1]
-	    wall_vertical_out.append((id, (h_x, y_i+1),( h_x, y_j-1)))
-	    sendsocket(s,(hunter_direction+"w"+"("+str(h_x)+","+str(y_i+1)+")"+","+"("+str(h_x)+","+str(y_j-1)+")"+'\n'))
-	    can_set = 0
-	    set_count = 0
-	    del prey_queue[:]
-	    built = True
+      #build vertical wall
+      if (prey_pos_in_box((h_x, h_y))
+          and abs(h_x + vx - x_prey) <= 2
+          and (math.copysign(1,vx)!=math.copysign(1,(h_x - x_prey)))
+          and h_x != x_prey):
+        id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
+        wall_vertical[str(id)] = h_x
+        prey_boundary = prey_update_box()
+        hunter_boundary = hunter_update_box()
+        (y_i, y_j) = hunter_boundary[1]
+        wall_vertical_out.append((id, (h_x, y_i+1),( h_x, y_j-1)))
+        sendsocket(s,(hunter_direction+"w"+"("+str(h_x)+","+str(y_i+1)+")"+","+"("+str(h_x)+","+str(y_j-1)+")"+'\n'))
+        can_set = 0
+        set_count = 0
+        del prey_queue[:]
+        built = True
 
-	  #build horizontal wall
-	  elif (prey_pos_in_box((h_x, h_y)) and abs(h_y + vy - y_prey)<=2 and (math.copysign(1,vy)!=math.copysign(1,(h_y - y_prey))) and h_y != y_prey):
-	    id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
-	    wall_horizontal[str(id)] = h_y
-	    prey_boundary = prey_update_box()
-	    hunter_boundary = hunter_update_box()
-	    (x_i, x_j) = hunter_boundary[0]
-	    wall_horizontal_out.append((id, (x_i+1, h_y),(x_j-1, h_y)))
-	    sendsocket(s,(hunter_direction+"w"+"("+str(x_i+1)+","+str(h_y)+")"+","+"("+str(x_j-1)+","+str(h_y)+")"+'\n'))
-	    can_set = 0
-	    set_count = 0
-	    del prey_queue[:]
-	    built = True
+      #build horizontal wall
+      elif (prey_pos_in_box((h_x, h_y)) and abs(h_y + vy - y_prey)<=2 and (math.copysign(1,vy)!=math.copysign(1,(h_y - y_prey))) and h_y != y_prey):
+        id = max(map(lambda x: int(x), wall_vertical.keys() + wall_horizontal.keys())) + 1
+        wall_horizontal[str(id)] = h_y
+        prey_boundary = prey_update_box()
+        hunter_boundary = hunter_update_box()
+        (x_i, x_j) = hunter_boundary[0]
+        wall_horizontal_out.append((id, (x_i+1, h_y),(x_j-1, h_y)))
+        sendsocket(s,(hunter_direction+"w"+"("+str(x_i+1)+","+str(h_y)+")"+","+"("+str(x_j-1)+","+str(h_y)+")"+'\n'))
+        can_set = 0
+        set_count = 0
+        del prey_queue[:]
+        built = True
 
-	  elif len(wall_horizontal.keys()+wall_vertical.keys()) > 4:
-	    removable_walls = [wall for wall in (wall_vertical_out+wall_horizontal_out) if wall[0]>=0]
-	    if prey_boundary == hunter_boundary:
-	      wall_to_remove = (-2,-2)
-	      for wall in removable_walls:
-		#pdb.set_trace()
-		if(wall[1][0]==wall[2][0]):
-		  if not(wall[1][0]==hunter_boundary[0][0] or wall[1][0]==hunter_boundary[0][1]):
-		    wall_to_remove = wall[0]
-		    sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
-		    wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
-		    wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
-		    removed = True
-		    break
-		elif(wall[1][1]==wall[2][1]):
-		  if not(wall[1][1]==hunter_boundary[1][0] or wall[1][1]==hunter_boundary[1][1]):
-		    wall_to_remove = wall[0]
-		    sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
-		    wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
-		    wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
-		    removed = True
-		    break
+      elif len(wall_horizontal.keys()+wall_vertical.keys()) > 4:
+        removable_walls = [wall for wall in (wall_vertical_out+wall_horizontal_out) if wall[0]>=0]
+        if prey_boundary == hunter_boundary:
+          wall_to_remove = (-2,-2)
+          for wall in removable_walls:
+        #pdb.set_trace()
+        if(wall[1][0]==wall[2][0]):
+          if not(wall[1][0]==hunter_boundary[0][0] or wall[1][0]==hunter_boundary[0][1]):
+            wall_to_remove = wall[0]
+            sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+            wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
+            wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
+            removed = True
+            break
+        elif(wall[1][1]==wall[2][1]):
+          if not(wall[1][1]==hunter_boundary[1][0] or wall[1][1]==hunter_boundary[1][1]):
+            wall_to_remove = wall[0]
+            sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+            wall_horizontal = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
+            wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
+            removed = True
+            break
 
 
-	  if not(built) and not(removed):
-	    sendsocket(s,hunter_direction+'\n')
+      if not(built) and not(removed):
+        sendsocket(s,hunter_direction+'\n')
       elif can_set and len(wall_horizontal.keys()+wall_vertical.keys())==max_walls+4 and max_walls == 4:
-	  print "cond1"
-	  #remove vertical wall
-	  if (prey_pos_in_box((h_x, h_y)) and abs(h_x + vx - x_prey) <= 4 and (math.copysign(1,vx)!=math.copysign(1,(h_x - x_prey))) and h_x != x_prey):
-	    print "cond2"
-	    removable_walls = [wall for wall in (wall_vertical_out) if wall[0]>=0]
-	    for wall in removable_walls:
-	      if (math.copysign(1,vx)==math.copysign(1,(h_x - wall[1][0]))):
-		wall_to_remove = wall[0]
-		sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
-		wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
-		removed = True
-		break
-	    if not(removed):
-	      sendsocket(s,hunter_direction+'\n')
-	  elif (prey_pos_in_box((h_x, h_y)) and abs(h_y + vy - y_prey)<=4 and (math.copysign(1,vy)!=math.copysign(1,(h_y - y_prey))) and h_y != y_prey):
-	    print "cond3"
-	    removable_walls = [wall for wall in (wall_horizontal_out) if wall[0]>=0]
-	    for wall in removable_walls:
-	      if (math.copysign(1,vy)==math.copysign(1,(h_y - wall[1][1]))):
-		wall_to_remove = wall[0]
-		sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
-		wall_vertical = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
-		removed = True
-		break
-	    if not(removed):
-	      sendsocket(s,hunter_direction+'\n')
-	  elif not(built) and not(removed):
-	    sendsocket(s,hunter_direction+'\n')
+      print "cond1"
+      #remove vertical wall
+      if (prey_pos_in_box((h_x, h_y)) and abs(h_x + vx - x_prey) <= 4 and (math.copysign(1,vx)!=math.copysign(1,(h_x - x_prey))) and h_x != x_prey):
+        print "cond2"
+        removable_walls = [wall for wall in (wall_vertical_out) if wall[0]>=0]
+        for wall in removable_walls:
+          if (math.copysign(1,vx)==math.copysign(1,(h_x - wall[1][0]))):
+        wall_to_remove = wall[0]
+        sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+        wall_vertical = {key: value for key, value in wall_vertical.items() if value != wall_to_remove}
+        removed = True
+        break
+        if not(removed):
+          sendsocket(s,hunter_direction+'\n')
+      elif (prey_pos_in_box((h_x, h_y)) and abs(h_y + vy - y_prey)<=4 and (math.copysign(1,vy)!=math.copysign(1,(h_y - y_prey))) and h_y != y_prey):
+        print "cond3"
+        removable_walls = [wall for wall in (wall_horizontal_out) if wall[0]>=0]
+        for wall in removable_walls:
+          if (math.copysign(1,vy)==math.copysign(1,(h_y - wall[1][1]))):
+        wall_to_remove = wall[0]
+        sendsocket(s,(hunter_direction+"wx"+str(wall_to_remove)+'\n'))
+        wall_vertical = {key: value for key, value in wall_horizontal.items() if value != wall_to_remove}
+        removed = True
+        break
+        if not(removed):
+          sendsocket(s,hunter_direction+'\n')
+      elif not(built) and not(removed):
+        sendsocket(s,hunter_direction+'\n')
 
       elif not(built) and not(removed):
-	sendsocket(s,hunter_direction+'\n')
+    sendsocket(s,hunter_direction+'\n')
     else:
       #Update prey
-	if not tick%20 and tick >=100:
-	    calculate_heat(predict_steps,vx,vy,h_x,h_y,heatmap)
-	    del prey_queue[:]
+    if not tick%20 and tick >=100:
+        calculate_heat(predict_steps,vx,vy,h_x,h_y,heatmap)
+        del prey_queue[:]
 
-	if not prey_queue:
-	    calculate_heat(predict_steps,vx,vy,h_x,h_y,heatmap)
-	    find_safest_path(prey_queue)
+    if not prey_queue:
+        calculate_heat(predict_steps,vx,vy,h_x,h_y,heatmap)
+        find_safest_path(prey_queue)
 
-	#There may be nothing more to do
-	if prey_queue:
-	    prey_move = prey_queue.pop(0)
-	    x_prey = x_prey + prey_move[0]
-	    y_prey = y_prey + prey_move[1]
+    #There may be nothing more to do
+    if prey_queue:
+        prey_move = prey_queue.pop(0)
+        x_prey = x_prey + prey_move[0]
+        y_prey = y_prey + prey_move[1]
 
-	sendsocket(s,(prey_moves[prey_move[0],prey_move[1]])+'\n')
+    sendsocket(s,(prey_moves[prey_move[0],prey_move[1]])+'\n')
 
     #Update hunter
     if vertical_check(h_x + vx):
