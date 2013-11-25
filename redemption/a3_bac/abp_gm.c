@@ -117,6 +117,7 @@ int eval_fn(int exhausted, int phase)
     int p1l = 0, p1r = 0;
     int num1 = 0, num2 = 0, count = 0;
     int nearmid = 0;
+    int count_1 = 0, count_2 = 0;
 
     torques(t);
 
@@ -188,143 +189,16 @@ int eval_fn(int exhausted, int phase)
        }
     }
 
-
-    /* counts unstable 
-    for(i = 3; i < 13; i++)
+    for(i = 0; i < 12; i++)
     {
-       if(i == 3)
-       {
-          if(abs(board[i]) != 1 && board[i] > 0)
-             unstab1++;
-          else if (abs(board[i]) != 1 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 4)
-       {
-          if(abs(board[i]) != 1 && board[i] > 0)
-             unstab1++;
-          else if(abs(board[i]) != 1 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 5)
-       {
-          if(abs(board[i]) != 1 && board[i] > 0)
-             unstab1++;
-          else if(abs(board[i]) != 1 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 6)
-       {
-          if(abs(board[i]) != 1 && board[i] > 0)
-             unstab1++;
-          else if(abs(board[i]) != 1 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 7)
-       {
-          if(abs(board[i]) != 1 && board[i] > 0)
-             unstab1++;
-          else if(abs(board[i]) != 1 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 8)
-       {
-          if(abs(board[i]) != 1 && abs(board[i]) != 2 && board[i] > 0)
-             unstab1++;
-          else if(abs(board[i]) != 1 && abs(board[i]) != 2 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 9)
-       {
-          if(abs(board[i]) != 1 && abs(board[i]) != 2 && abs(board[i]) != 3 && board[i] > 0)
-             unstab1++;
-          else if(abs(board[i]) != 1 && abs(board[i]) != 2 && abs(board[i]) != 3 && board[i] < 0)
-             unstab2++;
-       }
-       else if(i == 10)
-       {
-          if(abs(board[i]) != 1 && abs(board[i]) != 2 && abs(board[i]) != 3 && board[i] > 0)
-          {
-             if(abs(board[i]) != 4)
-                unstab1++;
-          }
-          else if(abs(board[i]) != 1 && abs(board[i]) != 2 && abs(board[i]) != 3 && board[i] < 0)
-          {
-             if(abs(board[i]) != 4)
-                unstab2++;
-          }
-       }
-       else if(i == 11)
-       {
-          if(abs(board[i]) != 1 && abs(board[i]) != 2 && abs(board[i]) != 3 && board[i] > 0)
-          {
-             if(abs(board[i]) != 4 && abs(board[i]) !=5 && abs(board[i]) != 6)
-             {
-                if(abs(board[i]) != 7 && abs(board[i]) != 8 && abs(board[i]) != 9)
-                   unstab1++;  
-             }
-          }
-          else if(abs(board[i]) != 1 && abs(board[i]) != 2 && abs(board[i]) != 3 && board[i] < 0)
-          {
-             if(abs(board[i]) != 4 && abs(board[i]) !=5 && abs(board[i]) != 6)
-             {
-                if(abs(board[i]) != 7 && abs(board[i]) != 8 && abs(board[i]) != 9)
-                   unstab2++;  
-             }
-          }
-       }
-       else if(i == 12)
-       {
-          if(abs(board[i]) != 2 && abs(board[i]) != 3 && abs(board[i]) != 4 && board[i] > 0)
-          {
-             if(abs(board[i]) != 5 && abs(board[i]) != 6 && abs(board[i]) != 7)
-             {
-                if(abs(board[i]) != 8 && abs(board[i]) != 9 && abs(board[i]) != 10)
-                {
-                   if(abs(board[i]) != 11 && abs(board[i]) != 12)
-                      unstab1++;  
-                }
-             }
-          }
-          else if(abs(board[i]) != 2 && abs(board[i]) != 3 && abs(board[i]) != 4 && board[i] < 0)
-          {
-             if(abs(board[i]) != 5 && abs(board[i]) != 6 && abs(board[i]) != 7)
-             {
-                if(abs(board[i]) != 8 && abs(board[i]) != 9 && abs(board[i]) != 10)
-                {
-                   if(abs(board[i]) != 11 & abs(board[i]) != 12)
-                      unstab2++;
-                }
-             }
-          }
-       }
-       if(i == 13)
-       {
-          if(abs(board[i]) != 3 && abs(board[i]) != 4 && abs(board[i]) != 5 && board[i] > 0)
-          {
-             if(abs(board[i]) != 6 && abs(board[i]) != 7 && abs(board[i]) != 8)
-             {
-                if(abs(board[i]) != 9 && abs(board[i]) != 10 && abs(board[i]) != 11)
-                {
-                   if(abs(board[i]) != 12)
-                      unstab1++;  
-                }
-             }
-          }
-          else if(abs(board[i]) != 3 && abs(board[i]) != 4 && abs(board[i]) != 5 && board[i] < 0)
-          {
-             if(abs(board[i]) != 6 && abs(board[i]) != 7 && abs(board[i]) != 8)
-             {
-                if(abs(board[i]) != 9 && abs(board[i]) != 10 && abs(board[i]) != 11)
-                {
-                   if(abs(board[i]) != 12)
-                      unstab2++;
-                }
-             }
-          }
-       }
+       if(p1w[i] == 0)
+          count_1++;
+       else if(p2w[i] == 0)
+          count_2++;
     }
-    */
+
+    unstab1 = count_1 - stab1;
+    unstab2 = count_2 - stab2;
 
     for(i = 0; i < 12; i++)
     {
@@ -356,6 +230,10 @@ int eval_fn(int exhausted, int phase)
  //   if(pplayer == 1)
  //      score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
+  // if(t[0] == 0 || t[1] == 0)
+   //   return inf;
+  // else
+    //  return 500 - min(abs(t[0]),abs(t[1]));
 //   if(t[0] == 0 || t[1] == 0)
   //    return inf;
 //   else
@@ -375,7 +253,7 @@ int eval_fn(int exhausted, int phase)
     }
     else
     { */
-        return score;
+    return score;
    // }
 }
 
