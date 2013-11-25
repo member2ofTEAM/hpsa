@@ -341,7 +341,7 @@ while(1):
 
     if play_as == 'H':
       #Build wall
-      if can_set and len(wall_horizontal.keys()+wall_vertical.keys())<max_walls+4:
+      #if can_set and len(wall_horizontal.keys()+wall_vertical.keys())<max_walls+4:
 
       #build vertical wall
       if (prey_pos_in_box((h_x, h_y))
