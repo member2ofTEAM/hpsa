@@ -303,48 +303,8 @@ int eval_fn(int exhausted, int phase)
           }
           else if(pplayer == -1)
           {
-             l_count = 0;
-             r_count = 0;
-             for(i = 0; i < 32; i++)
-             {
-                if((i < 12) && (board[i] > 0))
-                {
-                   l_count++;
-                   //fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
-                }
-                else if((i > 15) && (board[i] > 0))
-                {
-                   r_count++;
-                   //fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
-                }
-             }
-             all_left = 0;
-             all_right = 0;
-             if((l_count == 0) && (r_count > 0))
-             {
-                all_right = 1;
-                //fprintf(file, "ALLLLLL ARE RIGHT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
-             }
-             else if((l_count > 0) && (r_count == 0))
-             {
-                all_left = 1;
-                //fprintf(file, "ALLLLLL ARE LEFT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
-                //for(i = 0; i < 32; i++)
-                //   fprintf(file, "%d ", board[i]);
-                fprintf(file, "\n");
-             }
-             if(all_left == 1)
-             {
-                score = 500 - abs(t[1]);
-             }
-             else if(all_right == 1)
-             {
-                score = 500 - abs(t[0]) + abs(p1t[1]);
-             }
-             else
-             {
-                score = abs(abs(t[0]) - abs(p1t[1])) + abs(abs(t[1]) - abs(p1t[0])); 
-             }
+             
+                score = p1t[1] * p1t[0]; 
           }
        }
     
