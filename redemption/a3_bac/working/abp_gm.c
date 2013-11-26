@@ -14,7 +14,7 @@ int inf = 999999999;
 int p1w[12];
 int p2w[12];
 
-int d = 6;
+int d = 12;
 
 int w1 = 4;
 int w2 = 10;
@@ -58,15 +58,6 @@ int main(int argc, char *argv[])
     {
         board[i - 3] = atoi(argv[i]);
     }
-
-    if(player == 1)
-    {
-       d = 6;
-    }
-    else
-    { 
-       d = 8;
-    } 
     
     //phase = 1;
     //player = 1;
@@ -151,14 +142,11 @@ int eval_fn(int exhausted, int phase)
     int nearmid = 0;
     int count_1 = 0, count_2 = 0;
     int p1t[2];
-    int all_left = 0;
-    int all_right = 0;
-    int l_count = 0, r_count = 0;
 
     FILE *file;
 
-    file = fopen("scores.txt", "a");
-    assert(file);
+ //   file = fopen("scores.txt", "a");
+ //   assert(file);
 
     torques(t);
     p1_torques(p1t);
@@ -267,94 +255,41 @@ int eval_fn(int exhausted, int phase)
     if(abs(num1 - num2) > 2)
        count++;
 
- /*   if(pplayer == -1)
-       score = w1 * stab2 - w2 * count;
-    if(pplayer == 1)
-       score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
-*/
+//    if(pplayer == -1)
+ //      score = w1 * stab2 - w2 * count;
+ //   if(pplayer == 1)
+ //      score = w3 * abs(t[0] * t[1]) - w4 * abs(p1l - p1r) - w5 * abs(t[0] - t[1]) + w6 * nearmid;
 
+  // if(t[0] == 0 || t[1] == 0)
+   //   return inf;
+  // else
+    //  return 500 - min(abs(t[0]),abs(t[1]));
+//   if(t[0] == 0 || t[1] == 0)
+  //    return inf;
+//   else
+//      return (1.0 / (float)(min(abs(t[0]),abs(t[1]))));
+   
+   //return 500 - min(abs(t[0]), abs(t[1]));
+//    if(abs(t[0]) <= 4 || abs(t[1]) <= 4)
+//    {
+//       player = -1 * player;
+//       return player * inf;
+//    }
 
    if (exhausted)
    {
         player = -1 * player;
-        fprintf(file, "%d\n", player * inf);
-        fclose(file);
+   //     fprintf(file, "%d\n", player * inf);
+   //     fclose(file);
         return player * inf;
     }
     else
     {
-       if(phase == 1)
-       {
-          if(pplayer == 1)
-          {
-             score = (152 - abs(abs(t[0]) - abs(t[1]))) + (152 - abs(abs(p1t[0]) - abs(p1t[1]))) + abs(t[0]) + abs(t[1]);
-            // score = (152 - abs(abs(t[0]) - abs(t[1]))) + (152 - abs(abs(p1t[0]) - abs(p1t[1]))) + (152 - abs(t[0]) + abs(t[1]));
-          }
-          else if(pplayer == -1)
-          {
-             score = (152 - (abs(t[0]) + abs(t[1])) + abs(abs(t[0]) - abs(t[1])));
-          }
-       }
-       else if(phase == 2)
-       {
-          if(pplayer == 1)
-          {
-             score = abs(abs(t[0]) - abs(t[1])) + (152 - abs(abs(p1t[0]) - abs(p1t[1])));
-          }
-          else if(pplayer == -1)
-          {
-             l_count = 0;
-             r_count = 0;
-             for(i = 0; i < 32; i++)
-             {
-                if((i < 12) && (board[i] > 0))
-                {
-                   l_count++;
-                   fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
-                }
-                else if((i > 15) && (board[i] > 0))
-                {
-                   r_count++;
-                   fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
-                }
-             }
-             all_left = 0;
-             all_right = 0;
-             if((l_count == 0) && (r_count > 0))
-             {
-                all_right = 1;
-                fprintf(file, "ALLLLLL ARE RIGHT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
-             }
-             else if((l_count > 0) && (r_count == 0))
-             {
-                all_left = 1;
-                fprintf(file, "ALLLLLL ARE LEFT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
-                for(i = 0; i < 32; i++)
-                   fprintf(file, "%d ", board[i]);
-                fprintf(file, "\n");
-             }
-             if(all_left == 1)
-             {
-                score = 500 - abs(t[1]);
-             }
-             else if(all_right == 1)
-             {
-                score = 500 - abs(t[0]) + abs(p1t[1]);
-             }
-             else
-             {
-                score = abs(abs(t[0]) - abs(p1t[1])) + abs(abs(t[1]) - abs(p1t[0])); 
-             }
-          }
-       }
-    
-
-       fprintf(file, "%d\n", score);
-       fclose(file);
-    //   return (500 - min(abs(t[0]), abs(t[1])));
-       return score;
+    //   fprintf(file, "%d\n", 500 - min(abs(t[0]), abs(t[1])));
+    //   fclose(file);
+       return (500 - min(abs(t[0]), abs(t[1])));
     }
-    fclose(file);
+    //fclose(file);
 }
 
 int value(int alpha, int beta, int depth, int max, int phase)

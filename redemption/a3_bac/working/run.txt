@@ -1,2 +1,2 @@
-python TEAM.py
 python random_player.py
+python TEAM.py
