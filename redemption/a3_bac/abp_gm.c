@@ -310,12 +310,12 @@ int eval_fn(int exhausted, int phase)
                 if((i < 12) && (board[i] > 0))
                 {
                    l_count++;
-                   fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
+                   //fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
                 }
                 else if((i > 15) && (board[i] > 0))
                 {
                    r_count++;
-                   fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
+                   //fprintf(file, "COUNTED WEIGHT: %d at %d\n", board[i], i);
                 }
              }
              all_left = 0;
@@ -323,14 +323,14 @@ int eval_fn(int exhausted, int phase)
              if((l_count == 0) && (r_count > 0))
              {
                 all_right = 1;
-                fprintf(file, "ALLLLLL ARE RIGHT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
+                //fprintf(file, "ALLLLLL ARE RIGHT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
              }
              else if((l_count > 0) && (r_count == 0))
              {
                 all_left = 1;
-                fprintf(file, "ALLLLLL ARE LEFT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
-                for(i = 0; i < 32; i++)
-                   fprintf(file, "%d ", board[i]);
+                //fprintf(file, "ALLLLLL ARE LEFT! DDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
+                //for(i = 0; i < 32; i++)
+                //   fprintf(file, "%d ", board[i]);
                 fprintf(file, "\n");
              }
              if(all_left == 1)
@@ -348,7 +348,6 @@ int eval_fn(int exhausted, int phase)
           }
        }
     
-
        fprintf(file, "%d\n", score);
        fclose(file);
     //   return (500 - min(abs(t[0]), abs(t[1])));
