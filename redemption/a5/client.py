@@ -1,8 +1,10 @@
 import socket, sys
 import random
 import pdb
+from subprocess import Popen, PIPE
 import time
 import numpy as np
+import itertools as it
 from exceptions import ZeroDivisionError
 
 teamname="RandomBrie"
@@ -49,38 +51,27 @@ def serversaid(msg):
     print("Server: %s"%msg[:80])
 def isaid(msg):
     print("Client: %s"%msg[:80])
+
 class State:
-    def __init__(self,noplayers,Nstones,playerid):
+    def __init__(self):
         # personal
-        self.playerid=playerid
-        # game parameters
-        self.Nstones=Nstones
-        self.noplayers=noplayers
-        # changing game
-        self.nextplayer=0
-        self.timeleft=-1.00
-        self.moves=[]
+        self.moves = []
+        self.somezip = lambda *x: it.islice(it.izip_longest(*x), len(x[0]))
 
-    def parsestate(self,statestr):
-        state=statestr.split('\n')
-        line1=state[0].split(',')
-        self.nextplayer=int(line1[0])
-        if self.nextplayer==self.playerid:
-            self.timeleft=float(line1[1])
-        self.parsemoves(state[1])
+    def update_state(self, statestr):
+        statestr = statestr.split("\n")
+        if statestr[1]:
+            exec("self.moves = [" + statestr[1] + "]")
+            p1moves = []
+            p2moves = []
+            for move in self.moves:
+                if move[0] == 1:
+                    p1moves.append(move[1:])
+                else:
+                    p2moves.append(move[1:])
+            self.moves = self.somezip(p1moves, p2moves)
+            self.moves = [item for sublist in self.moves for item in sublist if item]
 
-    def parsemoves(self,movestr):
-        self.moves=[[] for i in range(0,self.noplayers+1)]
-        if len(movestr)==0: return # no moves yet
-        movelist=movestr.split('),(')
-        movelist[0]=movelist[0][1:]
-        movelist[-1]=movelist[-1][:-1]
-        for m in movelist:
-            m=m.split(',')
-            mid=int(m[0])
-            x =int(m[1])
-            y =int(m[2])
-            self.moves[mid].append((x,y))
 
 if __name__=="__main__":
     print "Get question from socket"
@@ -95,27 +86,34 @@ if __name__=="__main__":
     N=int(params[1])
     assert(int(params[2])==dim)
     pid=int(params[3])
-    state=State(n_pl, N, pid)
+    state=State()
 
     # Game phase 4
     for turn in xrange(N):
         for pl in range(1,n_pl+1):
             statestr=readsocket(s)
-            state.parsestate(statestr)
-            assert(pl==state.nextplayer)
+            state.update_state(statestr)
             if pl == pid:
-                #Calculate the id of the other player
-                oid = (pid + 1)
-                if oid == state.noplayers + 1:
-                    oid = 1
-                if state.moves[oid]:
-                    omove = state.moves[oid][-1]
+                if turn == N - 1:
+                    input_args = []
+                    for move in state.moves:
+                        if move:
+                            for x in move:
+                                input_args.append(str(x))
+                    pdb.set_trace()
+                    out = Popen(["./TEAM"] + input_args, stdout = PIPE)
+                    mymove = map(int, out.communicate()[0].split(" "))
+                    makemove(s,pid,mymove[0],mymove[1])
                 else:
-                    omove = (500, 500)
-                mymove = (500-(omove[0] - 500), 500-(omove[1]-500))
-                #Should we select a greedy stone if the move already exists?
-                while (mymove in state.moves[oid]):
-                    mymove = (max(min(mymove[0] + random.randint(-2, 2), 1000), 0),
-                              max(min(mymove[1] + random.randint(-2, 2), 1000), 0))
-                makemove(s,pid,mymove[0],mymove[1])
-    state.parsestate(readsocket(s))
+                    #Calculate the id of the other player
+                    if state.moves:
+                        omove = state.moves[-1]
+                    else:
+                        omove = (500, 500)
+                    mymove = (500-(omove[0] - 500), 500-(omove[1]-500))
+                    #Should we select a greedy stone if the move already exists?
+                    while (mymove in state.moves):
+                        mymove = (max(min(mymove[0] + random.randint(-2, 2), 1000), 0),
+                                  max(min(mymove[1] + random.randint(-2, 2), 1000), 0))
+                    makemove(s,pid,mymove[0],mymove[1])
+    s.close()

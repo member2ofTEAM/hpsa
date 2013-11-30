@@ -15,10 +15,14 @@ int do_move_algorithm(int *move);
 int do_move_manual(int *move);
 void print_board();
 void decent_random(int *move);
-void alpha_better(int *move);
-int value(int alpha, int beta, int depth, int max);
+void final_best_move(int *move, int algo);
 int eval_fn();
 int our_area();
+void update_point(int *pos, int do_flag, int *move);
+double exact_pull(int *pos);
+int next_point(int *move, int which, int algo);
+int get_random_int();
+
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -32,26 +36,38 @@ int our_area();
 
 
 const int BOARD_SIZE = 1000;
-const double INF = 10000;
+const double INF = 10000000;
 double board[1000][1000];
-int NUM_MOVES_REMAINING = 15;
-// 1 is us, 0 is the other guy
-// We assume, that we always start!
-int next_to_set = 1;
+int NUM_MOVES_REMAINING = 30;
+int MAX_NUMBER_OF_MOVES = 30;
+int moves[60];
+int MAX_NUMBER_OF_POINTS = 1000000;
+int next_to_set;
+//Player 1 gets to start
+int player_to_start = 0;
 tinymt32_t state;
 
-void init_board()
-{
-    int i, j;
-    FILE *input;
-    input = fopen("input", "r");
-    for (i = 0; i < BOARD_SIZE; i++)
+//char INPUT_FILENAME[8];
+
+/*
+ *
+ * CHANGING THE BOARD
+ * PLayer 0 has -INf and negative pull, Player 1 has +INF and positive pull
+ */                                                                 
+                                                                    
+void init_board()                                                   
+{                                                                   
+    int pos[2], i = 0;
+                                                                    
+    //TODO NEED TO FLIP NEXT_TO_SET AS MANY TIMES AS THERE ARE MOVES!
+    for (i = 0; i < MAX_NUMBER_OF_POINTS; i++)
     {
-        for (j = 0; j < BOARD_SIZE; j++)
-        {
-            fscanf(input, "%lf ", &board[i][j]);
-        }
+        if (!next_point(pos, i, 1))
+            break;
+        if(abs(board[pos[0]][pos[1]]) != INF)
+            board[pos[0]][pos[1]] = exact_pull(pos);
     }
+
 }
 
 double distance_squared(int x0, int y0, int x1, int y1)
@@ -59,203 +75,190 @@ double distance_squared(int x0, int y0, int x1, int y1)
     return (x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1);
 }
 
+void update_point(int *pos, int do_flag, int *move)
+{
+    int i = pos[0], j = pos[1];
+    double d = 0.0;
+    //Ignore pixels with stones set
+    if (abs(board[i][j]) != INF)
+    {
+        d = distance_squared(move[0], move[1], i, j);
+        if(d)
+        {
+            if (!do_flag)
+                d = -d;
+            board[i][j] += (1.0 / d);
+        }
+    }
+}
 
+double exact_pull(int *pos)
+{
+    int i = 0;
+    double d = 0.0, pull = 0.0;
+    for (i = 0; i < MAX_NUMBER_OF_MOVES - NUM_MOVES_REMAINING; i++)
+    {
+        d = distance_squared(pos[0], pos[1], moves[i * 2], moves[i * 2 + 1]);
+        if(d)
+	{
+            if (i % 2)
+	        pull += (1.0 / d);
+	    else
+	        pull -= (1.0 / d);
+	}
+    }
+    return pull;
+}
+
+int execute_move(int *move, int do_flag, int algo)
+{
+    int next[2], i;
+    
+    //Make sure the move is valid
+    if (move[0] < 0 || move[0] > 999 || move[1] < 0 || move[1] > 999)
+        return -1;
+
+    if (do_flag)
+    {
+        //Make sure stone can be placed
+        if (abs(board[move[0]][move[1]]) == INF)
+            return -1;
+        //Place the stone
+        if (next_to_set)
+            board[move[0]][move[1]] = INF;
+        else
+            board[move[0]][move[1]] = -INF;
+    }
+    else
+    {
+        //Make sure stone can be removed
+        if (abs(board[move[0]][move[1]]) != INF)
+            return -1;
+        //Restore its value
+        board[move[0]][move[1]] = exact_pull(move); //is this necessary?
+    }
+
+    //Update the board
+    for(i = 0; i < MAX_NUMBER_OF_POINTS; i++)
+    {
+        if (!next_point(next, i, 1))
+            break;
+        //If we are not next_to_set subtract the pull
+        update_point(next, next_to_set, move);
+    }
+
+    //Flip the player
+    next_to_set = next_to_set > 0 ? 0 : 1;
+
+
+    //Store the move, and adjust number of moves remaining
+    i = MAX_NUMBER_OF_MOVES - NUM_MOVES_REMAINING;
+    if (do_flag)
+    {
+        moves[i * 2]       = move[0];
+        moves[(i * 2) + 1] = move[1];
+        NUM_MOVES_REMAINING--;
+    }
+    else
+    {
+        i = i - 1;
+        moves[i * 2]       = -1;
+        moves[(i * 2) + 1] = -1;
+        NUM_MOVES_REMAINING++;
+    }
+
+    return our_area();
+}
 //move is in the format [x, y] as a 2 dim array
 //returns the area owned by us
 int do_move(int *move)
 {
-    int our_area = 0, i, j;
-    double d;
-    if (move[0] < 0 || move[0] > 999 || move[1] < 0 || move[1] > 999)
-        return -1;
-    
-    //Make sure stone can be placed
-    if (abs(board[move[0]][move[1]]) == INF)
-        return -1;
-
-    //Place the stone
-    if (next_to_set)
-        board[move[0]][move[1]] = INF;
-    else
-        board[move[0]][move[1]] = -INF;
-
-    //Update the board
-    for (i = max(move[0] - 300, 0); i < min(BOARD_SIZE, move[0] + 300); i++)
-    {
-        for (j = max(move[1] - 300, 0); j < min(BOARD_SIZE, move[1] + 300); j++)
-        {
-            d = 0.0;
-            //Ignore pixels with stones set
-            if (abs(board[i][j]) == INF)
-                continue;
-            if(move[0] == i && move[1] == j)
-                continue;
-            d = distance_squared(move[0], move[1], i, j);
-            //If we are not next_to_set subtract the pull
-            if (!next_to_set)
-                d = -d;
-            board[i][j] += 1.0 / d;
-            //Our area only have positive pull
-            if (board[i][j] > 0)
-                our_area++;
-        }
-     }
-     //Flip the player
-     next_to_set = next_to_set > 0 ? 0 : 1;
-     //Decrease number of moves remaining;
-     NUM_MOVES_REMAINING--;
-     return our_area;
-}
-
-void print_board()
-{
-    int i, j;
-    for (i = 0; i < BOARD_SIZE; i++)
-    {
-        for (j = 0; j < BOARD_SIZE; j++)
-        {
-            printf("%17.16lf ", board[i][j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
+    return execute_move(move, 1, 1);
 }
 
 //move is in the format [x, y] as a 2 dim array
 int undo_move(int *move)
 {
-    int our_area = 0, i, j;
-    double d = 0.0;
-    if (move[0] < 0 || move[0] > 999 || move[1] < 0 || move[1] > 999)
-    {
-        return -1;
-    }
-    //Make sure stone can be removed
-    if (abs(board[move[0]][move[1]]) != INF)
-        return -1;
-
-    //Remove the stone
-    board[move[0]][move[1]] = 0;
-
-    //Update the board
-    for (i = max(move[0] - 300, 0); i < min(BOARD_SIZE, move[0] + 300); i++)
-    {
-        for (j = max(move[1] - 300, 0); j < min(BOARD_SIZE, move[1] + 300); j++)
-        {
-            d = distance_squared(move[0], move[1], i, j);
-            if (!next_to_set)
-                d = -d;
-            //If the considered pixel is a placed stone, add the value to 
-            //neutral pixel as appropiate
-            if (abs(board[i][j]) == INF)
-            {
-                if(board[i][j] > 0)
-                    board[move[0]][move[1]] += 1/d;
-            }
-            else
-            {
-                board[i][j] += 1 / d;
-            }
-            //Our area only has positive pull
-            if (board[i][j] > 0)
-                our_area++;
-        }
-     }
-     //Flip the player
-     next_to_set = !next_to_set;
-     //Increase number of moves remaining
-     NUM_MOVES_REMAINING++;
-     return our_area;
+    return execute_move(move, 0, 1);
 }
 
-void save_stats(int score, int *p1moves, int *p2moves)
+int next_point(int *move, int which, int algo)
 {
-    FILE *stats;
-    int i;
-    stats = fopen("output.csv", "a+");
-    assert(stats);
-    fprintf(stats, "%d", score);
-    for(i = 0; i < NUM_MOVES_REMAINING; i++)
+    int MAX_POINTS;
+    int x, y;
+
+    if (algo == 1)
     {
-       fprintf(stats, ", %d %d", p1moves[i * 2], p1moves[(i * 2) + 1]);
-       fprintf(stats, ", %d %d", p2moves[i * 2], p2moves[(i * 2) + 1]); 
+        MAX_POINTS = 10000;
+        if (which >= MAX_POINTS)
+            return 0;
+        move[0] = (which / 100) * 10;
+        move[1] = (which % 100) * 10;
+        return 1;
     }
-    fprintf(stats, "\n");
-    
+    return 0;
 }
+
+/*
+ *
+ * PERFORMING TEST / STATS
+ *
+ */
 
 int our_area()
 {
-    int i, j, area;
-    for (int i = 0; i < BOARD_SIZE; i++)
+    int i, j, area = 0;
+    for (i = 0; i < BOARD_SIZE; i++)
     {
-        for (int j = 0; j < BOARD_SIZE; j++)
+        for (j = 0; j < BOARD_SIZE; j++)
         {
-        if (board[i][j] >= 0)
-            area++;
+           if (board[i][j] > 0)
+               area++;
         }
     }
     return area;
 }
 
-void test_algorithm()
-{
-    int p1moves[30] = {-1}, p2moves[30] = {-1};
-    int i, score;
-    for (i = 0; i < NUM_MOVES_REMAINING; i++)
-    {
-        int move[2];
-        score = do_move_algorithm(move);
-        p1moves[i * 2] = move[0];
-        p1moves[(i * 2) + 1] = move[1];
-//        score = do_move_random(move);
-        score = do_move_manual(move);
-        printf("%d %d", move[0], move[1]);
-        p2moves[i * 2] = move[0];
-        p2moves[(i * 2) + 1] = move[1];
-        //Log results etc. - maybe use csv for sorting actions later
-        //Only log if we lose?
-    }
-    printf("%d", our_area());
-    //print_board();
-    if(score <= 500000)
-       save_stats(score, p1moves, p2moves);
-}
-
+/*
+ *
+ *
+ *
+ */
 
 int main(int argc, char *argv[])
 {
-//    NUM_MOVES_REMAINING = atoi(argv[1]);
+    //TODO: READ IN NAME OF INPUT FILE
+//    int i;
+//    for (i = 1; i < argc; i++)
+//        INPUT_FILENAME[i] = argv[i];
 //    init_board();
-    int i, move[2];
+    int move[2], i;
     uint32_t seed = getpid();
     tinymt32_init(&state, seed);
-
-    for(i = 0; i < 1; i++)
-       test_algorithm();
-    return 0;
-}
-
-int do_move_manual(int *move)
-{
-    int score = -1;
-    while(score < 0)
-    {
-        scanf("%d,%d", &move[0], &move[1]);
-        printf("move received\n");
-        score = do_move(move);
+    for(i = 0; i < 60; i++)                                         
+       moves[i] = -1;
+    i = 0;
+    while(2 * i < argc - 1)
+    { 
+       moves[i * 2] = atoi(argv[i * 2 + 1]);
+       moves[i * 2 + 1] = atoi(argv[i * 2 + 1 + 1]);
+       if(i % 2)
+          board[moves[i * 2]][moves[i * 2 + 1]] = INF;
+       else
+          board[moves[i * 2]][moves[i * 2 + 1]] = -INF;
+       i++;
+       NUM_MOVES_REMAINING--;
+       next_to_set = next_to_set > 0 ? 0 : 1;
     }
-    return score;
-}
-
-// ALGORITHMS ALGORITHMS ALGORITMHS
-
-int do_move_algorithm(int *move)
-{
-    int score;
-    alpha_better(move);
-    score = do_move(move);
-    return(score);
+    init_board();
+    final_best_move(move, 1);
+    while(abs(board[move[0]][move[1]]) == INF)
+    {
+       move[0] = get_random_int() % 1000;
+       move[1] = get_random_int() % 1000;
+    }
+    printf("%d %d %d", move[0], move[1], our_area());
+    return 0;
 }
 
 //Between 0 and 999 inclusive
@@ -264,108 +267,28 @@ int get_random_int()
     return ((int)((unsigned int) tinymt32_generate_uint32(&state) % 1000));
 }
 
-int do_move_random(int *move)
+/* */
+void final_best_move(int *move, int algo)
 {
-    move[0] = get_random_int();
-    move[1] = get_random_int();
-    int score;
-    while((score = do_move(move)) < 0)
-    {
-        move[0] = get_random_int();
-        move[1] = get_random_int();
-    }
-    return score;
-}
-
-// Randomly where we don't own 
-void decent_random(int *move)
-{
-    move[0] = get_random_int();
-    move[1] = get_random_int();
-    while(do_move(move) < 0 || board[move[0]][move[1]] > 0)
-    {
-        move[0] = get_random_int();
-        move[1] = get_random_int();
-    }
-    undo_move(move);
-}
-
-int eval_fn()
-{
-    return our_area();
-}
-
- int value(int alpha, int beta, int depth, int max)
-{
-    int v = -INF, i, next = 0, j, move[2];
-    if (depth > min(0, NUM_MOVES_REMAINING)){
-        return eval_fn();
-    }
-    
-    for (j = 0; j < BOARD_SIZE; j = j + 50)
-    {
-        for (i = 0; i < BOARD_SIZE; i = i + 50)
-        {
-            move[0] = i;
-            move[1] = j;
-            if(do_move(move) > 0)
-            {
-                if (max)
-                {
-                    v = max(v, value(alpha, beta, depth + 1, 0));
-                    if (v >= beta)
-                    {
-                        undo_move(move);
-                        return v;
-                    }
-                    alpha = max(alpha, v);
-                }
-                else
-                {
-                    v = min(v, value(alpha, beta, depth + 1, 1));
-                    if (v <= alpha)
-                    {
-                        undo_move(move);
-                        return v;
-                    }
-                    beta = min(beta, v);
-                }
-                undo_move(move);
-            }
-         }
-    }
-    return v;
-}
-                                 
-/* Recrusively realizes feasible sequences of moves and calls
- * the evaulation function
- */
-void alpha_better(int *move)
-{
-    int best_v = -2 * INF, v = INF;
-    int i, j;
+    int best_v = -1, i, v;
     int best_move[2];
-    for (j = 0; j < BOARD_SIZE; j = j + 50)
+
+    for (i = 0; i < MAX_NUMBER_OF_POINTS; i = i + 1)
     {
-        for (i = 0; i < BOARD_SIZE; i = i + 50)
+        if(!next_point(move, i, algo))
+            break;
+    	if (do_move(move) == -1)
+            continue;
+        v = our_area();
+        if (v < best_v)
         {
-            move[0] = i;
-            move[1] = j;
-            if (do_move(move) > 0)
-            {
-                v = value(-1 * INF, INF, 1, 0);
-                if (v > best_v)
-                {
-                    best_v = v;
-                    best_move[0] = i;
-                    best_move[1] = j;
-                }
-	        undo_move(move);
-            }
+            best_v = v;
+            best_move[0] = move[0]; 
+            best_move[1] = move[1];
         }
+        undo_move(move);
     }
     move[0] = best_move[0];
     move[1] = best_move[1];
-    printf("\n%d %d\n", move[0], move[1]);
 } 
 
