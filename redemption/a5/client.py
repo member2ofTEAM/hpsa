@@ -1,7 +1,6 @@
 import socket, sys
 import random
 import pdb
-from subprocess import Popen, PIPE
 import time
 import math
 import numpy as np
@@ -95,8 +94,6 @@ if __name__=="__main__":
     state=State()
     plac = range(N)
     random.shuffle(plac)
-    # TODO: FIX BUG! WHEN THERE IS A COLLISION AND SOMEONE DROPS OUT OUR
-    # PROGRAM FUCKS UP! GET THE PID FROM THE SERVER!
     # Game phase 4
     turn = 0
     pl = 1
