@@ -252,11 +252,11 @@ int main(int argc, char *argv[])
     }
     init_board();
     final_best_move(move, 1);
-    while(abs(board[move[0]][move[1]]) == INF)
+/*    while(abs(board[move[0]][move[1]]) == INF)
     {
        move[0] = get_random_int() % 1000;
        move[1] = get_random_int() % 1000;
-    }
+    }*/
     printf("%d %d %d", move[0], move[1], our_area());
     return 0;
 }
@@ -280,7 +280,7 @@ void final_best_move(int *move, int algo)
     	if (do_move(move) == -1)
             continue;
         v = our_area();
-        if (v < best_v)
+        if (v > best_v)
         {
             best_v = v;
             best_move[0] = move[0]; 
