@@ -95,9 +95,8 @@ def parseStatus(status):
     remainingStuff = map(int, lines[4].split(','))
     return (munched, liveMunchers, otherLiveMunchers, otherNewMunchers, scores, remainingStuff)
 
-def greedyMove(munched,nodes,edges, edges_data, otherLiveMunchers, round_no, subGs, G, ol):
+def greedyMove(munched, nodes, edges, edges_data, otherLiveMunchers, round_no, ol):
     move_string = str(0)
-    subGs.sort(key = lambda x: len(x), reverse=True)
     #pdb.set_trace()
     points = []
     maxy = 0
@@ -106,13 +105,13 @@ def greedyMove(munched,nodes,edges, edges_data, otherLiveMunchers, round_no, sub
     consider = [m for m in otherLiveMunchers] #m[1] for m in ...
     for enemy in consider:
         for node in edges[enemy].values():
-            if node in subGs[0].nodes() and node not in consider:
+            if node not in consider and node not in munched:
                 points.append(node)
                 break
-    for node in subGs[0].nodes():
-        if maxy > nodes[node][1]:
-            maxy = nodes[node][1]
-            chosen = node
+    for i in range(len(nodes)):
+        if i not in munched and maxy > nodes[i][1]:
+            maxy = nodes[i][1]
+            chosen = i
     if ol and not otherLiveMunchers:#not otherNewMunchers:
     	points = [chosen]
     move_string = str(len(points)) + ':'
@@ -127,27 +126,21 @@ if __name__ == "__main__":
     send("TEAM")
     (nodes, edges, edges_data) = parseData(receive())
     nodes_owner = [0] * len(nodes)
-    G = nx.Graph()
-    G.add_edges_from(edges_data)
     round_no = 0
     munched = set()
     ol = 0
     while(True):
         status = receive()
-        if not status:
-	    continue
         print "Status: " + status
         if round_no > 1000:
             break
         (newlyMunched, liveMunchers, otherLiveMunchers, 
             otherNewMunchers, scores, remainingStuff) = parseStatus(status)
         munched.update(newlyMunched)
-        G.remove_nodes_from(munched)
-        subGs = nx.connected_component_subgraphs(G)
         if len(otherLiveMunchers):
 	    ol = 1
         send(greedyMove(munched, nodes, edges, edges_data,
-                            otherLiveMunchers, round_no, subGs, G, ol))
+                            otherLiveMunchers, round_no, ol))
         round_no += 1
     print remainingStuff[2]
 
